@@ -39,11 +39,17 @@ app.get('/',(req,res)=>{
 
 const signupRoute = require('./routes/auth/signup');
 const loginRoute = require('./routes/auth/login');
+const { isLoggedIn } = require('./middlewares/isLoggedIn');
 const homeRoute = require('./routes/home');
+const profileRoute = require('./routes/profile/profile');
+const tripRoute = require('./routes/trip');
 
 app.use('/auth/signup',signupRoute);
 app.use('/auth/login',loginRoute);
+app.use(isLoggedIn);
 app.use('/home',homeRoute);
+app.use('/profile',profileRoute);
+app.use('/trips',tripRoute);
 
 app.get('/logout',(req,res,next)=>{
     req.logout((err)=>{

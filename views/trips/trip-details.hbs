@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{trip.tripName}}</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+
+    {{>navbar}}
+
+    <h1>{{trip.tripName}}</h1>
+    <p><strong>Destination:</strong> {{trip.destination}}</p>
+    <p><strong>Start Date:</strong> {{trip.startDate}}</p>
+    <p><strong>End Date:</strong> {{trip.endDate}}</p>
+    <p><strong>Description:</strong> {{trip.description}}</p>
+
+    <a href="/trips/edit/?tripId={{trip._id}}">Edit Trip</a>
+</body>
+</html>
