@@ -8,11 +8,15 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const MongoStore = require('connect-mongo');
 const passport = require('./auth/passport');
+const hbs = require('hbs');
+const favicon = require('serve-favicon');
 
 app.set('view engine','hbs');
+hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
+app.use(favicon(path.join(__dirname, 'public', 'images', 'Nomadly_icon.png')));
 
 const mongoUrl = process.env.MONGO_URL;
 const sessionSecret = process.env.SESSION_SECRET;

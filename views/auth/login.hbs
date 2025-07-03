@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/auth.css">
 </head>
 <body>
     {{#if msg}}
@@ -13,19 +13,34 @@
         </div>
     {{/if}}
     <div class="container">
-        <h1 class="heading">Login page</h1>
-        <form action="/auth/login" method="post">
-            <input type="text" name="username" placeholder="Enter username">
-            <input type="password" name="password" placeholder="Enter password">
-            <button type="submit" class="btn">Login</button>
-        </form>
-        <div class="third-party-login">
-            <button class="fb-btn"><a href="/auth/login/facebook">Login with Facebook</a></button>
-            <button class="g-btn"><a href="/auth/login/google">Login with Google</a></button>
-        </div>
-        <div class="redirect">
-            New user? <button><a href="/auth/signup">SignUp</a></button>
+        <div class="image"></div>
+
+        <div class="auth-box">
+            <div class="title"><span class="title-img"></span>Nomadly</div>
+            <h1 class="heading">Welcome back, traveler.</h1>
+
+            <form action="/auth/login" method="post">
+                <input type="text" name="username" placeholder="Enter username">
+                <input type="password" name="password" placeholder="Enter password">
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+
+            <div class="redirect">
+                Don't have an account? <button><a href="/auth/signup">Register</a></button>
+            </div>
+
+            <div class="separator">
+                <span>OR CONTINUE WITH</span>
+            </div>
+
+            <div class="third-party-login">
+                <a href="/auth/login/facebook" class="third-party-btn fb-btn">Login with Facebook</a>
+                <a href="/auth/login/google" class="third-party-btn g-btn">Login with Google</a>
+            </div>
+
+
         </div>
     </div>
+
 </body>
 </html>
