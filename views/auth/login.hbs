@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    {{#if msg}}
+        <div class="msg">
+            {{msg}}
+        </div>
+    {{/if}}
+    <div class="container">
+        <h1 class="heading">Login page</h1>
+        <form action="/auth/login" method="post">
+            <input type="text" name="username" placeholder="Enter username">
+            <input type="password" name="password" placeholder="Enter password">
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div class="third-party-login">
+            <button class="fb-btn"><a href="/auth/login/facebook">Login with Facebook</a></button>
+            <button class="g-btn"><a href="/auth/login/google">Login with Google</a></button>
+        </div>
+        <div class="redirect">
+            New user? <button><a href="/auth/signup">SignUp</a></button>
+        </div>
+    </div>
+</body>
+</html>

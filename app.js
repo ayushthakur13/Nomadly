@@ -1,0 +1,63 @@
+require('dotenv').config();
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 4444;
+const path = require('path');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const flash = require('connect-flash');
+const MongoStore = require('connect-mongo');
+const passport = require('./auth/passport');
+
+app.set('view engine','hbs');
+app.use(express.urlencoded({extended:true}));
+app.use(express.static(path.join(__dirname,'public')));
+app.use(express.json());
+
+const mongoUrl = process.env.MONGO_URL;
+const sessionSecret = process.env.SESSION_SECRET;
+
+app.use(session({
+    secret: sessionSecret,
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({mongoUrl})
+}));
+
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/',(req,res)=>{
+    res.redirect('/auth/login')
+})
+
+const signupRoute = require('./routes/auth/signup');
+const loginRoute = require('./routes/auth/login');
+const homeRoute = require('./routes/home');
+
+app.use('/auth/signup',signupRoute);
+app.use('/auth/login',loginRoute);
+app.use('/home',homeRoute);
+
+app.get('/logout',(req,res,next)=>{
+    req.logout((err)=>{
+        if (err) return next(err);
+        res.redirect('/auth/login');
+    });
+})
+
+app.use((req, res) => {
+    res.status(404).render('404');
+});
+
+mongoose.connect(mongoUrl)
+    .then(()=>{
+        app.listen(PORT,()=>{
+            console.log(`🟢 Server started at http://localhost:${PORT}`);
+        })
+    })
+    .catch((err)=>{
+        console.error('🔴 Cannot connect to DB', err.message);
+    })

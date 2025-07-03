@@ -1,0 +1,142 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(90deg, #f5f7fa, #c3cfe2);
+}
+
+.container{
+    width: 400px;
+    background-color: #ffffffdd;
+    border: 2px solid #ccc;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 100px auto;
+}
+
+.heading{
+    text-align: center;
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input{
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+}
+
+.btn{
+    padding: 8px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover{
+    background-color: #357ab8;
+}
+
+.third-party-login{
+    text-align: center;
+    margin-top: 25px;
+    font-size: 20px;
+    color: #444;
+}
+
+.fb-btn{
+    padding: 8px;
+    border: none;
+    background-color: #0000ff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.g-btn{
+    padding: 8px;
+    border: 1px solid blue;
+    background-color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.fb-btn a {
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+}
+
+.fb-btn:hover{
+    background-color: #0700d2;
+}
+
+.g-btn a{
+    color: blue;
+    text-decoration: none;
+}
+
+.g-btn:hover{
+    background-color: #cad1f4;
+}
+.redirect {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 15px;
+    color: #444;
+}
+
+.redirect button{
+    padding: 5px;
+    border: none;
+    background-color: #dfdfdf;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.redirect a {
+    color: rgb(17, 0, 255);
+    text-decoration: none;
+}
+
+.redirect button:hover {
+    background-color: #c2c2c2;
+}
+
+.msg {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    margin: 15px auto;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}

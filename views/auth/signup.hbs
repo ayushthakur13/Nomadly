@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    {{#if msg}}
+        <div class="msg">
+            {{msg}}
+        </div>
+    {{/if}}
+
+    <div class="container">
+        <h1 class="heading">Signup page</h1>
+        <form action="/auth/signup" method="post">
+            <input type="text" name="username" placeholder="Enter username" required>
+            <input type="password" name="password" placeholder="Enter password" required>
+            <button type="submit" class="btn">Signup</button>
+        </form>
+        <div class="redirect">
+            Already a user? <button><a href="/auth/login">Login</a></button>
+        </div>
+    </div>
+</body>
+</html>
