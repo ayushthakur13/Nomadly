@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{trip.tripName}}</title>
+    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/trip.css">
+
+</head>
+<body>
+    
+    {{>navbar}}
+
+    <main class="trip-create-page">
+        <a href="javascript:history.back()" class="btn-back-fixed">←</a>
+
+        <div class="trip-form-box">
+            <h1 class="form-title">Edit {{trip.tripName}}</h1>
+
+            <form action="/trips/edit" method="post" class="trip-form-grid">
+                <div class="form-group">
+                    <label for="tripName">Trip Name</label>
+                    <input type="text" id="tripName" name="tripName" required value="{{trip.tripName}}"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="mainDestination">Destination</label>
+                    <input type="text" id="mainDestination" name="mainDestination" required value="{{trip.mainDestination}}"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" required value="{{formatDate trip.startDate}}"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" name="endDate" required value="{{formatDate trip.endDate}}"/>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="4">{{trip.description}}</textarea>
+                </div>
+
+                <input type="hidden" name="tripId" value="{{trip._id}}"/>
+
+                <button type="submit" class="btn-primary full-width">Save Changes</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

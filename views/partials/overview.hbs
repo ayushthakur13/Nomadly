@@ -1,0 +1,65 @@
+<section class="tab-content active" id="overview">
+                <div class="overview-grid">
+
+                    <div class="overview-tile">
+                    <div class="tile-icon">📍</div>
+                    <div class="tile-info">
+                        <span class="tile-label">Destination</span>
+                        <span class="tile-value">{{trip.mainDestination}}</span>
+                    </div>
+                    </div>
+
+                    <div class="overview-tile">
+                    <div class="tile-icon">🗓️</div>
+                    <div class="tile-info">
+                        <span class="tile-label">Start Date</span>
+                        <span class="tile-value">{{formatDate trip.startDate}}</span>
+                    </div>
+                    </div>
+
+                    <div class="overview-tile">
+                    <div class="tile-icon">🏁</div>
+                    <div class="tile-info">
+                        <span class="tile-label">End Date</span>
+                        <span class="tile-value">{{formatDate trip.endDate}}</span>
+                    </div>
+                    </div>
+
+                    <div class="overview-tile">
+                    <div class="tile-icon">⏳</div>
+                    <div class="tile-info">
+                        <span class="tile-label">Duration</span>
+                        <span class="tile-value">{{calculateTripDuration trip.startDate trip.endDate}} days</span>
+                    </div>
+                    </div>
+
+                    <div class="overview-tile">
+                    <div class="tile-icon">✅</div>
+                    <div class="tile-info">
+                        <span class="tile-label">Task Progress</span>
+                        <div class="progress-bar-wrapper">
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {{taskProgress trip.tasks}}%"></div>
+                        </div>
+                        <span class="progress-text">{{countCompletedTasks trip.tasks}} / {{trip.tasks.length}} done</span>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="overview-tile countdown-tile">
+                    <div class="tile-icon">📅</div>
+                    <div class="tile-info">
+                        <span class="tile-label">Countdown</span>
+                        <span class="tile-value">{{daysUntil trip.startDate}} days left</span>
+                    </div>
+                    </div>
+
+                </div>
+
+                {{#if trip.description}}
+                    <div class="overview-description">
+                    <h3>About the Trip</h3>
+                    <p>{{trip.description}}</p>
+                    </div>
+                {{/if}}
+            </section>

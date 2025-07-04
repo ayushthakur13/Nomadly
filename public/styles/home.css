@@ -1,3 +1,10 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 :root {
   --color-primary: #1A2A36;          /* Explorer Navy */
   --color-accent: #FF6B35;           /* Compass Orange */
@@ -16,5 +23,11 @@
   --color-border: rgba(0, 0, 0, 0.08);
   --color-glass: rgba(255, 255, 255, 0.2);
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+
+main{
+    min-height: 100vh;
+    background: var(--color-bg);
 }
 

@@ -27,29 +27,37 @@
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+body {
+  padding-top: 92px; /* because of navbar */
+}
 
 /* ----------NAVBAR---------- */
 .navbar{
+    position: fixed;
+    top: 0;
+    width: 100%; 
+    z-index: 1000;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
     min-height: 70px;
-    background-color: var(--logo-bg);
-    padding: 12px 50px;
+    background-color: var(--color-primary);
+    padding: 16px 50px;
 }
 
 .logo{
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: var(--color-primary);
+  color: white;
 }
 
 .logo-img{
-    background: url('../images/Nomadly_icon_white.png');
-    height: 70px;
-    width: 70px;
-    margin-right: 10px;
+    background: url('../images/Nomadly_icon-removebg.png');
+    height: 60px;
+    width: 60px;
+    /* margin-right: 10px; */
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -68,7 +76,7 @@
 .links a,
 .profile a{
     text-decoration: none;
-    color: var(--color-primary);
+    color: white;
     font-size: 18px;
     font-weight: 500;
     transition: color 0.3s ease;
@@ -89,4 +97,29 @@
 
 .profile {
     margin-right: 30px;
+}
+
+
+/* ----------BACK BUTTON---------- */
+.btn-back-fixed {
+    position: fixed;
+    top: 9rem;
+    left: 1.5rem;
+    z-index: 999;
+    
+    font-size: 1.3rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.2s ease;
+}
+
+.btn-back-fixed:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
 }

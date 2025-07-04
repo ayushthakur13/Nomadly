@@ -13,6 +13,12 @@ const favicon = require('serve-favicon');
 
 app.set('view engine','hbs');
 hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
+hbs.registerHelper('formatDate', require('./helpers/formatDate'));
+hbs.registerHelper('calculateTripDuration', require('./helpers/calculateTripDuration'));
+hbs.registerHelper('countCompletedTasks', require('./helpers/countCompletedTasks'));
+hbs.registerHelper('taskProgress', require('./helpers/taskProgress'));
+hbs.registerHelper('daysUntil', require('./helpers/daysUntil'));
+
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());

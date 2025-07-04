@@ -1,0 +1,20 @@
+<section class="tab-content" id="tasks">
+                <form class="task-add-form" action="/trips/{{trip._id}}/tasks" method="POST">
+                    <input type="text" name="title" placeholder="Add a new task..." required />
+                    <button type="submit">Add</button>
+                </form>
+
+                <ul class="task-list">
+                    {{#each trip.tasks}}
+                    <li class="task-item {{#if this.completed}}completed{{/if}}">
+                        <form action="/trips/{{../trip._id}}/tasks/{{this._id}}/toggle" method="POST" class="task-toggle-form">
+                            <button type="submit" class="check-btn">{{#if this.completed}}✔️{{else}}⭕{{/if}}</button>
+                        </form>
+                        <span class="task-title">{{this.title}}</span>
+                        <form action="/trips/{{../trip._id}}/tasks/{{this._id}}/delete" method="POST" class="task-delete-form">
+                            <button type="submit" class="delete-btn">🗑️</button>
+                        </form>
+                    </li>
+                    {{/each}}
+                </ul>
+            </section>

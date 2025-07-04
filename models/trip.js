@@ -7,35 +7,82 @@ const tripSchema = new Schema({
         required: true,
         trim: true
     },
-    destination:{
+
+    mainDestination:{
         type: String,
         required: true
     },
+
+    startDate: {
+        type: Date,
+        required: true
+    },
+    
+    endDate: {
+        type: Date,
+        required: true
+    },
+
+    description: {
+        type: String,
+        trim: true
+    },
+
+    destinations: [{
+        name: { type: String, required: true },
+        location: String,
+        date: Date,
+        notes: String,
+        coordinates: {
+            lat: { type: Number },
+            lng: { type: Number }
+        },
+        imageUrl: { type: String, default: '/images/default-dest.jpg' },
+        addedAt: { type: Date, default: Date.now }
+    }],
+
+    tasks: [{
+        title: String,
+        completed: { type: Boolean, default: false }
+    }],
+
+    budget: {
+        total: { type: Number, required: true, default: 0 },
+        expenses: [{
+            category: { type: String, required: true },
+            amount: { type: Number, required: true },
+            description: String,
+            spentBy: { type: Schema.Types.ObjectId, ref: 'User' },
+            date: { type: Date, default: Date.now }
+        }]
+    },
+
+    accommodations: [{
+        name: String,
+        address: String,
+        checkIn: Date,
+        checkOut: Date,
+        price: Number,
+        bookingUrl: String,
+        notes: String
+    }],
+
+    participants: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+
+    imageUrl: {
+        type: String,
+        default: '/images/default-trip.jpg'
+    },
+
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    participants: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }],
-    startDate: {
-        type: Date,
-        required: true
-    },
-    endDate: {
-        type: Date,
-        required: true
-    },
-    description: {
-        type: String,
-        trim: true
-    },
-    imageUrl: {
-        type: String,
-        default: '/images/default-trip.jpg'
-    },
+
     createdAt: {
         type: Date,
         default: Date.now

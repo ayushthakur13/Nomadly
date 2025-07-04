@@ -1,0 +1,41 @@
+<section class="tab-content" id="destinations">
+    <form action="/trips/{{trip._id}}/destinations" method="POST" class="destination-form">
+        <input type="text" name="name" placeholder="City or Place Name" required />
+        <input type="text" name="location" placeholder="Location (optional)" />
+        <input type="date" name="date" />
+        <input type="text" name="notes" placeholder="Notes (optional)" />
+        <button type="submit">Add Destination</button>
+    </form>
+
+    <ul class="destination-list">
+        {{#each trip.destinations}}
+        <div class="destination-card" data-dest-id="{{this._id}}">
+            <!-- View Mode -->
+            <div class="view-mode">
+                <h4>{{this.name}}</h4>
+                <p>{{this.notes}}</p>
+                <p>{{formatDate this.date}}</p>
+
+                <div class="card-actions">
+                    <button class="edit-toggle-btn">✏️ Edit</button>
+                    <form method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/delete">
+                        <button type="submit">🗑️ Delete</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Mode (Hidden by default) -->
+            <form class="edit-mode hidden" method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/edit">
+                <input type="text" name="name" value="{{this.name}}" required />
+                <textarea name="notes">{{this.notes}}</textarea>
+                <input type="date" name="date" value="{{formatDate this.date}}" />
+                <div class="edit-actions">
+                    <button type="submit">💾 Save</button>
+                    <button type="button" class="cancel-edit-btn">❌ Cancel</button>
+                </div>
+            </form>
+        </div>
+        {{/each}}
+
+    </ul>
+</section>

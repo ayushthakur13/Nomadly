@@ -5,17 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{trip.tripName}}</title>
     <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/trip.css">
+    <link rel="stylesheet" href="/styles/trip-details.css">
 </head>
 <body>
 
     {{>navbar}}
 
-    <h1>{{trip.tripName}}</h1>
-    <p><strong>Destination:</strong> {{trip.destination}}</p>
-    <p><strong>Start Date:</strong> {{trip.startDate}}</p>
-    <p><strong>End Date:</strong> {{trip.endDate}}</p>
-    <p><strong>Description:</strong> {{trip.description}}</p>
+    <main class="trip-details-container">
+        <a href="/trips" class="btn-back-fixed">←</a>
 
-    <a href="/trips/edit/?tripId={{trip._id}}">Edit Trip</a>
+        <header class="trip-header">
+            <div class="trip-header-top">
+                <h1 class="trip-title">{{trip.tripName}}</h1>
+                <a href="/trips/edit?tripId={{trip._id}}" class="edit-btn btn-outline">Edit</a>
+            </div>
+        </header>
+
+        <ul class="tab-nav">
+            <li class="tab active" data-tab="overview">Overview</li>
+            <li class="tab" data-tab="destinations">Destinations</li>
+            <li class="tab" data-tab="tasks">Tasks</li>
+            <li class="tab" data-tab="budget">Budget</li>
+            <li class="tab" data-tab="accommodation">Accommodation</li>
+            <li class="tab" data-tab="members">Members</li>
+        </ul>
+
+        <div class="tab-panel-wrapper">
+            {{> overview}}
+            {{> destinations}}
+            {{> tasks}}
+            {{> budget}}
+            {{> accommodation}}
+            {{> members}}
+        </div>
+
+    </main>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(target).classList.add('active');
+            });
+        });
+
+
+        document.querySelectorAll('.edit-toggle-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const card = button.closest('.destination-card');
+                card.querySelector('.view-mode').classList.add('hidden');
+                card.querySelector('.edit-mode').classList.remove('hidden');
+            });
+        });
+
+        document.querySelectorAll('.cancel-edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const card = button.closest('.destination-card');
+                card.querySelector('.view-mode').classList.remove('hidden');
+                card.querySelector('.edit-mode').classList.add('hidden');
+            });
+        });
+
+    </script>
 </body>
 </html>

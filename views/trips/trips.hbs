@@ -5,26 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trips</title>
     <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/trip.css">
 </head>
 <body>
 
     {{>navbar}}
 
-    <h1>Your Trips</h1>
+    <main class="trip-list-page">
+        <h1 class="page-heading">Your Trips</h1>
 
-    {{#if trips.length}}
-        <ul class="trip-list">
+        {{#if trips.length}}
+        <div class="trip-card-grid">
             {{#each trips as |t|}}
-                <li class="trip-card">
-                    <h2>{{t.tripName}}</h2>
-                    <p>{{t.destination}}</p>
-                    <a href="/trips/details/{{t._id}}">View</a>
-                </li>
-            {{/each}}
-        </ul>
+            <div class="trip-card">
+                <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
+                    <div class="trip-card-overlay">
+                        <h2 class="trip-title">{{t.tripName}}</h2>
+                        <p class="trip-destination">{{t.destination}}</p>
+                    </div>
+                </div>
 
-    {{else}}
-        <p>No trips yet. <a href="/trips/create">Create one</a> now!</p>
-    {{/if}}
-    </body>
+                <div class="trip-actions">
+                    <a href="/trips/details?tripId={{t._id}}" class="btn-outline">View</a>
+                    <a href="/trips/delete?tripId={{t._id}}" class="btn-danger">Delete</a>
+                </div>
+            </div>
+            {{/each}}
+
+            <div class="trip-card add-trip-card">
+                <a href="/trips/create" class="add-trip-link">
+                <div class="add-icon">+</div>
+                <div class="add-text">Create New Trip</div>
+                </a>
+            </div>
+            
+        </div>
+        {{else}}
+            <p class="empty-state">No trips yet. <a href="/trips/create">Create one</a> now!</p>
+        {{/if}}
+    </main>
+
+</body>
 </html>

@@ -1,0 +1,268 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+  --color-primary: #1A2A36;          /* Explorer Navy */
+  --color-accent: #FF6B35;           /* Compass Orange */
+
+  --color-bg: #F7F4EF;               /* Canvas Sand */
+  --color-card: #E4E4E4;             /* Trail Smoke */
+
+  --color-text-main: #2E2E2E;        /* Campfire Charcoal */
+  --color-text-muted: #6c6c6c;       /* Foggy Ash */
+
+  --logo-bg: #f7f7f7;
+
+  --color-success: #2C6E49;          /* Forest Green */
+  --color-warning: #F4B942;          /* Desert Mustard */
+  --color-danger: #D72638;           /* Route Red */
+  --color-info: #3478F6;             /* Skyline Blue */
+
+  --color-border: rgba(0, 0, 0, 0.2);
+  --color-glass: rgba(255, 255, 255, 0.2);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+
+/* create.hbs, trips.hbs, edit.hbs */
+
+
+/* ---------Create trip page--------- */
+.trip-create-page {
+    background: var(--color-bg);
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.8rem 0;
+}
+
+.trip-form-box {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 1.25rem;
+    box-shadow: var(--shadow-soft);
+    max-width: 800px;
+    width: 100%;
+}
+
+.form-title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--color-primary);
+}
+
+.trip-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 0.85rem 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    background-color: #fff;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--color-accent);
+    outline: none;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.btn-primary {
+    padding: 1rem 2rem;
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    transition: transform 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #142028;
+    transform: translateY(-1px);
+}
+
+
+
+
+
+
+
+/* --------- TRIP LIST PAGE --------- */
+
+.trip-list-page {
+    padding: 3rem 2rem;
+    background-color: var(--color-bg);
+    min-height: 100vh;
+}
+
+.page-heading {
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    color: var(--color-primary);
+}
+
+.trip-card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.trip-card {
+    width: 400px;
+    border-radius: 1rem;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+}
+
+.trip-card-img {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; 
+    background-size: cover;
+    background-position: center;
+}
+
+.trip-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+    color: white;
+}
+
+.trip-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.trip-destination {
+    font-size: 1rem;
+    color: #f0f0f0;
+    margin-top: 0.3rem;
+}
+
+.trip-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.btn-outline {
+    border: 1px solid var(--color-primary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.6rem;
+    color: var(--color-primary);
+    background: transparent;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-danger {
+    border: 1px solid var(--color-danger);
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.6rem;
+    color: var(--color-danger);
+    background: transparent;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.add-trip-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--color-card);
+    border: 2px dashed var(--color-border);
+    color: var(--color-text-muted);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.add-trip-card:hover {
+    background-color: var(--color-bg);
+    color: var(--color-primary);
+}
+
+.add-trip-link {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 100px;
+}
+
+.add-icon {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.add-text {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    font-size: 1.3rem;
+    margin-top: 4rem;
+}
