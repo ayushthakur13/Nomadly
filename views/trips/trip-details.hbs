@@ -6,7 +6,14 @@
     <title>{{trip.tripName}}</title>
     <link rel="stylesheet" href="/styles/style.css">
     <link rel="stylesheet" href="/styles/trip.css">
-    <link rel="stylesheet" href="/styles/trip-details.css">
+    <link rel="stylesheet" href="/styles/trip-details/trip-details.css">
+    <link rel="stylesheet" href="/styles/trip-details/overview.css">
+    <link rel="stylesheet" href="/styles/trip-details/destination.css">
+    <link rel="stylesheet" href="/styles/trip-details/task.css">
+    <link rel="stylesheet" href="/styles/trip-details/budget.css">
+    <link rel="stylesheet" href="/styles/trip-details/accommodation.css">
+    <link rel="stylesheet" href="/styles/trip-details/members.css">
+    <link rel="stylesheet" href="/styles/trip-details/other.css">
 </head>
 <body>
 
@@ -29,6 +36,7 @@
             <li class="tab" data-tab="budget">Budget</li>
             <li class="tab" data-tab="accommodation">Accommodation</li>
             <li class="tab" data-tab="members">Members</li>
+            <li class="tab" data-tab="other">Other</li>
         </ul>
 
         <div class="tab-panel-wrapper">
@@ -38,6 +46,7 @@
             {{> budget}}
             {{> accommodation}}
             {{> members}}
+            {{> other}}
         </div>
 
     </main>
@@ -57,24 +66,6 @@
                 document.getElementById(target).classList.add('active');
             });
         });
-
-
-        document.querySelectorAll('.edit-toggle-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const card = button.closest('.destination-card');
-                card.querySelector('.view-mode').classList.add('hidden');
-                card.querySelector('.edit-mode').classList.remove('hidden');
-            });
-        });
-
-        document.querySelectorAll('.cancel-edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const card = button.closest('.destination-card');
-                card.querySelector('.view-mode').classList.remove('hidden');
-                card.querySelector('.edit-mode').classList.add('hidden');
-            });
-        });
-
     </script>
 </body>
 </html>

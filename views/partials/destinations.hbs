@@ -10,32 +10,60 @@
     <ul class="destination-list">
         {{#each trip.destinations}}
         <div class="destination-card" data-dest-id="{{this._id}}">
-            <!-- View Mode -->
-            <div class="view-mode">
-                <h4>{{this.name}}</h4>
-                <p>{{this.notes}}</p>
-                <p>{{formatDate this.date}}</p>
-
-                <div class="card-actions">
-                    <button class="edit-toggle-btn">✏️ Edit</button>
-                    <form method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/delete">
-                        <button type="submit">🗑️ Delete</button>
-                    </form>
-                </div>
+            <div class="card-left-actions">
+                <button type="button" class="edit-toggle-btn" title="Edit">✏️</button>
+                <form method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/delete">
+                <button type="submit" title="Delete">🗑️</button>
+                </form>
             </div>
 
-            <!-- Edit Mode (Hidden by default) -->
-            <form class="edit-mode hidden" method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/edit">
-                <input type="text" name="name" value="{{this.name}}" required />
-                <textarea name="notes">{{this.notes}}</textarea>
-                <input type="date" name="date" value="{{formatDate this.date}}" />
-                <div class="edit-actions">
-                    <button type="submit">💾 Save</button>
-                    <button type="button" class="cancel-edit-btn">❌ Cancel</button>
+            <div class="card-content">
+                <!-- View Mode -->
+                <div class="view-mode">
+                    <h4>{{this.name}}</h4>
+                    {{#if this.notes}}<p>{{this.notes}}</p>{{/if}}
+                    {{#if this.date}}<p><strong>Date:</strong> {{formatDate this.date}}</p>{{/if}}
                 </div>
-            </form>
+
+                <!-- Edit Mode -->
+                <form class="edit-mode hidden" method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/edit">
+                    <input type="text" name="name" value="{{this.name}}" required />
+                    <textarea name="notes">{{this.notes}}</textarea>
+                    <input type="date" name="date" value="{{formatDate this.date}}" />
+                    <div class="edit-actions">
+                        <button type="submit">💾 Save</button>
+                        <button type="button" class="cancel-edit-btn">❌ Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
         {{/each}}
 
     </ul>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.edit-toggle-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const card = button.closest('.destination-card');
+                const viewMode = card.querySelector('.view-mode');
+                const editMode = card.querySelector('.edit-mode');
+
+                viewMode.classList.add('hidden');
+                editMode.classList.remove('hidden');
+            });
+        });
+
+        document.querySelectorAll('.cancel-edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const card = button.closest('.destination-card');
+                const viewMode = card.querySelector('.view-mode');
+                const editMode = card.querySelector('.edit-mode');
+
+                viewMode.classList.remove('hidden');
+                editMode.classList.add('hidden');
+            });
+        });
+    });
+</script>
