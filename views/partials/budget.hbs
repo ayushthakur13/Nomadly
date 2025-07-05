@@ -1,3 +1,81 @@
 <section class="tab-content" id="budget">
-    Budget content coming soon.
+
+    {{#if trip.budget.total}}
+        <div class="budget-summary-header">
+            <h3>💵 Total Budget: ₹{{trip.budget.total}}</h3>
+            <button class="edit-budget-btn" onclick="toggleBudgetEdit()">✏️ Edit</button>
+        </div>
+
+        <form method="POST" action="/trips/{{trip._id}}/budget/update" class="edit-budget-form hidden">
+            <input type="number" name="budget" value="{{trip.budget.total}}" required />
+            <button type="submit">💾 Save</button>
+            <button type="button" onclick="toggleBudgetEdit()">❌ Cancel</button>
+        </form>
+
+        <div class="budget-summary">
+            <div class="budget-box">
+                <span>💰 Remaining:</span> ₹{{calculateRemaining trip.budget.total trip.budget.expenses}}
+            </div>
+            <div class="budget-box">
+                <span>📊 Amount Spent:</span> ₹{{calculateSpent trip.budget.expenses}}
+            </div>
+        </div>
+
+        <button class="toggle-expense-form">➕ Add Expense</button>
+
+        <form method="POST" action="/trips/{{trip._id}}/expenses" class="expense-form hidden">
+            <input type="text" name="category" placeholder="Category (e.g. Travel, Food)" required />
+            <input type="number" name="amount" placeholder="Amount" required />
+            <input type="date" name="date" required/>
+            <input type="text" name="description" placeholder="Description (optional)" />
+            <select name="spentBy" required>
+                <option disabled selected>Spent By</option>
+                <option value="{{trip.createdBy._id}}">You</option>
+                {{#each trip.participants}}
+                    <option value="{{this._id}}">{{this.username}}</option>
+                {{/each}}
+            </select>
+            <button type="submit">Add</button>
+        </form>
+
+        <ul class="expense-list">
+            {{#each trip.budget.expenses}}
+                <li class="expense-item">
+                    <div class="expense-info">
+                        <strong>📁 {{this.category}}</strong> - ₹{{this.amount}}<br />
+                        {{#if this.description}}
+                            <span>{{this.description}}</span><br />
+                        {{/if}}
+                        <small>🧍 {{getUserName this.spentBy ../trip}} • 🗓️ {{formatDate this.date}}</small>
+                    </div>
+                    <form method="POST" action="/trips/{{../trip._id}}/expenses/{{this._id}}/delete">
+                        <button type="submit">🗑️</button>
+                    </form>
+                </li>
+            {{/each}}
+        </ul>
+
+    {{else}}
+    <form method="POST" action="/trips/{{trip._id}}/budget/update" class="budget-form">
+        <input type="number" name="budget" placeholder="Enter your total trip budget" required />
+        <button type="submit">Set Budget</button>
+    </form>
+    {{/if}}
+
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.querySelector('.toggle-expense-form');
+        const form = document.querySelector('.expense-form');
+        if (toggleBtn && form) {
+            toggleBtn.addEventListener('click', () => {
+                form.classList.toggle('hidden');
+            });
+        }
+    });
+
+    function toggleBudgetEdit() {
+        document.querySelector('.edit-budget-form').classList.toggle('hidden');
+    }
+</script>

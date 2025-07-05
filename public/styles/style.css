@@ -82,8 +82,7 @@ body {
     transition: color 0.3s ease;
 }
 
-.links a:hover,
-.profile a:hover{
+.links a:hover{
     color: var(--color-info);
 }
 
@@ -95,8 +94,15 @@ body {
     color: #cc0000;
 }
 
-.profile {
-    margin-right: 30px;
+.profile-img{
+    background: url('../images/profile-icon.png');
+    height: 45px;
+    width: 45px;
+    margin-right: 20px;
+    margin-top: 5px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: inline-block;
 }
 
 

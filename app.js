@@ -18,6 +18,9 @@ hbs.registerHelper('calculateTripDuration', require('./helpers/calculateTripDura
 hbs.registerHelper('countCompletedTasks', require('./helpers/countCompletedTasks'));
 hbs.registerHelper('taskProgress', require('./helpers/taskProgress'));
 hbs.registerHelper('daysUntil', require('./helpers/daysUntil'));
+hbs.registerHelper('calculateSpent', require('./helpers/calculateSpent'));
+hbs.registerHelper('calculateRemaining', require('./helpers/calculateRemaining'));
+hbs.registerHelper('getUserName', require('./helpers/getUserName'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));
@@ -48,7 +51,7 @@ const loginRoute = require('./routes/auth/login');
 const { isLoggedIn } = require('./middlewares/isLoggedIn');
 const homeRoute = require('./routes/home');
 const profileRoute = require('./routes/profile/profile');
-const tripRoute = require('./routes/trip');
+const tripRoute = require('./routes/trips');
 
 app.use('/auth/signup',signupRoute);
 app.use('/auth/login',loginRoute);
