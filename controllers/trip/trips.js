@@ -3,7 +3,12 @@ const Trip = require('../../models/trip');
 module.exports.getTrips = async (req, res) => {
     try {
         const userId = req.user._id;
-        const trips = await Trip.find({ createdBy: userId }).sort({ createdAt: -1 });
+        const trips = await Trip.find({ 
+            $or: [
+            { createdBy: userId },
+            { participants: userId }
+        ]
+         }).sort({ createdAt: -1 });
 
         res.render('trips/trips',{ trips });
     } 
@@ -16,15 +21,33 @@ module.exports.getTrips = async (req, res) => {
 
 module.exports.getTripDetails = async (req,res)=>{
     try {
+        const userId = req.user._id;
         const { tripId } = req.query;
 
-        const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id })
-        .populate('participants createdBy');
+        const trip = await Trip.findOne({
+            _id: tripId, 
+            $or: [
+                { createdBy: userId },
+                { participants: userId }
+            ]
+         })
+            .populate('participants', 'username')
+            .populate('createdBy', 'username');
 
         if (!trip) 
             return res.status(404).render('404');
 
-        res.render('trips/trip-details',{ trip });
+        const totalMembers = trip.participants.length + 1;
+        const memberLabel = totalMembers === 1 ? "member" : "members";
+
+        res.render('trips/trip-details',{
+            trip,
+            owner: trip.createdBy,
+            participants: trip.participants,
+            isOwner: req.user._id.equals(trip.createdBy._id),
+            totalMembers,
+            memberLabel
+        });
     } 
     catch (err) {
         console.error('Failed to fetch trip:', err);

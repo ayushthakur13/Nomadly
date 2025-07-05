@@ -8,6 +8,12 @@ const userSchema = new Schema({
     },
     password: String,
 
+    email: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+
     fbID: String,
     fbAccesToken: String,
     
