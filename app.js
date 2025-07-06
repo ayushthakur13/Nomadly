@@ -25,7 +25,7 @@ hbs.registerHelper('getUserName', require('./helpers/getUserName'));
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
-app.use(favicon(path.join(__dirname, 'public', 'images', 'Nomadly_icon.png')));
+app.use(favicon(path.join(__dirname, 'public', 'images', 'icon' ,'Nomadly_icon.png')));
 
 const mongoUrl = process.env.MONGO_URL;
 const sessionSecret = process.env.SESSION_SECRET;

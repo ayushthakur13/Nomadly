@@ -5,32 +5,6 @@
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-:root {
-  --color-primary: #1A2A36;          /* Explorer Navy */
-  --color-accent: #FF6B35;           /* Compass Orange */
-
-  --color-bg: #F7F4EF;               /* Canvas Sand */
-  --color-card: #E4E4E4;             /* Trail Smoke */
-
-  --color-text-main: #2E2E2E;        /* Campfire Charcoal */
-  --color-text-muted: #6c6c6c;       /* Foggy Ash */
-
-  --logo-bg: #f7f7f7;
-
-  --color-success: #2C6E49;          /* Forest Green */
-  --color-warning: #F4B942;          /* Desert Mustard */
-  --color-danger: #D72638;           /* Route Red */
-  --color-info: #3478F6;             /* Skyline Blue */
-
-  --color-border: rgba(0, 0, 0, 0.2);
-  --color-glass: rgba(255, 255, 255, 0.2);
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-
-
-
-
 /* ---------Trip Details Page--------- */
 
 .trip-details-container {

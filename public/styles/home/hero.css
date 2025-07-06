@@ -1,0 +1,181 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+  /* Base Brand */
+  --color-primary: #1A2A36;             /* Explorer Navy */
+  --color-primary-light: #3d607d;       /* Soft Midnight */
+
+  --color-accent: #4FB286;              /* Nomad Mint */
+  --color-accent-dark: #3F9470;         /* Jungle Mint */
+  --color-accent-muted: #48685b;         
+
+  /* Backgrounds & Containers */
+  --color-bg: #F7F4EF;            /* Canvas Sand */
+  --color-card: #DEDAD2;          /* Nomad Map Tan */
+  --color-card-alt: #D2D7D9;      /* Overcast Grey Trail */
+  --color-card-muted: #DFE3E1;    /* Misty Travel Morning */
+
+  --color-card-dark: #2F3A45;     /* Midnight Trail */
+  --color-text-light: #F1F1F1;    /* Fog Light */
+
+  /* Text */
+  --color-text-main: #2E2E2E;           /* Campfire Charcoal */
+  --color-text-muted: #7D7D7D;          /* Foggy Ash */
+
+  /* Semantic */
+  --color-success: #2C6E49;             /* Forest Green */
+  --color-warning: #F4B942;             /* Sunset Mustard */
+  --color-danger: #D72638;              /* Route Red */
+  --color-info: #3478F6;                /* Skyline Blue */
+
+  /* Effects */
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-glass: rgba(255, 255, 255, 0.2);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-soft-dark: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+  /* Hero Background */
+  --gradient-hero: linear-gradient(180deg, #1A2A36 0%, #3d607d 100%);
+  --gradient-cta: linear-gradient(10deg, #4FB286 0%, #1A2A36 100%);
+}
+
+
+
+main {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+
+/* Hero Section */
+.hero-section {
+  background: var(--color-bg);
+  color: var(--color-text-main);
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5rem;
+  animation: fadeUp 0.8s ease forwards;
+}
+
+.hero-content {
+  margin: 1.5rem 0 0 5rem;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.highlight-badge {
+  display: inline-block;
+  background-color: var(--color-accent-dark);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-soft);
+  width: fit-content;
+}
+
+.highlight-badge .badge-emoji {
+  margin-right: 0.4rem;
+}
+
+.hero-title {
+  font-size: 3.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+  color: var(--color-primary);
+}
+
+.hero-subtext {
+  font-size: 1.25rem;
+  color: var(--color-accent-muted);
+  max-width: 520px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-cta .btn {
+  padding: 0.9rem 1.8rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-accent-dark);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  background-color: transparent;
+}
+
+.btn-outline:hover {
+  color: var(--color-accent-dark);
+  border-color: var(--color-accent-dark);
+}
+
+.hero-image {
+  flex: 1 1 300px;
+  text-align: center;
+}
+
+.hero-image img {
+  max-width: 600px;
+  height: 600px;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-cta {
+    justify-content: center;
+  }
+}
+
+

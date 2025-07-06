@@ -10,7 +10,9 @@
   --color-accent: #FF6B35;           /* Compass Orange */
 
   --color-bg: #F7F4EF;               /* Canvas Sand */
-  --color-card: #E4E4E4;             /* Trail Smoke */
+  --color-card: #DEDAD2;          /* Nomad Map Tan */
+  --color-card-alt: #D2D7D9;      /* Overcast Grey Trail */
+  --color-card-muted: #DFE3E1;    /* Misty Travel Morning */
 
   --color-text-main: #2E2E2E;        /* Campfire Charcoal */
   --color-text-muted: #7D7D7D;       /* Foggy Ash */
@@ -25,6 +27,16 @@
   --color-border: rgba(0, 0, 0, 0.08);
   --color-glass: rgba(255, 255, 255, 0.2);
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  --gradient-hero: linear-gradient(180deg, #1A2A36 0%, #324a5e 100%);
+
+  --color-primary-light: #324a5e;     /* Faded Explorer Navy */
+  --color-accent-light: #FFA06E;     /* Soft Compass Orange */
+  
+  --color-secondary: #F5F3EB;       /* Mist Linen – soft background contrast */
+  --color-highlight: #C3E4ED;       /* Travel Sky – accent for CTA hovers */
+  --color-purple: #8E7DBE;            /* Evening Lavender */
+  --color-pink: #F76C6C;              /* Sunset Coral */
 }
 
 body {
@@ -54,7 +66,7 @@ body {
 }
 
 .logo-img{
-    background: url('../images/Nomadly_icon-removebg.png');
+    background: url('../images/icon/Nomadly_icon-removebg.png');
     height: 60px;
     width: 60px;
     /* margin-right: 10px; */
@@ -70,7 +82,7 @@ body {
 .links{
   display: flex;
   align-items: center;
-  gap: 50px;
+  gap: 5rem;
 }
 
 .links a,
@@ -83,19 +95,11 @@ body {
 }
 
 .links a:hover{
-    color: var(--color-info);
-}
-
-.links .logout {
-    color: #ff4d4d;
-}
-
-.links .logout:hover {
-    color: #cc0000;
+    color: var(--color-accent);
 }
 
 .profile-img{
-    background: url('../images/profile-icon.png');
+    background: url('../images/icon/undraw_avatar-traveler.png');
     height: 45px;
     width: 45px;
     margin-right: 20px;

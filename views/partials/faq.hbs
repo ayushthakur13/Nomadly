@@ -1,0 +1,46 @@
+<section class="faq-section" id="faq">
+    <div class="faq-header">
+        <h2 class="section-heading">Frequently Asked Questions</h2>
+    </div>
+
+    <div class="faq-list">
+        <div class="faq-item">
+            <button class="faq-question">Is Nomadly free to use?</button>
+            <div class="faq-answer">Yes, Nomadly is completely free for personal trip planning. We may introduce premium features later, but core tools will remain free.</div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">Can I plan trips alone?</button>
+            <div class="faq-answer">Of course! Nomadly works great for solo travel too. You get access to all the same planning tools.</div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">Is my data secure?</button>
+            <div class="faq-answer">Absolutely. Your trip data is private and only visible to invited members. We don’t sell your data.</div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">Can I invite friends who don’t have an account?</button>
+            <div class="faq-answer">Currently, invited friends need to create an account to join your trip — but we’re working on guest access soon.</div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const faqItems = document.querySelectorAll(".faq-item");
+
+        faqItems.forEach(item => {
+            const question = item.querySelector(".faq-question");
+
+            question.addEventListener("click", () => {
+                item.classList.toggle("open");
+
+                faqItems.forEach(other => {
+                    if (other !== item) other.classList.remove("open");
+                });
+            });
+        });
+    });
+</script>
