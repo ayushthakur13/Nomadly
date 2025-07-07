@@ -52,6 +52,7 @@ const { isLoggedIn } = require('./middlewares/isLoggedIn');
 const homeRoute = require('./routes/home');
 const profileRoute = require('./routes/profile/profile');
 const tripRoute = require('./routes/trips');
+const aboutUsRoute = require('./routes/aboutus');
 
 app.use('/auth/signup',signupRoute);
 app.use('/auth/login',loginRoute);
@@ -59,6 +60,7 @@ app.use(isLoggedIn);
 app.use('/home',homeRoute);
 app.use('/profile',profileRoute);
 app.use('/trips',tripRoute);
+app.use('/aboutus',aboutUsRoute);
 
 app.get('/logout',(req,res,next)=>{
     req.logout((err)=>{
