@@ -1,0 +1,26 @@
+<section id="featured-trips" class="explore-section">
+  <div class="section-heading">
+    <h2 class="section-title">✨ Featured Trips</h2>
+    <p class="section-subtext">Carefully crafted adventures curated by the Nomadly team.</p>
+  </div>
+
+  <div class="trip-card-grid">
+    {{#each featuredTrips}}
+    <a href="/explore/trip/{{this._id}}" class="trip-card-modern">
+        <div class="trip-card-modern-img" style="background-image: url('{{this.imageUrl}}');"></div>
+        <div class="trip-card-modern-content">
+            <h2 class="trip-modern-title">{{this.tripName}}</h2>
+            <p class="trip-modern-destination">📍 
+            {{#each this.destinations}}
+                {{this.name}}{{#unless @last}}, {{/unless}}
+            {{/each}}
+            </p>
+            <p class="trip-modern-dates">🗓️ {{formatDate this.startDate}} - {{formatDate this.endDate}} ({{calculateTripDuration this.startDate this.endDate}})</p>
+            {{#if this.description}}
+            <p class="trip-modern-description">{{this.description}}</p>
+            {{/if}}
+        </div>
+        </a>
+    {{/each}}
+  </div>
+</section>

@@ -6,42 +6,52 @@
 }
 
 :root {
-  --color-primary: #1A2A36;          /* Explorer Navy */
-  --color-accent: #FF6B35;           /* Compass Orange */
+  /* Base Brand */
+  --color-primary: #1A2A36;             /* Explorer Navy */
+  --color-primary-light: #3d607d;       /* Soft Midnight */
 
-  --color-bg: #F7F4EF;               /* Canvas Sand */
+  --color-accent: #4FB286;              /* Nomad Mint */
+  --color-accent-dark: #3F9470;         /* Jungle Mint */
+  --color-accent-muted: #48685b;         
+
+  /* Backgrounds & Containers */
+  --color-bg: #F7F4EF;            /* Canvas Sand */
   --color-card: #DEDAD2;          /* Nomad Map Tan */
   --color-card-alt: #D2D7D9;      /* Overcast Grey Trail */
   --color-card-muted: #DFE3E1;    /* Misty Travel Morning */
 
-  --color-text-main: #2E2E2E;        /* Campfire Charcoal */
-  --color-text-muted: #7D7D7D;       /* Foggy Ash */
+  --color-card-dark: #2F3A45;     /* Midnight Trail */
+  --color-text-light: #F1F1F1;    /* Fog Light */
 
-  --logo-bg: #f7f7f7;
+  /* Text */
+  --color-text-main: #2E2E2E;           /* Campfire Charcoal */
+  --color-text-muted: #7D7D7D;          /* Foggy Ash */
 
-  --color-success: #2C6E49;          /* Forest Green */
-  --color-warning: #F4B942;          /* Desert Mustard */
-  --color-danger: #D72638;           /* Route Red */
-  --color-info: #3478F6;             /* Skyline Blue */
+  /* Semantic */
+  --color-success: #2C6E49;             /* Forest Green */
+  --color-warning: #F4B942;             /* Sunset Mustard */
+  --color-danger: #D72638;              /* Route Red */
+  --color-info: #3478F6;                /* Skyline Blue */
 
+  /* Effects */
   --color-border: rgba(0, 0, 0, 0.08);
   --color-glass: rgba(255, 255, 255, 0.2);
   --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-soft-dark: 0 4px 12px rgba(0, 0, 0, 0.2);
 
-  --gradient-hero: linear-gradient(180deg, #1A2A36 0%, #324a5e 100%);
-
-  --color-primary-light: #324a5e;     /* Faded Explorer Navy */
-  --color-accent-light: #FFA06E;     /* Soft Compass Orange */
-  
-  --color-secondary: #F5F3EB;       /* Mist Linen – soft background contrast */
-  --color-highlight: #C3E4ED;       /* Travel Sky – accent for CTA hovers */
-  --color-purple: #8E7DBE;            /* Evening Lavender */
-  --color-pink: #F76C6C;              /* Sunset Coral */
+  /* Hero Background */
+  --gradient-hero: linear-gradient(180deg, #1A2A36 0%, #3d607d 100%);
+  --gradient-cta: linear-gradient(10deg, #4FB286 0%, #1A2A36 100%);
 }
 
 body {
   padding-top: 92px; /* because of navbar */
 }
+
+
+/* NAVBAR, BACK BUTTON, FOOTER */
+
+
 
 /* ----------NAVBAR---------- */
 .navbar{
@@ -66,7 +76,7 @@ body {
 }
 
 .logo-img{
-    background: url('../images/icon/Nomadly_icon-removebg.png');
+    background: url('../../images/icon/Nomadly_icon-removebg.png');
     height: 60px;
     width: 60px;
     /* margin-right: 10px; */
@@ -99,7 +109,7 @@ body {
 }
 
 .profile-img{
-    background: url('../images/icon/undraw_avatar-traveler.png');
+    background: url('../../images/icon/undraw_avatar-traveler.png');
     height: 45px;
     width: 45px;
     margin-right: 20px;

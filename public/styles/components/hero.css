@@ -100,7 +100,7 @@ main {
 
 .hero-subtext {
   font-size: 1.25rem;
-  color: var(--color-accent-muted);
+  color: var(--color-text-muted);
   max-width: 520px;
 }
 

@@ -77,6 +77,16 @@ const tripSchema = new Schema({
         default: '/images/default-trip.jpg'
     },
 
+    isPublic: {
+        type: Boolean,
+        default: false
+    },
+
+    isFeatured: {
+        type: Boolean,
+        default: false
+    },
+
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',

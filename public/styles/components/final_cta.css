@@ -27,20 +27,37 @@
   opacity: 0.95;
 }
 
-.final-cta-section .btn-primary {
-  background-color: white;
-  color: var(--color-primary);
-  padding: 0.9rem 2rem;
-  border-radius: 0.6rem;
-  font-size: 1.1rem;
+.final-cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.final-cta-buttons .btn {
+  padding: 1rem 2rem;
+  border-radius: 0.7rem;
+  font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.final-cta-buttons .btn-primary {
+  background-color: white;
+  color: var(--color-primary);
   display: inline-block;
   transition: all 0.3s ease;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-.final-cta-section .btn-primary:hover {
+.final-cta-buttons .btn-primary:hover {
   background-color: var(--color-text-light);
   transform: translateY(-2px);
+}
+
+.final-cta-buttons .btn-outline {
+  border: 2px solid white;
+  color: white;
+  background-color: transparent;
 }
