@@ -95,3 +95,44 @@
   color: var(--color-text-main);
   line-height: 1.6;
 }
+
+.publish-trip-cta {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+.publish-trip-cta .btn {
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.6rem;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s ease;
+  margin-top: 0.6rem;
+}
+
+.publish-trip-cta .btn-primary {
+  background-color: var(--color-accent);
+}
+
+.publish-trip-cta .btn-primary:hover {
+  background-color: var(--color-accent-dark);
+}
+
+.publish-trip-cta .btn-danger {
+  background-color: var(--color-danger);
+}
+
+.publish-trip-cta .btn-danger:hover {
+  background-color: #a51425;
+}
+
+.already-published,
+.not-published {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}

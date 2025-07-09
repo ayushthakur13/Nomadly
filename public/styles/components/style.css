@@ -44,6 +44,10 @@
   --gradient-cta: linear-gradient(10deg, #4FB286 0%, #1A2A36 100%);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   padding-top: 92px; /* because of navbar */
 }
@@ -108,6 +112,10 @@ body {
     color: var(--color-accent);
 }
 
+.links a.active {
+  color: var(--color-accent);
+}
+
 .profile-img{
     background: url('../../images/icon/undraw_avatar-traveler.png');
     height: 45px;
@@ -123,15 +131,15 @@ body {
 /* ----------BACK BUTTON---------- */
 .btn-back-fixed {
     position: fixed;
-    top: 9rem;
+    top: 7.2rem;
     left: 1.5rem;
     z-index: 999;
     
     font-size: 1.3rem;
-    color: var(--color-primary);
+    color: white;
     text-decoration: none;
     padding: 0.5rem 1rem;
-    background-color: white;
+    background-color: var(--color-primary);
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     box-shadow: var(--shadow-soft);
@@ -139,8 +147,8 @@ body {
 }
 
 .btn-back-fixed:hover {
-    background-color: var(--color-primary);
-    color: white;
+    background-color: white;
+    color: var(--color-primary);
     border-color: var(--color-primary);
 }
 

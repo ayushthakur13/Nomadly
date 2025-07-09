@@ -21,6 +21,9 @@
             {{#if this.description}}
             <p class="trip-modern-description">{{this.description}}</p>
             {{/if}}
+            <p class="trip-publisher">
+              👤 Shared by: {{#if this.createdBy}} {{this.createdBy.username}} {{else}} Anonymous Explorer{{/if}}
+            </p>
         </div>
         </a>
     {{/each}}

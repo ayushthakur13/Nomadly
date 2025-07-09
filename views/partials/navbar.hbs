@@ -19,3 +19,12 @@
     </div>
 
 </nav>
+
+<script>
+    const links = document.querySelectorAll('.navbar .links a');
+
+    links.forEach(link => {
+    if (link.getAttribute('href') === window.location.pathname) 
+        link.classList.add('active');
+    });
+</script>

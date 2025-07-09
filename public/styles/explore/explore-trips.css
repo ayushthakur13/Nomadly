@@ -1,6 +1,11 @@
-j.explore-section {
+.explore-section {
   padding: 4rem 2rem;
   background-color: var(--color-bg);
+  animation: fadeInUp 0.5s ease both;
+}
+
+#featured-trips{
+  background-color: var(--color-primary);
 }
 
 .section-heading {
@@ -14,6 +19,10 @@ j.explore-section {
   margin-bottom: 0.3rem;
 }
 
+#featured-trips .section-title{
+  color: var(--color-bg);
+}
+
 .section-subtext {
   font-size: 1.05rem;
   color: var(--color-text-muted);
@@ -23,11 +32,11 @@ j.explore-section {
 }
 
 .trip-card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  justify-items: center;
+  align-items: center;
   gap: 2rem;
   padding: 0 1rem;
-  justify-items: center;
 }
 
 .trip-card-modern {
@@ -37,12 +46,11 @@ j.explore-section {
   max-width: 320px;
   border-radius: 1rem;
   overflow: hidden;
-  background-color: white;
+  background-color: var(--color-card);
   box-shadow: var(--shadow-soft);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
   text-decoration: none;
   color: inherit;
-  animation: fadeInUp 0.5s ease both;
+  transition: all 0.3s ease;
 }
 
 .trip-card-modern:hover {
@@ -76,11 +84,23 @@ j.explore-section {
 .trip-modern-description {
   font-size: 0.95rem;
   line-height: 1.5;
-  color: var(--color-text-muted);
+  color: var(--color-text);
 }
 
 .trip-modern-description {
   font-style: italic;
+}
+
+.trip-publisher {
+  width: fit-content;
+  margin-top: 0.6rem;
+  font-size: 1rem;
+  margin-left: auto;
+  color: var(--color-primary);
+  background-color: rgba(79, 195, 143, 0.2);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
 }
 
 @media (max-width: 768px) {

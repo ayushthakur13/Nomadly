@@ -2,7 +2,7 @@ const Trip = require('../models/trip');
 
 module.exports.getExplore = async (req,res)=>{
     try{
-        const publicTrips = await Trip.find({ isPublic: true }).lean();
+        const publicTrips = await Trip.find({ isPublic: true }).lean().populate('createdBy');
         const featuredTrips = await Trip.find({ isFeatured: true }).lean();
 
         res.render('explore/explore', { publicTrips, featuredTrips });
@@ -15,7 +15,7 @@ module.exports.getExplore = async (req,res)=>{
 
 module.exports.getExploreTripDetail = async (req,res)=>{
     try{
-        const trip = await Trip.find({
+        const trip = await Trip.findOne({
             _id: req.params.id, 
             $or: [{ isPublic: true }, { isFeatured: true }] 
         });

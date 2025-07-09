@@ -11,13 +11,13 @@
         <div class="trip-card-modern-content">
             <h2 class="trip-modern-title">{{this.tripName}}</h2>
             <p class="trip-modern-destination">📍 
-            {{#each this.destinations}}
-                {{this.name}}{{#unless @last}}, {{/unless}}
-            {{/each}}
+              {{#each this.destinations}}
+                  {{this.name}}{{#unless @last}}, {{/unless}}
+              {{/each}}
             </p>
-            <p class="trip-modern-dates">🗓️ {{formatDate this.startDate}} - {{formatDate this.endDate}} ({{calculateTripDuration this.startDate this.endDate}})</p>
+            <p class="trip-modern-dates">🗓️ {{calculateTripDuration this.startDate this.endDate}}</p>
             {{#if this.description}}
-            <p class="trip-modern-description">{{this.description}}</p>
+              <p class="trip-modern-description">{{this.description}}</p>
             {{/if}}
         </div>
         </a>

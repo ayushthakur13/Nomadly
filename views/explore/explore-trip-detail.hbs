@@ -5,12 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{trip.tripName}}</title>
     <link rel="stylesheet" href="/styles/components/style.css">
+    <link rel="stylesheet" href="/styles/explore/explore-trip-detail.css">
 </head>
 <body>
     {{>navbar}}
 
-    <main>
+    <main class="explore-detail-page">
+        <a href="javascript:history.back()" class="btn-back-fixed">←</a>
 
+        <div class="explore-detail-container">
+            <section class="trip-header">
+                <div class="trip-header-img" style="background-image: url('{{trip.imageUrl}}');"></div>
+                <div class="trip-header-info">
+                    <h1 class="trip-name">{{trip.tripName}}</h1>
+                    <p class="trip-destination">📍 {{trip.mainDestination}}</p>
+                    <p class="trip-dates">
+                        🗓️ {{formatDate trip.startDate}} - {{formatDate trip.endDate}} ({{calculateTripDuration trip.startDate trip.endDate}})
+                    </p>
+                    {{#if trip.description}}
+                        <p class="trip-description">{{trip.description}}</p>
+                    {{/if}}
+                </div>
+            </section>
+
+            <section class="trip-section">
+                <h2 class="section-title">🗺️ Destinations</h2>
+                <div class="destinations-list grid">
+                    {{#each trip.destinations}}
+                        <div class="destination-card">
+                            <h3>{{this.name}}</h3>
+                            <p class="destination-date">📅 {{formatDate this.date}}</p>
+                            <p class="destination-location">📍 {{this.location}}</p>
+                            {{#if this.notes}}<p class="destination-notes">📝 {{this.notes}}</p>{{/if}}
+                        </div>
+                    {{/each}}
+                </div>
+            </section>
+
+            {{#if trip.tasks.length}}
+                <section class="trip-section">
+                    <h2 class="section-title">✅ Tasks</h2>
+                    <ul class="task-list">
+                        {{#each trip.tasks}}
+                            <li class="task-item">
+                                <span class="check-icon">✔️</span>
+                                {{this.title}}
+                            </li>
+                        {{/each}}
+                    </ul>
+                </section>
+            {{/if}}
+
+            {{#if trip.budget.expenses.length}}
+                <section class="trip-section">
+                    <h2 class="section-title">💰 Budget & Expenses</h2>
+                    <div class="budget-summary">
+                        <div class="total-budget">
+                            <span class="budget-label">Total Budget:</span>₹{{trip.budget.total}} 
+                        </div>
+                        <div class="remaining-budget">
+                            <span class="budget-label">Remaining:</span>₹{{calculateRemaining trip.budget.total trip.budget.expenses}} 
+                        </div>
+                    </div>
+
+                    <div class="expenses-list grid">
+                        {{#each trip.budget.expenses}}
+                            <div class="expense-card">
+                                <p class="expense-category">📂 {{this.category}}</p>
+                                <p class="expense-amount">💸 ₹{{this.amount}}</p>
+                                {{#if this.description}}<p class="expense-desc">📝 {{this.description}}</p>{{/if}}
+                                <p class="expense-date">📅 {{formatDate this.date}}</p>
+                            </div>
+                        {{/each}}
+                    </div>
+                </section>
+            {{/if}}
+
+            {{#if trip.accommodations.length}}
+                <section class="trip-section">
+                    <h2 class="section-title">🏨 Accommodations</h2>
+                    <div class="accommodation-list">
+                        {{#each trip.accommodations}}
+                        <div class="accommodation-card">
+                            <h3>{{this.name}}</h3>
+                            <p class="address">📍 {{this.address}}</p>
+                            <p class="dates">🛏️ {{formatDate this.checkIn}} - {{formatDate this.checkOut}}</p>
+                            {{#if this.notes}}<p class="notes">📝 {{this.notes}}</p>{{/if}}
+                        </div>
+                        {{/each}}
+                    </div>
+                </section>
+            {{/if}}
+
+            <section class="clone-trip-section">
+                <h2 class="clone-heading">Inspired by this journey?</h2>
+                <p class="clone-subtext">Make it yours. Customize and start your own adventure based on this trip.</p>
+                <a href="/trips/clone/{{trip._id}}" class="btn btn-primary clone-btn">Add to My Trips</a>
+            </section>
+        </div>
     </main>
 
     {{>footer}}

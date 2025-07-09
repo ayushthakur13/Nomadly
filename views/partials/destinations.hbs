@@ -20,7 +20,7 @@
             <div class="card-content">
                 <!-- View Mode -->
                 <div class="view-mode">
-                    <h4>{{this.name}}</h4>
+                    <h4>{{this.name}}, {{this.location}}</h4>
                     {{#if this.notes}}<p>{{this.notes}}</p>{{/if}}
                     {{#if this.date}}<p><strong>Date:</strong> {{formatDate this.date}}</p>{{/if}}
                 </div>
@@ -28,6 +28,7 @@
                 <!-- Edit Mode -->
                 <form class="edit-mode hidden" method="POST" action="/trips/{{../trip._id}}/destinations/{{this._id}}/edit">
                     <input type="text" name="name" value="{{this.name}}" required />
+                    <input type="text" name="location" value="{{this.location}}" required />
                     <textarea name="notes">{{this.notes}}</textarea>
                     <input type="date" name="date" value="{{formatDate this.date}}" />
                     <div class="edit-actions">

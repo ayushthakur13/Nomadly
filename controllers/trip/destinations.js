@@ -46,7 +46,7 @@ module.exports.postDeleteDestinantion = async (req, res) => {
 
 module.exports.postEditDestination = async (req, res) => {
     const { tripId, destId } = req.params;
-    const { name, notes, date } = req.body;
+    const { name, location, notes, date } = req.body;
 
     try {
         const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
@@ -56,6 +56,7 @@ module.exports.postEditDestination = async (req, res) => {
         if (!dest) return res.status(404).send("Destination not found");
 
         dest.name = name;
+        dest.location = location;
         dest.notes = notes;
         dest.date = date;
 
