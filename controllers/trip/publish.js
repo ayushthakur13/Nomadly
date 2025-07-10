@@ -9,7 +9,7 @@ module.exports.postPublishTrip = async (req,res)=>{
         trip.isPublic = true;
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     }
     catch(err){
         console.error('Error publishing trip:', err);
@@ -26,7 +26,7 @@ module.exports.postUnpublishTrip = async (req,res)=>{
         trip.isPublic = false;
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     }
     catch(err){
         console.error('Error unpublishing trip:', err);

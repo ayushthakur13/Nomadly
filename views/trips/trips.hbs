@@ -26,8 +26,8 @@
                 </div>
 
                 <div class="trip-actions">
-                    <a href="/trips/details?tripId={{t._id}}" class="btn-outline">View itinerary</a>
-                    <a href="/trips/delete?tripId={{t._id}}" class="btn-danger">Delete</a>
+                    <a href="/trips/{{t._id}}/details" class="btn-outline">View itinerary</a>
+                    <a href="/trips/{{t._id}}/delete" class="btn-danger">Delete</a>
                 </div>
             </div>
             {{/each}}

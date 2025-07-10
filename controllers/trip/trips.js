@@ -22,7 +22,7 @@ module.exports.getTrips = async (req, res) => {
 module.exports.getTripDetails = async (req,res)=>{
     try {
         const userId = req.user._id;
-        const { tripId } = req.query;
+        const { tripId } = req.params;
 
         const trip = await Trip.findOne({
             _id: tripId, 
@@ -61,13 +61,14 @@ module.exports.getCreateTrip = (req, res) => {
 };
 
 module.exports.postCreateTrip = async (req,res)=>{
-    const { tripName, mainDestination, startDate, endDate, description } = req.body;
+    const { tripName, mainDestination, startDate, endDate, category, description } = req.body;
     try {
         await Trip.create({
             tripName,
             mainDestination,
             startDate,
             endDate,
+            category,
             description,
             createdBy: req.user._id,
             participants: [req.user._id]
@@ -83,7 +84,7 @@ module.exports.postCreateTrip = async (req,res)=>{
 
 module.exports.getEditTrip = async (req, res) => {
     try {
-        const { tripId } = req.query;
+        const { tripId } = req.params;
         const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
 
         if (!trip) 
@@ -98,7 +99,7 @@ module.exports.getEditTrip = async (req, res) => {
 };
 
 module.exports.postEditTrip = async (req,res)=>{
-    const { tripName, mainDestination, startDate, endDate, description, tripId } = req.body;
+    const { tripName, mainDestination, startDate, endDate, category, description, tripId } = req.body;
     try {
         let trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
 
@@ -106,10 +107,11 @@ module.exports.postEditTrip = async (req,res)=>{
         trip.mainDestination = mainDestination;
         trip.startDate = startDate;
         trip.endDate = endDate;
+        trip.category = category;
         trip.description = description;
 
         trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     }
     catch(err){
         console.error('Cannot edit trip: ', err.message);
@@ -119,7 +121,7 @@ module.exports.postEditTrip = async (req,res)=>{
 
 
 module.exports.getDeleteTrip = async (req,res)=>{
-    const { tripId } = req.query;
+    const { tripId } = req.params;
     try{
         await Trip.deleteOne({ _id:tripId, createdBy:req.user._id });
         res.redirect('/trips');

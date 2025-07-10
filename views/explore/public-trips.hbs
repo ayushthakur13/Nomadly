@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public trips</title>
+    <link rel="stylesheet" href="/styles/components/style.css">
+    <link rel="stylesheet" href="/styles/explore/explore-trips.css">
+    <link rel="stylesheet" href="/styles/explore/explore-all-trips.css">
+</head>
+<body>
+    {{>navbar}}
+
+    <main>
+        <div class="explore-section">
+            <div class="section-heading">
+                <h2 class="section-title">🌐 All Community Trips</h2>
+            </div>
+
+            <div class="trip-filter-bar">
+                <div class="filter-group">
+                    <label for="category">Filter by Category</label>
+                    <select id="category" name="category">
+                    <option value="">All</option>
+                    <option value="mountains">Mountains</option>
+                    <option value="adventure">Adventure</option>
+                    <option value="beach">Beach</option>
+                    <option value="historical">Historical</option>
+                    <option value="wildlife-nature">Wildlife / Nature</option>
+                    <option value="spiritual">Spiritual</option>
+                    <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sort">Sort by</label>
+                    <select id="sort" name="sort">
+                    <option value="latest">Latest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="shortest">Shortest Duration</option>
+                    <option value="longest">Longest Duration</option>
+                    </select>
+                </div>
+                </div>
+
+
+            <div class="trip-card-grid">
+                {{#each publicTrips}}
+                    <a href="/explore/trip/{{this._id}}" class="trip-card-modern">
+                        <div class="trip-card-modern-img" style="background-image: url('{{this.imageUrl}}');"></div>
+                        <div class="trip-card-modern-content">
+                            <h2 class="trip-modern-title">{{this.tripName}}</h2>
+                            <span class="category-badge-explore">{{this.category}}</span>
+                            <p class="trip-modern-destination">📍 {{this.mainDestination}}</p>
+                            <p class="trip-modern-dates">🗓️ {{formatDate this.startDate}} - {{formatDate this.endDate}}</p>
+                            <p class="trip-modern-duration">⌚ {{calculateTripDuration this.startDate this.endDate}}</p>
+                            {{#if this.description}}
+                                <p class="trip-modern-description">{{this.description}}</p>
+                            {{/if}}
+                            <p class="trip-publisher">
+                                👤 Shared by: {{#if this.createdBy}} {{this.createdBy.username}} {{else}} Anonymous Explorer{{/if}}
+                            </p>
+                        </div>
+                    </a>
+                {{/each}}
+            </div>
+        </div>
+    </main>
+
+    {{>footer}}
+</body>
+</html>

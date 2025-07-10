@@ -12,7 +12,7 @@ module.exports.postAddTask = async (req, res) => {
         trip.tasks.push({ title });
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error adding task:", err);
@@ -33,7 +33,7 @@ module.exports.postToggleTask = async (req, res) => {
         task.completed = !task.completed;
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error toggling task:", err);
@@ -51,7 +51,7 @@ module.exports.postDeleteTask = async (req, res) => {
         trip.tasks = trip.tasks.filter(t => t._id.toString() !== taskId);
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error Deleting task:", err);

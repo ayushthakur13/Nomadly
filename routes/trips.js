@@ -12,10 +12,10 @@ const tripPublishController = require('../controllers/trip/publish');
 router.get('/', tripController.getTrips);
 router.get('/create', tripController.getCreateTrip);
 router.post('/create', tripController.postCreateTrip);
-router.get('/details', tripController.getTripDetails);
-router.get('/edit', tripController.getEditTrip);
+router.get('/:tripId/details', tripController.getTripDetails);
+router.get('/:tripId/edit', tripController.getEditTrip);
 router.post('/edit', tripController.postEditTrip);
-router.get('/delete', tripController.getDeleteTrip);
+router.get('/:tripId/delete', tripController.getDeleteTrip);
 
 router.post('/:tripId/tasks', tripTaskController.postAddTask);
 router.post('/:tripId/tasks/:taskId/toggle', tripTaskController.postToggleTask);

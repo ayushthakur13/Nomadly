@@ -4,23 +4,30 @@
     <p class="section-subtext">Carefully crafted adventures curated by the Nomadly team.</p>
   </div>
 
-  <div class="trip-card-grid">
-    {{#each featuredTrips}}
-    <a href="/explore/trip/{{this._id}}" class="trip-card-modern">
-        <div class="trip-card-modern-img" style="background-image: url('{{this.imageUrl}}');"></div>
-        <div class="trip-card-modern-content">
+  {{#if featuredTrips.length}}
+    <div class="trip-card-grid">  
+      {{#each featuredTrips}}
+        <a href="/explore/trip/{{this._id}}" class="trip-card-modern">
+          <div class="trip-card-modern-img" style="background-image: url('{{this.imageUrl}}');"></div>
+          <div class="trip-card-modern-content">
             <h2 class="trip-modern-title">{{this.tripName}}</h2>
-            <p class="trip-modern-destination">📍 
-              {{#each this.destinations}}
-                  {{this.name}}{{#unless @last}}, {{/unless}}
-              {{/each}}
-            </p>
+            <span class="category-badge-explore">{{this.category}}</span>
+            <p class="trip-modern-destination">📍 {{this.mainDestination}}</p>
             <p class="trip-modern-dates">🗓️ {{calculateTripDuration this.startDate this.endDate}}</p>
             {{#if this.description}}
               <p class="trip-modern-description">{{this.description}}</p>
             {{/if}}
-        </div>
+          </div>
         </a>
-    {{/each}}
-  </div>
+      {{/each}}
+    </div>
+
+    <div class="see-all-wrapper">
+      <a href="/explore/featured" class="see-all-btn">See All Featured Trips →</a>
+    </div>
+
+  {{else}}
+    <p class="empty-message">No featured trips available at the moment.</p>
+  {{/if}}
+
 </section>

@@ -29,11 +29,30 @@
     margin-bottom: 0.5rem;
 }
 
+.header-left{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .trip-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: var(--color-primary);
     line-height: 1.2;
+}
+
+.category-badge{
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 1rem;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-soft);
+    width: fit-content;
 }
 
 .edit-btn {

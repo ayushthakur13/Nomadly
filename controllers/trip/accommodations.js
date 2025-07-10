@@ -20,7 +20,7 @@ module.exports.postAddAccommodation = async (req, res) => {
         });
 
         await trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error adding accommodation:", err);
@@ -40,7 +40,7 @@ module.exports.postDeleteAccommodation = async (req, res) => {
         trip.accommodations = trip.accommodations.filter(a => a._id.toString() !== accommoId);
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error('Error deleting accommodation:', err);
@@ -70,7 +70,7 @@ module.exports.postEditAccommodation = async (req, res) => {
         accommo.notes = notes;
         
         await trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error editing accommodation:", err);

@@ -23,6 +23,11 @@ const tripSchema = new Schema({
         required: true
     },
 
+    category: {
+        type: String,
+        required: true
+    },
+
     description: {
         type: String,
         trim: true

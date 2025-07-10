@@ -30,3 +30,30 @@ module.exports.getExploreTripDetail = async (req,res)=>{
     }
 }
 
+
+module.exports.getFeaturedTrips = async (req,res)=>{
+    try{
+        const featuredTrips = await Trip.find({ isFeatured: true }).sort({ createdAt: -1 }).lean();
+        if (!featuredTrips.length) return res.status(404).send('No featured trips found.');
+        
+
+        res.render('explore/featured-trips', { featuredTrips });
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports.getPublicTrips = async (req,res)=>{
+    try{
+        const publicTrips = await Trip.find({ isPublic: true }).sort({ createdAt: -1 }).lean().populate('createdBy');
+        if (!publicTrips.length) return res.status(404).send('No public trips found.');
+
+        res.render('explore/public-trips', { publicTrips });
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+}

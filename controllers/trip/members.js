@@ -24,7 +24,7 @@ module.exports.postInviteMember = async (req, res) => {
         trip.participants.push(user._id);
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error inviting member:", err);
@@ -47,7 +47,7 @@ module.exports.postRemoveMember = async (req, res) => {
         trip.participants = trip.participants.filter(id => id.toString() !== memberId);
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error removing member:", err);

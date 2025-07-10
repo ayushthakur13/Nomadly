@@ -11,7 +11,7 @@ module.exports.postAddBudget = async (req,res)=>{
 
         trip.budget.total = budget;
         await trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     }
     catch(err){
         console.error('Failed to add budget:', err);
@@ -37,7 +37,7 @@ module.exports.postAddExpense = async (req,res)=>{
         });
 
         await trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     }
     catch(err){
         console.error('Failed to add budget:', err);
@@ -55,7 +55,7 @@ module.exports.postDeleteExpense = async (req, res) => {
         trip.budget.expenses = trip.budget.expenses.filter(e => e._id.toString() !== expenseId);
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error('Error deleting expense:', err);

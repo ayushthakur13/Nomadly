@@ -18,7 +18,7 @@ module.exports.postAddDestination = async (req, res) => {
         });
 
         await trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error adding destination:", err);
@@ -36,7 +36,7 @@ module.exports.postDeleteDestinantion = async (req, res) => {
         trip.destinations = trip.destinations.filter(d => d._id.toString() !== destId);
         await trip.save();
 
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error('Error deleting destination:', err);
@@ -61,7 +61,7 @@ module.exports.postEditDestination = async (req, res) => {
         dest.date = date;
 
         await trip.save();
-        res.redirect(`/trips/details?tripId=${tripId}`);
+        res.redirect(`/trips/${tripId}/details`);
     } 
     catch (err) {
         console.error("Error editing destination:", err);

@@ -44,9 +44,10 @@
   flex-direction: column;
   width: 100%;
   max-width: 320px;
+  
   border-radius: 1rem;
   overflow: hidden;
-  background-color: var(--color-card);
+  background-color: white;
   box-shadow: var(--shadow-soft);
   text-decoration: none;
   color: inherit;
@@ -60,7 +61,7 @@
 
 .trip-card-modern-img {
   width: 100%;
-  height: 180px;
+  height: 150px;
   background-size: cover;
   background-position: center;
 }
@@ -73,22 +74,43 @@
 }
 
 .trip-modern-title {
-  font-size: 1.25rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-primary);
   margin: 0;
 }
 
+.category-badge-explore {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.75rem;
+  width: fit-content;
+  margin-top: 0.2rem;
+  box-shadow: var(--shadow-soft);
+}
+
 .trip-modern-destination,
 .trip-modern-dates,
+.trip-modern-duration,
 .trip-modern-description {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   line-height: 1.5;
   color: var(--color-text);
 }
 
 .trip-modern-description {
   font-style: italic;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .trip-publisher {
@@ -102,6 +124,51 @@
   border-radius: 0.5rem;
   font-weight: 500;
 }
+
+.see-all-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.see-all-btn {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  padding: 0.8rem 1.6rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-size: 1rem;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+#featured-trips .see-all-btn{
+  background-color: var(--color-accent);
+}
+
+.see-all-btn:hover {
+  background-color: #142028;
+  transform: translateY(-2px);
+}
+
+#featured-trips .see-all-btn:hover{
+  background-color: var(--color-accent-dark);
+  transform: translateY(-2px);
+}
+
+.empty-message {
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--color-text-light);
+  padding: 1.5rem;
+  background-color: var(--color-danger);
+  border-radius: 0.75rem;
+  max-width: 500px;
+  margin: 2rem auto 0;
+  box-shadow: var(--shadow-soft);
+}
+
 
 @media (max-width: 768px) {
   .trip-card-modern-img {

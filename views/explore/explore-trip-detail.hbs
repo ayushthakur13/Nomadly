@@ -17,7 +17,10 @@
             <section class="trip-header">
                 <div class="trip-header-img" style="background-image: url('{{trip.imageUrl}}');"></div>
                 <div class="trip-header-info">
-                    <h1 class="trip-name">{{trip.tripName}}</h1>
+                    <div class="header-top">
+                        <h1 class="trip-name">{{trip.tripName}}</h1>
+                        <span class="category-badge-explore">{{trip.category}}</span>
+                    </div>
                     <p class="trip-destination">📍 {{trip.mainDestination}}</p>
                     <p class="trip-dates">
                         🗓️ {{formatDate trip.startDate}} - {{formatDate trip.endDate}} ({{calculateTripDuration trip.startDate trip.endDate}})

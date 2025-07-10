@@ -24,8 +24,11 @@
 
         <header class="trip-header">
             <div class="trip-header-top">
-                <h1 class="trip-title">{{trip.tripName}}</h1>
-                <a href="/trips/edit?tripId={{trip._id}}" class="edit-btn btn-outline">Edit</a>
+                <div class="header-left">
+                    <h1 class="trip-title">{{trip.tripName}}</h1>
+                    <span class="category-badge">{{trip.category}}</span>
+                </div>
+                <a href="/trips/{{trip._id}}/edit" class="edit-btn btn-outline">Edit</a>
             </div>
         </header>
 
