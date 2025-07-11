@@ -8,6 +8,7 @@ const tripBudgetController = require('../controllers/trip/budget');
 const tripAccommodationController = require('../controllers/trip/accommodations');
 const tripMemberController = require('../controllers/trip/members');
 const tripPublishController = require('../controllers/trip/publish');
+const tripCloneController = require('../controllers/trip/clone');
 
 router.get('/', tripController.getTrips);
 router.get('/create', tripController.getCreateTrip);
@@ -39,5 +40,7 @@ router.post('/:tripId/members/:memberId/remove', tripMemberController.postRemove
 
 router.post('/:tripId/publish/', tripPublishController.postPublishTrip);
 router.post('/:tripId/unpublish', tripPublishController.postUnpublishTrip);
+
+router.post('/:tripId/clone', tripCloneController.postCloneTrip);
 
 module.exports = router;

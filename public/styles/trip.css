@@ -159,7 +159,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 2rem;
-    padding: 0 1rem;
+    padding: 2rem;
 }
 
 .trip-card {
@@ -180,7 +180,7 @@
 .trip-card-img {
     position: relative;
     width: 100%;
-    padding-top: 56.25%; 
+    padding-top: 60%; 
     background-size: cover;
     background-position: center;
 }
@@ -191,20 +191,36 @@
     left: 0;
     right: 0;
     padding: 1rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+    background: linear-gradient(to top, rgb(0, 0, 0, 0.9) 40%, rgba(0, 0, 0, 0) 100%, transparent);
     color: white;
 }
 
 .trip-title {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: 600;
-    margin: 0;
+    margin-bottom: 0.2rem;
+}
+
+.card-overlay-bottom{
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .trip-destination {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #f0f0f0;
     margin-top: 0.3rem;
+}
+
+.category-badge{
+    display: inline-block;
+    background-color: var(--color-card);
+    color: var(--color-primary);
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-soft);
 }
 
 .trip-actions {

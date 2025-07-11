@@ -21,6 +21,7 @@ hbs.registerHelper('daysUntil', require('./helpers/daysUntil'));
 hbs.registerHelper('calculateSpent', require('./helpers/calculateSpent'));
 hbs.registerHelper('calculateRemaining', require('./helpers/calculateRemaining'));
 hbs.registerHelper('getUserName', require('./helpers/getUserName'));
+hbs.registerHelper('ifEquals', require('./helpers/ifEquals'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));

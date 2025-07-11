@@ -1,6 +1,7 @@
 .explore-section {
   padding: 4rem 2rem;
   background-color: var(--color-bg);
+  margin: 0 auto;
   animation: fadeInUp 0.5s ease both;
 }
 

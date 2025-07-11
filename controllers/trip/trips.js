@@ -3,14 +3,29 @@ const Trip = require('../../models/trip');
 module.exports.getTrips = async (req, res) => {
     try {
         const userId = req.user._id;
-        const trips = await Trip.find({ 
-            $or: [
-            { createdBy: userId },
-            { participants: userId }
-        ]
-         }).sort({ createdAt: -1 });
+        const { category, sort } = req.query;
 
-        res.render('trips/trips',{ trips });
+        const query = {
+            $or: [
+                { createdBy: userId },
+                { participants: userId }
+            ]
+        };
+
+        if (category) query.category = category;
+        
+        let sortOption = { createdAt: -1 };
+        if (sort === 'oldest') sortOption = { createdAt: 1 };
+        
+        const trips = await Trip.find(query)
+            .sort(sortOption)
+            .lean();
+
+        res.render('trips/trips', {
+            trips,
+            selectedCategory: category || "",
+            selectedSort: sort || "latest"
+        });
     } 
     catch (err) {
         console.error('Failed to fetch trips:', err);

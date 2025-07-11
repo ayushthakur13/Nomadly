@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trips</title>
     <link rel="stylesheet" href="/styles/components/style.css">
+    <link rel="stylesheet" href="/styles/components/filter_sort_bar.css">
     <link rel="stylesheet" href="/styles/trip.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
@@ -14,14 +16,19 @@
     <main class="trip-list-page">
         <h1 class="page-heading">Your Trips</h1>
 
+        {{>filter_sort_bar}}
+
         {{#if trips.length}}
         <div class="trip-card-grid">
             {{#each trips as |t|}}
             <div class="trip-card">
                 <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
                     <div class="trip-card-overlay">
-                        <h2 class="trip-title">{{t.tripName}}</h2>
-                        <p class="trip-destination">{{t.destination}}</p>
+                        <h1 class="trip-title">{{t.tripName}}</h1>
+                        <div class="card-overlay-bottom">
+                            <p class="trip-destination">{{t.mainDestination}}</p>
+                            <span class="category-badge">{{t.category}}</span>
+                        </div>
                     </div>
                 </div>
 
@@ -45,5 +52,6 @@
         {{/if}}
     </main>
 
+    {{>footer}}
 </body>
 </html>

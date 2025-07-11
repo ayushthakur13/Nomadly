@@ -5,44 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Featured trips</title>
     <link rel="stylesheet" href="/styles/components/style.css">
+    <link rel="stylesheet" href="/styles/components/filter_sort_bar.css">
     <link rel="stylesheet" href="/styles/explore/explore-trips.css">
     <link rel="stylesheet" href="/styles/explore/explore-all-trips.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
     {{>navbar}}
 
     <main>
         <div class="explore-section">
+        <a href="/explore#featured-trips" class="btn-back-fixed">←</a>
+
             <div class="section-heading">
-                <h2 class="section-title">✨ All Featured Trips</h2>
+                <h2 class="section-title">✨ Featured Trips</h2>
             </div>
 
-            <div class="trip-filter-bar">
-                <div class="filter-group">
-                    <label for="category">Filter by Category</label>
-                    <select id="category" name="category">
-                    <option value="">All</option>
-                    <option value="mountains">Mountains</option>
-                    <option value="adventure">Adventure</option>
-                    <option value="beach">Beach</option>
-                    <option value="historical">Historical</option>
-                    <option value="wildlife-nature">Wildlife / Nature</option>
-                    <option value="spiritual">Spiritual</option>
-                    <option value="other">Other</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="sort">Sort by</label>
-                    <select id="sort" name="sort">
-                    <option value="latest">Latest</option>
-                    <option value="oldest">Oldest</option>
-                    <option value="shortest">Shortest Duration</option>
-                    <option value="longest">Longest Duration</option>
-                    </select>
-                </div>
-                </div>
-
+            {{>filter_sort_bar}}
 
             <div class="trip-card-grid">
                 {{#each featuredTrips}}
