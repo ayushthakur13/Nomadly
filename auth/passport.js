@@ -7,11 +7,17 @@ const bcrypt = require('bcrypt');
 const LocalStrategy = require('passport-local');
 
 passport.use(new LocalStrategy(
-    async (username, password, done)=>{
+    async (usernameOrEmail, password, done)=>{
       try{
-        const user = await User.findOne({ username });
+        const user = await User.findOne({
+          $or: [
+            { username: usernameOrEmail }, 
+            { email: usernameOrEmail }
+          ]
+        });
+
         if(!user) 
-          return done(null, false, { message: 'Incorrect username.' });
+          return done(null, false, { message: 'Incorrect username or email.' });
 
         const isMatch = await bcrypt.compare(password, user.password);
 
@@ -46,19 +52,32 @@ const FacebookStrategy = require('passport-facebook');
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: `http://localhost:${process.env.PORT}/auth/login/facebook/callback`
+  callbackURL: `http://localhost:${process.env.PORT}/auth/login/facebook/callback`,
+  profileFields: ['id', 'displayName', 'emails']
 },
     async (accessToken, refreshToken, profile, cb)=>{
       
       try{
-        let user = await User.findOne({
-          fbID: profile.id
-        });
-
+        let user = await User.findOne({fbID: profile.id});
         if(user) return cb(null, user);
 
+        const name = profile.displayName;
+        const email = profile.emails?.[0]?.value || null;
+
+        if (!email) 
+          return cb(null, false, { message: 'Email required for signup.' });
+
+        const baseUsername = email.split('@')[0];
+        let username = baseUsername;
+        let counter = 1;
+        while (await User.findOne({ username })) {
+          username = `${baseUsername}${counter++}`;
+        }
+
         user = await User.create({
-          username: profile.displayName,
+          username,
+          name,
+          email,
           fbID: profile.id,
           fbAccesToken: accessToken
         });
@@ -77,19 +96,34 @@ const GoogleStrategy = require('passport-google-oauth20');
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_APP_ID,
   clientSecret: process.env.GOOGLE_APP_SECRET,
-  callbackURL: `http://localhost:${process.env.PORT}/auth/login/google/callback`
+  callbackURL: `http://localhost:${process.env.PORT}/auth/login/google/callback`,
+  scope: ['profile', 'email']
 },
     async (accessToken, refreshToken, profile, cb)=>{
       
       try{
-        let user = await User.findOne({
-          googleID: profile.id
-        });
-
+        let user = await User.findOne({googleID: profile.id});
         if(user) return cb(null, user);
 
+        const name = profile.displayName;
+        const profilePic = profile.photos?.[0].value || null;
+        const email = profile.emails?.[0]?.value || null;
+
+        if (!email) 
+          return cb(null, false, { message: 'Email required for signup.' });
+        
+        const baseUsername = email.split('@')[0];
+        let username = baseUsername;
+        let counter = 1;
+        while (await User.findOne({ username })) {
+          username = `${baseUsername}${counter++}`;
+        }
+
         user = await User.create({
-          username: profile.displayName,
+          username,
+          name,
+          profilePic,
+          email,
           googleID: profile.id,
           googleAccessToken: accessToken
         });

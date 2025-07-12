@@ -8,10 +8,28 @@ const userSchema = new Schema({
     },
     password: String,
 
+    name: String,
     email: {
         type: String,
         unique: true,
         sparse: true
+    },
+    
+    profilePic: {
+        type: String,
+        default: '/images/icon/undraw_avatar-traveler.png'
+    },
+    profilePicId: String,
+
+    bio: {
+        type: String,
+        maxlength: 300,
+        default: ''
+    },
+
+    isPublic: {
+        type: Boolean,
+        default: false
     },
 
     fbID: String,

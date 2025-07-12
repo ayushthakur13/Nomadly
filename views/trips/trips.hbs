@@ -16,9 +16,8 @@
     <main class="trip-list-page">
         <h1 class="page-heading">Your Trips</h1>
 
-        {{>filter_sort_bar}}
-
         {{#if trips.length}}
+        {{>filter_sort_bar}}
         <div class="trip-card-grid">
             {{#each trips as |t|}}
             <div class="trip-card">

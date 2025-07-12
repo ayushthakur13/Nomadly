@@ -24,18 +24,26 @@ module.exports.facebookLogin = myPassport.authenticate('facebook');
 
 module.exports.facebookCallback = (req, res, next) => {
     myPassport.authenticate('facebook', {
-        failureRedirect: '/auth/login'
+        failureRedirect: '/auth/login',
+        failureFlash: true
     })
     (req, res, () => {
+        if (!req.user?.email) {
+            req.flash('msg', 'Email is required to finish signup');
+            return res.redirect('/auth/login/complete-profile');
+        }
         res.redirect('/home');
     });
 };
 
-module.exports.googleLogin = myPassport.authenticate('google', { scope: ['profile'] });
+// module.exports.completeProfile
+
+module.exports.googleLogin = myPassport.authenticate('google', { scope: ['profile', 'email'] });
 
 module.exports.googleCallback = (req, res, next) => {
     myPassport.authenticate('google', {
-        failureRedirect: '/auth/login'
+        failureRedirect: '/auth/login',
+        failureFlash: true
     })
     (req, res, () => {
         res.redirect('/home');

@@ -4,6 +4,7 @@ const loginController = require('../../controllers/auth/login')
 
 router.get('/', loginController.getLogin);
 router.post('/', loginController.postLogin);
+// router.get('/complete-profile', loginController.completeProfile);
 
 router.get('/facebook', loginController.facebookLogin);
 router.get('/facebook/callback', loginController.facebookCallback);

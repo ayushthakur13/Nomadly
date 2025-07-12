@@ -3,6 +3,12 @@ const Trip = require('../../models/trip');
 module.exports.postPublishTrip = async (req,res)=>{
     try{
         const { tripId } = req.params;
+
+        if (!req.user.isPublic) {
+            req.flash('msg', 'You must make your profile public to publish a trip.');
+            return res.redirect(`/trips/${tripId}/details`);
+        }
+
         const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
         if (!trip) return res.status(404).send("Trip not found or Unauthorized access");
 

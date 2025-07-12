@@ -1,0 +1,77 @@
+const User = require('../models/users');
+const Trip = require('../models/trip');
+const bcrypt = require('bcrypt');
+const { cloudinary } = require('../utils/cloudinary');
+
+module.exports.getProfile = async (req,res)=>{
+    const userId = req.user._id;
+                    
+    const trips = await Trip.find({
+        $or: [
+            { createdBy: userId },
+            { participants: userId }
+        ]
+    })
+    .sort({ createdAt: -1 })
+    .limit(3)
+    .lean();
+    console.log(trips);
+
+    res.render('profile/profile',{
+        user: req.user,
+        trips
+    });
+}
+
+module.exports.getProfileSettings = (req,res)=>{
+    res.render('profile/profile-settings',{
+        user: req.user
+    });
+}
+
+module.exports.postUpdateProfile = async (req, res, next) => {
+
+    const { name, email, username, bio, newPassword, isPublic } = req.body;
+
+    try {
+        const emailUser = await User.findOne({ email });
+        if (emailUser && emailUser._id.toString() !== req.user._id.toString()) {
+            req.flash('msg', 'Email already in use');
+            return res.redirect('/profile/settings');
+        }
+
+        const usernameUser = await User.findOne({ username });
+        if (usernameUser && usernameUser._id.toString() !== req.user._id.toString()) {
+            req.flash('msg', 'Username already taken');
+            return res.redirect('/profile/settings');
+        }
+
+        req.user.name = name;
+        req.user.email = email;
+        req.user.username = username;
+        req.user.bio = bio || '';
+        req.user.isPublic = isPublic === 'true' || isPublic === 'on';
+
+        if (req.file){
+
+            if (req.user.profilePicId && !req.user.profilePic.includes('/images/icon/')) 
+                await cloudinary.uploader.destroy(req.user.profilePicId);
+            
+            req.user.profilePic = req.file.path;              
+            req.user.profilePicId = req.file.filename;        
+        }
+    
+
+        if (newPassword && newPassword.trim() !== '') {
+            const hash = await bcrypt.hash(newPassword, 10);
+            req.user.password = hash;
+        }
+
+        await req.user.save();
+        req.flash('msg', 'Profile updated successfully!');
+        res.redirect('/profile');
+    } 
+    catch (err) {
+        next(err);
+    }
+};

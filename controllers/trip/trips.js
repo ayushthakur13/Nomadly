@@ -57,6 +57,7 @@ module.exports.getTripDetails = async (req,res)=>{
 
         res.render('trips/trip-details',{
             trip,
+            user: req.user,
             owner: trip.createdBy,
             participants: trip.participants,
             isOwner: req.user._id.equals(trip.createdBy._id),

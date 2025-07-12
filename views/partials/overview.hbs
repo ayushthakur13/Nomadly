@@ -64,16 +64,24 @@
                 {{/if}}
 
                 <div class="publish-trip-cta">
-                    {{#if trip.isPublic}}
-                        <p class="already-published">🌍 This trip is public and visible on the Explore page.</p>
-                        <form action="/trips/{{trip._id}}/unpublish" method="POST">
-                            <button type="submit" class="btn btn-danger">🔒 Unpublish This Trip</button>
-                        </form>
-                    {{else}}
-                        <p class="not-published">🔒 This trip is private and visible only to you.</p>
-                        <form action="/trips/{{trip._id}}/publish" method="POST">
-                            <button type="submit" class="btn btn-primary">🌍 Share This Trip with the World</button>
-                        </form>
+                    {{#if isOwner}}
+                        {{#if user.isPublic}}
+                            {{#if trip.isPublic}}
+                                <p class="already-published">🌍 This trip is public and visible on the Explore page.</p>
+                                <form action="/trips/{{trip._id}}/unpublish" method="POST">
+                                    <button type="submit" class="btn btn-danger">🔒 Unpublish This Trip</button>
+                                </form>
+                            {{else}}
+                                <p class="not-published">🔒 This trip is private and visible only to you.</p>
+                                <form action="/trips/{{trip._id}}/publish" method="POST">
+                                    <button type="submit" class="btn btn-primary">🌍 Share This Trip with the World</button>
+                                </form>
+                            {{/if}}
+                        {{else}}
+                            <p class="publish-warning">
+                                Your account is private. Make it public from <a href="/profile/settings">settings</a> to publish this trip. 🌍
+                            </p>
+                        {{/if}}
                     {{/if}}
                 </div>
             </section>

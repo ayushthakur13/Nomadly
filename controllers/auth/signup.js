@@ -9,19 +9,25 @@ module.exports.getSignup = (req,res)=>{
 }
 
 module.exports.postSignup = async (req, res, next) => {
-    const { username, password } = req.body;
+    const { username, password, name, email } = req.body;
 
     try {
-        const existingUser = await Users.findOne({ username });
+        const existingUsername = await Users.findOne({ username });
+        if (existingUsername) {
+            req.session.flash = {};
+            req.flash('msg', 'Username already taken');
+            return res.redirect('/auth/signup');
+        }
 
-        if (existingUser) {
-            req.session.flash = {}; // Flush the old flash manually
-            req.flash('msg', 'User already exists');
+        const existingEmail = await Users.findOne({ email });
+        if (existingEmail) {
+            req.session.flash = {};
+            req.flash('msg', 'Email already registered');
             return res.redirect('/auth/signup');
         }
 
         const hash = await bcrypt.hash(password, saltRounds);
-        await Users.create({ username, password: hash });
+        await Users.create({ username, name, email, password: hash });
 
         req.flash('msg', 'Signup successful');
         return res.redirect('/auth/login');

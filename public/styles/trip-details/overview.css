@@ -136,3 +136,11 @@
   font-style: italic;
   margin-bottom: 0.5rem;
 }
+
+.publish-warning {
+  color: var(--color-danger);
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+
