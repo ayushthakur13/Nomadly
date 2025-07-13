@@ -1,4 +1,5 @@
 const Trip = require('../../models/trip');
+const User = require('../../models/users');
 
 module.exports.getTrips = async (req, res) => {
     try {
@@ -46,13 +47,21 @@ module.exports.getTripDetails = async (req,res)=>{
                 { participants: userId }
             ]
          })
-            .populate('participants')
-            .populate('createdBy');
+            .populate('participants', 'name username')
+            .populate('createdBy', 'name username');
 
         if (!trip) 
             return res.status(404).render('404');
 
         const totalMembers = trip.participants.length + 1;
+
+        const memoryUserIds = trip.memories.map(m => m.uploadedBy?.toString()).filter(Boolean);
+        const users = await User.find({ _id: { $in: memoryUserIds } }).lean();
+
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user._id.toString()] = user.name || user.username;
+        });
 
         res.render('trips/trip-details',{
             trip,
@@ -60,7 +69,8 @@ module.exports.getTripDetails = async (req,res)=>{
             owner: trip.createdBy,
             participants: trip.participants,
             isOwner: req.user._id.equals(trip.createdBy._id),
-            totalMembers
+            totalMembers,
+            userMap
         });
     } 
     catch (err) {

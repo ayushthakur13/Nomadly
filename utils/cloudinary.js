@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
+const profileStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'Nomadly/ProfilePics',
@@ -16,7 +16,26 @@ const storage = new CloudinaryStorage({
   }
 });
 
+const tripCoverStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'Nomadly/TripCovers', 
+    allowed_formats: ['jpeg', 'png', 'jpg'],
+    // transformation: [{ width: 800, height: 400, crop: 'fill' }]
+  }
+});
+
+const memoryStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'Nomadly/Memories',
+    allowed_formats: ['jpeg', 'png', 'jpg']
+  }
+});
+
 module.exports = {
   cloudinary,
-  storage
+  profileStorage,
+  tripCoverStorage,
+  memoryStorage
 };

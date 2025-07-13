@@ -1,0 +1,197 @@
+.trip-cover-container {
+  width: 100%;
+  position: relative;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.trip-cover-wrapper {
+  position: relative;
+}
+
+.trip-cover-img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  transition: filter 0.3s ease;
+}
+
+.trip-cover-img:hover {
+  filter: brightness(0.9);
+}
+
+.trip-cover-actions {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 10px;
+}
+
+.cover-upload-label {
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  transition: background 0.3s;
+}
+
+.cover-upload-label:hover {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.upload-icon {
+  margin-right: 6px;
+}
+
+.delete-cover-btn {
+  background-color: rgba(230, 31, 31, 0.85);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.delete-cover-btn:hover {
+  background-color: rgb(187, 29, 29);
+}
+
+
+
+.memories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+  border: 1px solid #e2e2e2;
+}
+
+.memories-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.add-memory-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.memory-image-label,
+.memory-caption-input {
+  background-color: #ffffff;
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  border: 1px solid #ccc;
+  transition: all 0.2s ease;
+}
+
+.memory-image-label:hover {
+  background-color: #f0f0f0;
+  border-color: #999;
+}
+
+
+.memory-grid {
+  column-count: 2;
+  column-gap: 1.5rem;
+  margin-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .memory-grid {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .memory-grid {
+    column-count: 4;
+  }
+}
+
+.memory-card {
+  background: var(--color-bg);
+  display: inline-block;
+  margin: 0 0 1.5rem;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  position: relative;
+  break-inside: avoid;
+  transition: transform 0.2s ease;
+}
+
+.memory-card:hover {
+  transform: translateY(-5px);
+}
+
+.memory-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-bottom: 1px solid #eee;
+}
+
+.memory-caption,
+.memory-uploader {
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.memory-caption {
+  font-style: italic;
+  color: #555;
+  margin: 0;
+}
+
+.memory-uploader {
+  color: #888;
+  margin-top: -0.4rem;
+  font-size: 0.85rem;
+}
+
+.memory-delete-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  padding: 0.4rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+
+.memory-delete-btn:hover {
+  background: #f2f2f2;
+}

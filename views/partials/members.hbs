@@ -22,7 +22,9 @@
         <li class="member-card {{#ifEqualsStr this._id ../user._id}}current-user{{/ifEqualsStr}}" data-user-id="{{this._id}}">
             <span class="member-name">{{this.name}}</span>
             {{#if ../isOwner}}
-                <button type="button" class="remove-btn" data-id="{{this._id}}" title="Remove">❌</button>
+                <form class="remove-member-form" data-user-id="{{this._id}}">
+                    <button type="submit" class="remove-btn" title="Remove">❌</button>
+                </form>
             {{/if}}
         </li>
         {{/each}}

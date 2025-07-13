@@ -1,0 +1,59 @@
+<section class="tab-content" id="memories">
+    <div class="trip-cover-container">
+        <div class="trip-cover-wrapper">
+            <img
+                src="{{trip.imageUrl}}"
+                alt="Trip Cover"
+                class="trip-cover-img"
+            />
+
+            {{#if isOwner}}
+            <div class="trip-cover-actions">
+                <form class="update-trip-cover-form" enctype="multipart/form-data">
+                    <label class="cover-upload-label" for="coverImageInput">
+                        <span class="upload-icon">📸</span> Change Cover
+                    </label>
+                    <input type="file" name="image" id="coverImageInput" accept="image/*" hidden />
+                </form>
+
+                <form class="delete-trip-cover-form">
+                    <button type="submit" class="delete-cover-btn">🗑️ Remove</button>
+                </form>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="memories-content">
+        <div class="memories-header">
+            <h3>📷 Trip Memories</h3>
+
+            <form class="add-memory-form" enctype="multipart/form-data">
+                <label class="memory-image-label">
+                    Add Photo
+                    <input type="file" name="image" id="memoryImage" accept="image/*" hidden />
+                </label>
+                <input type="text" name="caption" placeholder="Add a caption (optional)" class="memory-caption-input" />
+            </form>
+
+        </div>
+
+        <div class="memory-grid">
+            {{#each trip.memories}}
+            <div class="memory-card" data-memory-id="{{this._id}}">
+                <img src="{{this.url}}" alt="Memory Image" class="memory-img" loading="lazy" />
+                {{#if this.caption}}
+                    <p class="memory-caption">“{{this.caption}}”</p>
+                {{/if}}
+                <p class="memory-uploader">— {{lookup ../userMap this.uploadedBy}}</p>
+
+                <form class="delete-memory-form">
+                    <input type="hidden" name="memoryId" value="{{this._id}}" />
+                    <button type="submit" class="memory-delete-btn" title="Delete">🗑️</button>
+                </form>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+</section>

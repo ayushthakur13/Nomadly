@@ -1,4 +1,8 @@
 const multer = require('multer');
-const { storage } = require('../utils/cloudinary');
+const { profileStorage, tripCoverStorage, memoryStorage } = require('../utils/cloudinary');
 
-module.exports = multer({ storage });
+module.exports = {
+    uploadProfile: multer({ storage: profileStorage }),
+    uploadTripCover: multer({ storage: tripCoverStorage }),
+    uploadMemory: multer({ storage: memoryStorage })
+};

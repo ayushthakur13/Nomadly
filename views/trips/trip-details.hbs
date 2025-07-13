@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/styles/trip-details/budget.css">
     <link rel="stylesheet" href="/styles/trip-details/accommodation.css">
     <link rel="stylesheet" href="/styles/trip-details/members.css">
-    <link rel="stylesheet" href="/styles/trip-details/other.css">
+    <link rel="stylesheet" href="/styles/trip-details/memories.css">
 </head>
 <body>
 
@@ -43,7 +43,7 @@
             <li class="tab" data-tab="budget">Budget</li>
             <li class="tab" data-tab="accommodation">Accommodation</li>
             <li class="tab" data-tab="members">Members</li>
-            <li class="tab" data-tab="gallery">Gallery</li>
+            <li class="tab" data-tab="memories">Memories</li>
         </ul>
 
         <div class="tab-panel-wrapper">
@@ -53,7 +53,7 @@
             {{> budget}}
             {{> accommodation}}
             {{> members}}
-            {{> gallery}}
+            {{> memories}}
         </div>
 
     </main>
@@ -82,8 +82,11 @@
     <script src="/scripts/trip-details/accommodations.js"></script>
     <script>
         window.currentUserId = "{{user._id}}";
+        window.isOwner = {{isOwner}};
+        window.userMap = {{{json userMap}}};
     </script>
     <script src="/scripts/trip-details/members.js"></script>
+    <script src="/scripts/trip-details/memories.js"></script>
 
 </body>
 </html>

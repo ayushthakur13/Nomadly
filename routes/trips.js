@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { uploadTripCover, uploadMemory } = require('../middlewares/multer');
 
 const tripController = require('../controllers/trip/trips');
 const tripTaskController = require('../controllers/trip/tasks');
@@ -7,6 +8,7 @@ const tripDestinationController = require('../controllers/trip/destinations');
 const tripBudgetController = require('../controllers/trip/budget');
 const tripAccommodationController = require('../controllers/trip/accommodations');
 const tripMemberController = require('../controllers/trip/members');
+const tripMemoriesController = require('../controllers/trip/memories');
 const tripPublishController = require('../controllers/trip/publish');
 const tripCloneController = require('../controllers/trip/clone');
 
@@ -39,6 +41,11 @@ router.post('/:tripId/members/invite', tripMemberController.postInviteMember);
 router.post('/:tripId/members/:memberId/remove', tripMemberController.postRemoveMember);
 // router.post('/:tripId/members/:memberId/make-owner', tripMemberController.postMakeOwner);
 router.post('/:tripId/leave', tripMemberController.postLeaveTrip);
+
+router.post('/:tripId/cover/update', uploadTripCover.single('image'), tripMemoriesController.postUpdateTripCoverImage);
+router.post('/:tripId/cover/delete', tripMemoriesController.postDeleteTripCoverImage);
+router.post('/:tripId/memories/add', uploadMemory.single('image'), tripMemoriesController.postAddMemory);
+router.post('/:tripId/memories/delete', tripMemoriesController.postDeleteMemory);
 
 router.post('/:tripId/publish/', tripPublishController.postPublishTrip);
 router.post('/:tripId/unpublish', tripPublishController.postUnpublishTrip);

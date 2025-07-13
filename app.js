@@ -23,6 +23,9 @@ hbs.registerHelper('calculateRemaining', require('./helpers/calculateRemaining')
 hbs.registerHelper('getUserName', require('./helpers/getUserName'));
 hbs.registerHelper('ifEquals', require('./helpers/ifEquals'));
 hbs.registerHelper('ifEqualsStr', require('./helpers/ifEqualsStr'));
+hbs.registerHelper('or', require('./helpers/or'));
+hbs.registerHelper('json', require('./helpers/json'));
+hbs.registerHelper('lookup', require('./helpers/lookup'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));

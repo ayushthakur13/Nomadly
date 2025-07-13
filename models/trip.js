@@ -82,6 +82,19 @@ const tripSchema = new Schema({
         default: '/images/default-trip.jpg'
     },
 
+    memories: [{
+        url: String, 
+        uploadedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        caption: String,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+
     isPublic: {
         type: Boolean,
         default: false
