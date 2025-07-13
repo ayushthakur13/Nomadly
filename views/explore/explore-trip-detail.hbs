@@ -12,7 +12,7 @@
     {{>navbar}}
 
     <main class="explore-detail-page">
-        <a href="javascript:history.back()" class="btn-back-fixed">←</a>
+        <a href="/explore" class="btn-back-fixed">←</a>
 
         <div class="explore-detail-container">
             <section class="trip-header">
@@ -101,14 +101,16 @@
                 </section>
             {{/if}}
 
-            <section class="trip-section">
-                <h2 class="section-title">
-                    👤 Shared by: 
-                    <span class="trip-shared-by">
-                        {{#if trip.createdBy}} {{trip.createdBy.username}} {{else}} Anonymous Explorer{{/if}}
-                    </span>
-                </h2>
-            </section>
+            {{#if trip.isPublic}}
+                <section class="trip-section">
+                    <h2 class="section-title">
+                        👤 Shared by: 
+                        <a href="/user/{{trip.createdBy.username}}" class="trip-shared-by">
+                            {{#if trip.createdBy}} {{trip.createdBy.name}} {{else}} Anonymous Explorer{{/if}}
+                        </a>
+                    </h2>
+                </section>
+            {{/if}}
 
             <section class="clone-trip-section">
                 <h2 class="clone-heading">Inspired by this journey?</h2>

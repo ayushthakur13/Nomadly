@@ -3,59 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{user.name}}'s Profile</title>
+    <title>{{profileUser.name}} (@{{profileUser.username}}) | Nomadly</title>
     <link rel="stylesheet" href="/styles/components/style.css">
     <link rel="stylesheet" href="/styles/profile.css">
     <link rel="stylesheet" href="/styles/trip.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-
     {{>navbar}}
 
     <main class="profile-page">
-        <a href="/home" class="btn-back-fixed">←</a>
+        <a href="javascript:history.back()" class="btn-back-fixed">←</a>
         <div class="profile-container">
             <div class="profile-card glass">
                 <div class="profile-image">
-                    <img src="{{user.profilePic}}" alt="Profile Picture" width="150" height="150">
+                    <img src="{{profileUser.profilePic}}" alt="Profile Picture" width="150" height="150">
                 </div>
                 
                 <div class="profile-info">
-                    <h2>{{user.name}}</h2>
-                    <p>@{{user.username}}</p>
-                    <p>{{user.email}}</p>
-                    {{#if user.bio}}
-                        <p class="profile-bio">{{user.bio}}</p>
+                    <h2>{{profileUser.name}}</h2>
+                    <p>@{{profileUser.username}}</p>
+                    {{#if profileUser.bio}}
+                        <p class="profile-bio">{{profileUser.bio}}</p>
                     {{/if}}
-
-                    <p>
-                        <strong>Account:</strong> 
-                        {{#if user.isPublic}}
-                            Public 🌍
-                        {{else}}
-                            Private 🔒
-                        {{/if}}
-                    </p>
-
-                    <div class="profile-actions">
-                        <a href="/profile/settings" class="btn-edit">Edit Profile</a>
-                        <a href="/logout" class="btn-logout">Logout</a>
-                    </div>
                 </div>
             </div>
 
 
             <section class="profile-trips-section glass">
                 <div class="profile-trips-header">
-                    <h3>Your Recent Trips</h3>
-                    <a href="/trips" class="see-all-btn small-btn">See All →</a>
+                    <h3>{{profileUser.name}}'s Recent Trips</h3>
                 </div>
 
                 {{#if trips.length}}
                     <div class="trip-card-mini-grid">
                     {{#each trips as |t|}}
-                        <a href="/trips/{{t._id}}/details" class="trip-card">
+                        <a href="/explore/trip/{{t._id}}" class="trip-card">
                             <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
                                 <div class="trip-card-overlay">
                                 <h1 class="trip-title">{{t.tripName}}</h1>
@@ -69,14 +52,12 @@
                     {{/each}}
                     </div>
                 {{else}}
-                    <p class="empty-state">No trips yet. <a href="/trips/create">Create one</a> now!</p>
+                    <p class="empty-state">{{profileUser.name}} hasn't shared any public trips yet.</p>
                 {{/if}}
-                </section>
-
+            </section>
         </div>
     </main>
 
     {{>footer}}
-
 </body>
 </html>

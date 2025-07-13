@@ -1,30 +1,37 @@
 <section class="tab-content" id="members">
-
     {{#if isOwner}}
-    <form class="invite-member-form" method="POST" action="/trips/{{trip._id}}/members/invite">
+    <form class="invite-member-form">
         <input type="text" name="identifier" placeholder="Enter username or email" required />
         <button type="submit">Invite</button>
+        <p class="form-message hidden"></p>
     </form>
     {{/if}}
 
-    <h4 class="member-count">👥 {{totalMembers}} {{memberLabel}} total</h4>
+    <h4 class="member-count">
+        👥 <span id="total-members">{{totalMembers}}</span> members total
+    </h4>
 
     <ul class="member-list">
-        <li class="member-card owner">
+        <li class="member-card owner" data-user-id="{{owner._id}}">
             <span class="member-name">
-                {{owner.username}} <span class="owner-badge">👑 Owner</span>
+                {{owner.name}} <span class="owner-badge">👑 Owner</span>
             </span>
         </li>
 
         {{#each participants}}
-        <li class="member-card">
-            <span class="member-name">{{this.username}}</span>
+        <li class="member-card {{#ifEqualsStr this._id ../user._id}}current-user{{/ifEqualsStr}}" data-user-id="{{this._id}}">
+            <span class="member-name">{{this.name}}</span>
             {{#if ../isOwner}}
-                <form method="POST" action="/trips/{{../trip._id}}/members/{{this._id}}/remove">
-                    <button type="submit" class="remove-btn" title="Remove">❌</button>
-                </form>
+                <button type="button" class="remove-btn" data-id="{{this._id}}" title="Remove">❌</button>
             {{/if}}
         </li>
         {{/each}}
     </ul>
+
+    {{#unless isOwner}}
+    <form class="leave-trip-form">
+        <button type="submit" class="leave-btn">Leave Trip</button>
+    </form>
+    {{/unless}}
 </section>
+

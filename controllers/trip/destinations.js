@@ -1,24 +1,25 @@
 const Trip = require('../../models/trip');
 
+function userCanEditTrip(trip, userId) {
+    return trip.createdBy.equals(userId) || trip.participants.includes(userId);
+}
+
 module.exports.postAddDestination = async (req, res) => {
     try {
         const { tripId } = req.params;
         const { name, location, date, notes, imageUrl } = req.body;
 
         const trip = await Trip.findById(tripId);
-
         if (!trip) return res.status(404).send("Trip not found");
 
-        trip.destinations.push({
-            name,
-            location,
-            date,
-            notes,
-            imageUrl
-        });
+        if (!userCanEditTrip(trip, req.user._id)) 
+            return res.status(403).send("Unauthorized");
 
+        trip.destinations.push({ name, location, date, notes, imageUrl });
         await trip.save();
-        res.redirect(`/trips/${tripId}/details`);
+
+        const added = trip.destinations[trip.destinations.length - 1];
+        res.json({ success: true, destination: added });
     } 
     catch (err) {
         console.error("Error adding destination:", err);
@@ -30,27 +31,33 @@ module.exports.postDeleteDestinantion = async (req, res) => {
     const { tripId, destId } = req.params;
 
     try {
-        const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
-        if (!trip) return res.status(404).send("Trip not found or you don't have permission.");
+        const trip = await Trip.findById(tripId);
+        if (!trip) return res.status(404).send("Trip not found");
+
+        if (!userCanEditTrip(trip, req.user._id)) 
+            return res.status(403).send("Unauthorized");
 
         trip.destinations = trip.destinations.filter(d => d._id.toString() !== destId);
         await trip.save();
 
-        res.redirect(`/trips/${tripId}/details`);
+        res.json({ success: true });
     } 
     catch (err) {
         console.error('Error deleting destination:', err);
         res.status(500).send('Something went wrong');
     }
-}
+};
 
 module.exports.postEditDestination = async (req, res) => {
     const { tripId, destId } = req.params;
     const { name, location, notes, date } = req.body;
 
     try {
-        const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
-        if (!trip) return res.status(403).send("Unauthorized");
+        const trip = await Trip.findById(tripId);
+        if (!trip) return res.status(404).send("Trip not found");
+
+        if (!userCanEditTrip(trip, req.user._id)) 
+            return res.status(403).send("Unauthorized");
 
         const dest = trip.destinations.id(destId);
         if (!dest) return res.status(404).send("Destination not found");
@@ -61,7 +68,7 @@ module.exports.postEditDestination = async (req, res) => {
         dest.date = date;
 
         await trip.save();
-        res.redirect(`/trips/${tripId}/details`);
+        res.json({ success: true, destination: dest });
     } 
     catch (err) {
         console.error("Error editing destination:", err);

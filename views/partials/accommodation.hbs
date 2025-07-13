@@ -67,26 +67,3 @@
         {{/each}}
     </div>
 </section>
-
-<script>
-    document.querySelector('.toggle-accommo-form')?.addEventListener('click', () => {
-        document.querySelector('.accommodation-form').classList.toggle('hidden');
-    });
-
-    document.querySelectorAll('.accommodation-card').forEach(card => {
-        const editBtn = card.querySelector('.edit-toggle-btn');
-        const cancelBtn = card.querySelector('.cancel-edit-btn');
-        const view = card.querySelector('.accommo-view');
-        const edit = card.querySelector('.accommo-edit');
-
-        editBtn?.addEventListener('click', () => {
-            view.classList.add('hidden');
-            edit.classList.remove('hidden');
-        });
-
-        cancelBtn?.addEventListener('click', () => {
-            edit.classList.add('hidden');
-            view.classList.remove('hidden');
-        });
-    });
-</script>

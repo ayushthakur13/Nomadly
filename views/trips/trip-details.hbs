@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{trip.tripName}}</title>
     <link rel="stylesheet" href="/styles/components/style.css">
-    <link rel="stylesheet" href="/styles/trip.css">
     <link rel="stylesheet" href="/styles/trip-details/trip-details.css">
     <link rel="stylesheet" href="/styles/trip-details/overview.css">
     <link rel="stylesheet" href="/styles/trip-details/destination.css">
@@ -28,7 +27,12 @@
                     <h1 class="trip-title">{{trip.tripName}}</h1>
                     <span class="category-badge">{{trip.category}}</span>
                 </div>
-                <a href="/trips/{{trip._id}}/edit" class="edit-btn btn-outline">Edit</a>
+                {{#if isOwner}}
+                    <div class="header-right">
+                        <a href="/trips/{{trip._id}}/edit" class="edit-btn">Edit</a>
+                        <a href="/trips/{{trip._id}}/delete" class="dlt-btn">Delete</a>
+                    </div>
+                {{/if}}
             </div>
         </header>
 
@@ -39,7 +43,7 @@
             <li class="tab" data-tab="budget">Budget</li>
             <li class="tab" data-tab="accommodation">Accommodation</li>
             <li class="tab" data-tab="members">Members</li>
-            <li class="tab" data-tab="other">Other</li>
+            <li class="tab" data-tab="gallery">Gallery</li>
         </ul>
 
         <div class="tab-panel-wrapper">
@@ -49,7 +53,7 @@
             {{> budget}}
             {{> accommodation}}
             {{> members}}
-            {{> other}}
+            {{> gallery}}
         </div>
 
     </main>
@@ -70,5 +74,16 @@
             });
         });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/scripts/trip-details/destinations.js"></script>
+    <script src="/scripts/trip-details/tasks.js"></script>
+    <script src="/scripts/trip-details/budget.js"></script>
+    <script src="/scripts/trip-details/accommodations.js"></script>
+    <script>
+        window.currentUserId = "{{user._id}}";
+    </script>
+    <script src="/scripts/trip-details/members.js"></script>
+
 </body>
 </html>

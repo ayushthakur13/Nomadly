@@ -27,6 +27,7 @@ router.post('/:tripId/destinations/:destId/delete', tripDestinationController.po
 router.post('/:tripId/destinations/:destId/edit', tripDestinationController.postEditDestination);
 
 router.post('/:tripId/budget/update', tripBudgetController.postAddBudget);
+router.post('/:tripId/budget/reset', tripBudgetController.postResetBudget);
 router.post('/:tripId/expenses', tripBudgetController.postAddExpense);
 router.post('/:tripId/expenses/:expenseId/delete', tripBudgetController.postDeleteExpense);
 
@@ -36,7 +37,8 @@ router.post('/:tripId/accommodations/:accommoId/edit', tripAccommodationControll
 
 router.post('/:tripId/members/invite', tripMemberController.postInviteMember);
 router.post('/:tripId/members/:memberId/remove', tripMemberController.postRemoveMember);
-// router.post('/:tripId/members/:memberId/make-owner', tripMemberController.postMakeOwner); 
+// router.post('/:tripId/members/:memberId/make-owner', tripMemberController.postMakeOwner);
+router.post('/:tripId/leave', tripMemberController.postLeaveTrip);
 
 router.post('/:tripId/publish/', tripPublishController.postPublishTrip);
 router.post('/:tripId/unpublish', tripPublishController.postUnpublishTrip);

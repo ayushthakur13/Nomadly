@@ -2,8 +2,16 @@ const Trip = require('../models/trip');
 
 module.exports.getExplore = async (req,res)=>{
     try{
-        const publicTrips = await Trip.find({ isPublic: true }).lean().limit(4).populate('createdBy');
-        const featuredTrips = await Trip.find({ isFeatured: true }).lean().limit(4);
+        const publicTrips = await Trip.find({ isPublic: true })
+            .lean()
+            .limit(4)
+            .sort({ createdAt: -1 })
+            .populate('createdBy');
+
+        const featuredTrips = await Trip.find({ isFeatured: true })
+            .lean()
+            .limit(4)
+            .sort({ createdAt: -1 });
 
         res.render('explore/explore', { publicTrips, featuredTrips });
     }

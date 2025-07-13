@@ -46,14 +46,13 @@ module.exports.getTripDetails = async (req,res)=>{
                 { participants: userId }
             ]
          })
-            .populate('participants', 'username')
-            .populate('createdBy', 'username');
+            .populate('participants')
+            .populate('createdBy');
 
         if (!trip) 
             return res.status(404).render('404');
 
         const totalMembers = trip.participants.length + 1;
-        const memberLabel = totalMembers === 1 ? "member" : "members";
 
         res.render('trips/trip-details',{
             trip,
@@ -61,8 +60,7 @@ module.exports.getTripDetails = async (req,res)=>{
             owner: trip.createdBy,
             participants: trip.participants,
             isOwner: req.user._id.equals(trip.createdBy._id),
-            totalMembers,
-            memberLabel
+            totalMembers
         });
     } 
     catch (err) {

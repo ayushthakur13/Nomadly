@@ -22,6 +22,7 @@ hbs.registerHelper('calculateSpent', require('./helpers/calculateSpent'));
 hbs.registerHelper('calculateRemaining', require('./helpers/calculateRemaining'));
 hbs.registerHelper('getUserName', require('./helpers/getUserName'));
 hbs.registerHelper('ifEquals', require('./helpers/ifEquals'));
+hbs.registerHelper('ifEqualsStr', require('./helpers/ifEqualsStr'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));
@@ -55,6 +56,7 @@ const profileRoute = require('./routes/profile');
 const tripRoute = require('./routes/trips');
 const aboutUsRoute = require('./routes/aboutus');
 const exploreRoute = require('./routes/explore');
+const userRoute = require('./routes/user');
 
 app.use('/auth/signup',signupRoute);
 app.use('/auth/login',loginRoute);
@@ -64,6 +66,7 @@ app.use('/profile',profileRoute);
 app.use('/trips',tripRoute);
 app.use('/aboutus',aboutUsRoute);
 app.use('/explore',exploreRoute);
+app.use('/user',userRoute);
 
 app.get('/logout',(req,res,next)=>{
     req.logout((err)=>{

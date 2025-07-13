@@ -5,7 +5,10 @@ module.exports.postCloneTrip = async (req, res) => {
         const userId = req.user._id;
         const tripId = req.params.tripId;
 
-        const originalTrip = await Trip.findOne({ _id: tripId, isPublic: true }).lean();
+        const originalTrip = await Trip.findOne({
+             _id: tripId, 
+             $or:[{isPublic: true}, {isFeatured:true}] 
+        }).lean();
 
         if (!originalTrip) 
             return res.status(404).send('Trip not found or not available to clone.');
@@ -17,7 +20,6 @@ module.exports.postCloneTrip = async (req, res) => {
         const clonedTrip = new Trip({
             ...originalTrip,
             _id: undefined,
-            imageUrl: '/images/default-trip.jpg',
             createdBy: userId,
             isPublic: false,
             isFeatured: false,

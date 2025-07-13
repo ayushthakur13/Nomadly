@@ -20,7 +20,7 @@
         {{>filter_sort_bar}}
         <div class="trip-card-grid">
             {{#each trips as |t|}}
-            <div class="trip-card">
+            <a href="/trips/{{t._id}}/details" class="trip-card">
                 <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
                     <div class="trip-card-overlay">
                         <h1 class="trip-title">{{t.tripName}}</h1>
@@ -30,12 +30,7 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="trip-actions">
-                    <a href="/trips/{{t._id}}/details" class="btn-outline">View itinerary</a>
-                    <a href="/trips/{{t._id}}/delete" class="btn-danger">Delete</a>
-                </div>
-            </div>
+            </a>
             {{/each}}
 
             <div class="trip-card add-trip-card">

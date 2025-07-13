@@ -4,23 +4,28 @@ const bcrypt = require('bcrypt');
 const { cloudinary } = require('../utils/cloudinary');
 
 module.exports.getProfile = async (req,res)=>{
-    const userId = req.user._id;
-                    
-    const trips = await Trip.find({
-        $or: [
-            { createdBy: userId },
-            { participants: userId }
-        ]
-    })
-    .sort({ createdAt: -1 })
-    .limit(3)
-    .lean();
-    console.log(trips);
+    try{
+        const userId = req.user._id;
+                        
+        const trips = await Trip.find({
+            $or: [
+                { createdBy: userId },
+                { participants: userId }
+            ]
+        })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean();
 
-    res.render('profile/profile',{
-        user: req.user,
-        trips
-    });
+        res.render('profile/profile',{
+            user: req.user,
+            trips
+        });
+    }
+    catch(err){
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 }
 
 module.exports.getProfileSettings = (req,res)=>{
