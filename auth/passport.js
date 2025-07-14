@@ -100,7 +100,6 @@ passport.use(new GoogleStrategy({
   scope: ['profile', 'email']
 },
     async (accessToken, refreshToken, profile, cb)=>{
-      
       try{
         let user = await User.findOne({googleID: profile.id});
         if(user) return cb(null, user);
