@@ -93,10 +93,14 @@ passport.use(new FacebookStrategy({
 // 3. Google
 const GoogleStrategy = require('passport-google-oauth20');
 
+const callbackURL = process.env.NODE_ENV === 'production'
+  ? 'https://nomadly-meuf.onrender.com/auth/login/google/callback'
+  : `http://localhost:${process.env.PORT}/auth/login/google/callback`;
+
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_APP_ID,
   clientSecret: process.env.GOOGLE_APP_SECRET,
-  callbackURL: `http://localhost:${process.env.PORT}/auth/login/google/callback`,
+  callbackURL,
   scope: ['profile', 'email']
 },
     async (accessToken, refreshToken, profile, cb)=>{
