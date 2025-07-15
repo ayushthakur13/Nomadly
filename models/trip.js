@@ -81,9 +81,11 @@ const tripSchema = new Schema({
         type: String,
         default: '/images/default-trip.jpg'
     },
+    imagePublicId: String,
 
     memories: [{
         url: String, 
+        public_id: String,
         uploadedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'

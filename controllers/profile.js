@@ -51,11 +51,21 @@ module.exports.postUpdateProfile = async (req, res, next) => {
             return res.redirect('/profile/settings');
         }
 
+        const wasPublic = req.user.isPublic;
+
         req.user.name = name;
         req.user.email = email;
         req.user.username = username;
         req.user.bio = bio || '';
         req.user.isPublic = isPublic === 'true' || isPublic === 'on';
+
+        if (wasPublic && !req.user.isPublic) {
+            await Trip.updateMany(
+                { createdBy: req.user._id, isPublic: true },
+                { $set: { isPublic: false } }
+            );
+            req.flash('msg', 'Profile set to private. Your public trips have been unpublished.');
+        }
 
         if (req.file){
 

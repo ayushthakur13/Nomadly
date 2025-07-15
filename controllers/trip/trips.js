@@ -1,5 +1,6 @@
 const Trip = require('../../models/trip');
 const User = require('../../models/users');
+const { cloudinary } = require('../../utils/cloudinary');
 
 module.exports.getTrips = async (req, res) => {
     try {
@@ -146,8 +147,20 @@ module.exports.postEditTrip = async (req,res)=>{
 
 module.exports.getDeleteTrip = async (req,res)=>{
     const { tripId } = req.params;
-    try{
-        await Trip.deleteOne({ _id:tripId, createdBy:req.user._id });
+    try {
+        const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
+        if (!trip)
+            return res.redirect('/trips');
+
+        if (trip.imagePublicId)
+            await cloudinary.uploader.destroy(trip.imagePublicId);
+
+        const deletePromises = trip.memories
+            .filter(mem => mem.public_id)
+            .map(mem => cloudinary.uploader.destroy(mem.public_id));
+        await Promise.all(deletePromises);
+
+        await trip.deleteOne();
         res.redirect('/trips');
     }
     catch(err){

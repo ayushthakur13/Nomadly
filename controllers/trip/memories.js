@@ -14,6 +14,7 @@ module.exports.postUpdateTripCoverImage = async (req, res) => {
         }
 
         trip.imageUrl = req.file.path;
+        trip.imagePublicId = req.file.filename;
         await trip.save();
 
         res.json({ success: true, imageUrl: trip.imageUrl });
@@ -31,10 +32,8 @@ module.exports.postDeleteTripCoverImage = async (req, res) => {
         const trip = await Trip.findOne({ _id: tripId, createdBy: req.user._id });
         if (!trip) return res.status(404).json({ success: false, message: 'Trip not found' });
 
-        if (trip.imageUrl && !trip.imageUrl.includes('/images/default-trip.jpg')) {
-            const publicId = trip.imageUrl.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(`Nomadly/TripCovers/${publicId}`);
-        }
+        if (trip.imagePublicId) 
+            await cloudinary.uploader.destroy(`Nomadly/TripCovers/${trip.imagePublicId}`);
 
         trip.imageUrl = '/images/default-trip.jpg';
         await trip.save();
@@ -66,6 +65,7 @@ module.exports.postAddMemory = async (req, res) => {
 
         const memory = {
             url: req.file.path,
+            public_id: req.file.filename,
             uploadedBy: req.user._id,
             caption
         };
@@ -102,10 +102,8 @@ module.exports.postDeleteMemory = async (req, res) => {
         if (!trip.createdBy.equals(req.user._id) && !memory.uploadedBy.equals(req.user._id)) 
             return res.status(403).json({ success: false, message: 'Not authorized to delete this memory' });
 
-        if (memory.url && memory.url.includes('res.cloudinary.com')) {
-            const publicId = memory.url.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(`Nomadly/Memories/${publicId}`);
-        }
+        if (memory.public_id) 
+            await cloudinary.uploader.destroy(`Nomadly/Memories/${memory.public_id}`);
 
         memory.deleteOne();
         await trip.save();
