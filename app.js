@@ -60,6 +60,7 @@ const tripRoute = require('./routes/trips');
 const aboutUsRoute = require('./routes/aboutus');
 const exploreRoute = require('./routes/explore');
 const userRoute = require('./routes/user');
+const contactUsRoute = require('./routes/contactus');
 
 app.use('/auth/signup',signupRoute);
 app.use('/auth/login',loginRoute);
@@ -70,6 +71,7 @@ app.use('/trips',tripRoute);
 app.use('/aboutus',aboutUsRoute);
 app.use('/explore',exploreRoute);
 app.use('/user',userRoute);
+app.use('/contact',contactUsRoute);
 
 app.get('/logout',(req,res,next)=>{
     req.logout((err)=>{
