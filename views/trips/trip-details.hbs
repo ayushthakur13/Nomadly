@@ -27,12 +27,13 @@
                     <h1 class="trip-title">{{trip.tripName}}</h1>
                     <span class="category-badge">{{trip.category}}</span>
                 </div>
-                {{#if isOwner}}
-                    <div class="header-right">
+                <div class="header-right">
+                    <a href="/trips/{{trip._id}}/chat" class="chat-access-btn">💬 Chat</a>
+                    {{#if isOwner}}
                         <a href="/trips/{{trip._id}}/edit" class="edit-btn">Edit</a>
-                        <a href="/trips/{{trip._id}}/delete" class="dlt-btn">Delete</a>
-                    </div>
-                {{/if}}
+                        <a href="/trips/{{trip._id}}/delete" class="dlt-btn">Delete</a>    
+                    {{/if}}
+                </div>
             </div>
         </header>
 

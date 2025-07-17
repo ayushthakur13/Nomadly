@@ -1,9 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 4444;
 const path = require('path');
-const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('connect-flash');
 const MongoStore = require('connect-mongo');
@@ -84,12 +82,4 @@ app.use((req, res) => {
     res.status(404).render('404');
 });
 
-mongoose.connect(mongoUrl)
-    .then(()=>{
-        app.listen(PORT,()=>{
-            console.log(`🟢 Server started at http://localhost:${PORT}`);
-        })
-    })
-    .catch((err)=>{
-        console.error('🔴 Cannot connect to DB', err.message);
-    })
+module.exports = app;

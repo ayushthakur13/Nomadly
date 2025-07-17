@@ -8,6 +8,7 @@ const tripDestinationController = require('../controllers/trip/destinations');
 const tripBudgetController = require('../controllers/trip/budget');
 const tripAccommodationController = require('../controllers/trip/accommodations');
 const tripMemberController = require('../controllers/trip/members');
+const tripChatController = require('../controllers/trip/chat');
 const tripMemoriesController = require('../controllers/trip/memories');
 const tripPublishController = require('../controllers/trip/publish');
 const tripCloneController = require('../controllers/trip/clone');
@@ -41,6 +42,8 @@ router.post('/:tripId/members/invite', tripMemberController.postInviteMember);
 router.post('/:tripId/members/:memberId/remove', tripMemberController.postRemoveMember);
 // router.post('/:tripId/members/:memberId/make-owner', tripMemberController.postMakeOwner);
 router.post('/:tripId/leave', tripMemberController.postLeaveTrip);
+
+router.get('/:tripId/chat', tripChatController.getTripChat);
 
 router.post('/:tripId/cover/update', uploadTripCover.single('image'), tripMemoriesController.postUpdateTripCoverImage);
 router.post('/:tripId/cover/delete', tripMemoriesController.postDeleteTripCoverImage);
