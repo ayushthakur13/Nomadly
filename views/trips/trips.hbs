@@ -16,35 +16,81 @@
     <main class="trip-list-page">
         <h1 class="page-heading">Your Trips</h1>
 
-        {{#if trips.length}}
         {{>filter_sort_bar}}
-        <div class="trip-card-grid">
-            {{#each trips as |t|}}
-            <a href="/trips/{{t._id}}/details" class="trip-card">
-                <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
-                    <div class="trip-card-overlay">
-                        <h1 class="trip-title">{{t.tripName}}</h1>
-                        <div class="card-overlay-bottom">
-                            <p class="trip-destination">{{t.mainDestination}}</p>
-                            <span class="category-badge">{{t.category}}</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            {{/each}}
 
-            <div class="trip-card add-trip-card">
-                <a href="/trips/create" class="add-trip-link">
-                <div class="add-icon">+</div>
-                <div class="add-text">Create New Trip</div>
-                </a>
+        {{#if (or ongoingTrips.length upcomingTrips.length pastTrips.length)}}
+
+            {{#if ongoingTrips.length}}
+                <h2 class="trip-section-heading ongoing">Ongoing Trips</h2>
+                <div class="trip-card-grid">
+                    {{#each ongoingTrips as |t|}}
+                        <a href="/trips/{{t._id}}/details" class="trip-card ongoing">
+                            <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
+                                <div class="trip-card-overlay">
+                                    <h1 class="trip-title">{{t.tripName}}</h1>
+                                    <div class="card-overlay-bottom">
+                                        <p class="trip-destination">{{t.mainDestination}}</p>
+                                        <span class="category-badge">{{t.category}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {{/each}}
+                </div>
+            {{/if}}
+
+            {{#if upcomingTrips.length}}
+                <h2 class="trip-section-heading upcoming">Upcoming Trips</h2>
+                <div class="trip-card-grid">
+                    {{#each upcomingTrips as |t|}}
+                        <a href="/trips/{{t._id}}/details" class="trip-card upcoming">
+                            <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
+                                <div class="trip-card-overlay">
+                                    <h1 class="trip-title">{{t.tripName}}</h1>
+                                    <div class="card-overlay-bottom">
+                                        <p class="trip-destination">{{t.mainDestination}}</p>
+                                        <span class="category-badge">{{t.category}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {{/each}}
+                </div>
+            {{/if}}
+
+            {{#if pastTrips.length}}
+                <h2 class="trip-section-heading past">Past Trips</h2>
+                <div class="trip-card-grid">
+                    {{#each pastTrips as |t|}}
+                        <a href="/trips/{{t._id}}/details" class="trip-card past">
+                            <div class="trip-card-img" style="background-image: url('{{t.imageUrl}}');">
+                                <div class="trip-card-overlay">
+                                    <h1 class="trip-title">{{t.tripName}}</h1>
+                                    <div class="card-overlay-bottom">
+                                        <p class="trip-destination">{{t.mainDestination}}</p>
+                                        <span class="category-badge">{{t.category}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {{/each}}
+                </div>
+            {{/if}}
+
+            <div class="trip-card-grid">
+                <div class="trip-card add-trip-card">
+                    <a href="/trips/create" class="add-trip-link">
+                        <div class="add-icon">+</div>
+                        <div class="add-text">Create New Trip</div>
+                    </a>
+                </div>
             </div>
-            
-        </div>
+
         {{else}}
             <p class="empty-state">No trips yet. <a href="/trips/create">Create one</a> now!</p>
         {{/if}}
     </main>
+
 
     {{>footer}}
 </body>

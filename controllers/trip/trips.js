@@ -23,8 +23,26 @@ module.exports.getTrips = async (req, res) => {
             .sort(sortOption)
             .lean();
 
+        const upcomingTrips = [];
+        const ongoingTrips = [];
+        const pastTrips = [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+
+        for (const trip of trips) {
+            const start = new Date(trip.startDate);
+            const end = new Date(trip.endDate);
+
+            if (today < start) upcomingTrips.push(trip);
+            else if (today >= start && today <= end) ongoingTrips.push(trip);
+            else pastTrips.push(trip);
+        }
+
         res.render('trips/trips', {
-            trips,
+            upcomingTrips,
+            ongoingTrips,
+            pastTrips,
             selectedCategory: category || "",
             selectedSort: sort || "latest"
         });
