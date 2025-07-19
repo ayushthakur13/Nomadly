@@ -21,10 +21,26 @@ module.exports.getTripChat = async (req,res)=>{
             .populate('sender', 'name')
             .lean();
 
+        const userId = String(req.user._id);
+
+        messages.forEach(msg => {
+            if (msg.sender && typeof msg.sender === 'object') {
+                msg.senderId = msg.sender._id.toString();
+                msg.senderName = msg.sender.name || 'Unknown';
+                msg.isMe = (msg.sender._id.toString() === userId);
+            } 
+            else {
+                msg.senderId = '';
+                msg.senderName = 'Unknown';
+                msg.isMe = false;
+            }
+        });
+
         res.render('trips/chat', { 
             trip, 
             messages, 
-            user: req.user
+            user: req.user,
+            userId
         });
     } 
     catch(err){

@@ -17,16 +17,16 @@
             <h2 class="chat-title">{{trip.mainDestination}} Trip Chat</h2>
             <div class="chat-box" id="chat-box">
                 {{#each messages}}
-                    <div class="chat-message {{#ifEqualsStr this.sender._id ../user._id}}me{{/ifEqualsStr}}">
+                    <div class="chat-message {{#if this.isMe}}me{{/if}}">
                         <div class="message-header">
                             <strong>
-                                {{#ifEqualsStr this.sender._id ../user._id}}
+                                {{#if this.isMe}}
                                     You
                                 {{else}}
-                                    {{this.sender.name}}
-                                {{/ifEqualsStr}}
+                                    {{this.senderName}}
+                                {{/if}}
                             </strong>
-                            <span class="timestamp">{{formatDate this.createdAt}}</span>
+                            <span class="timestamp">{{formatDateTime this.createdAt}}</span>
                         </div>
                         <div class="message-body">{{this.content}}</div>
                     </div>

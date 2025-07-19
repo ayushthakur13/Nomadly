@@ -24,6 +24,7 @@ hbs.registerHelper('ifEqualsStr', require('./helpers/ifEqualsStr'));
 hbs.registerHelper('or', require('./helpers/or'));
 hbs.registerHelper('json', require('./helpers/json'));
 hbs.registerHelper('lookup', require('./helpers/lookup'));
+hbs.registerHelper('formatDateTime', require('./helpers/formatDateTime'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));

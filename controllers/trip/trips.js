@@ -67,12 +67,19 @@ module.exports.getTripDetails = async (req,res)=>{
             ]
          })
             .populate('participants', 'name username')
-            .populate('createdBy', 'name username');
+            .populate('createdBy', 'name username')
+            .lean();
 
         if (!trip) 
             return res.status(404).render('404');
 
-        const totalMembers = trip.participants.length + 1;
+        const totalMembers = trip.participants.length;
+
+        const enhancedParticipants = trip.participants.map(p => ({
+            ...p,
+            isOwner: p._id.toString() === trip.createdBy._id.toString(),
+            isCurrentUser: p._id.toString() === userId.toString()
+        }));
 
         const memoryUserIds = trip.memories.map(m => m.uploadedBy?.toString()).filter(Boolean);
         const users = await User.find({ _id: { $in: memoryUserIds } }).lean();
@@ -86,7 +93,7 @@ module.exports.getTripDetails = async (req,res)=>{
             trip,
             user: req.user,
             owner: trip.createdBy,
-            participants: trip.participants,
+            participants: enhancedParticipants,
             isOwner: req.user._id.equals(trip.createdBy._id),
             totalMembers,
             userMap

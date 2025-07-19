@@ -30,7 +30,7 @@ socket.on('receiveMessage', ({ sender, content, createdAt }) => {
     msgElement.innerHTML = `
         <div class="message-header">
             <strong>${isMe ? 'You' : sender.name}</strong>
-            <span class="timestamp">${new Date(createdAt).toLocaleTimeString()}</span>
+            <span class="timestamp">${new Date(createdAt).toLocaleString('en-IN',{hour12: true})}</span>
         </div>
         <div class="message-body">${content}</div>
     `;
