@@ -81,7 +81,15 @@ module.exports.getTripDetails = async (req,res)=>{
             isCurrentUser: p._id.toString() === userId.toString()
         }));
 
-        const memoryUserIds = trip.memories.map(m => m.uploadedBy?.toString()).filter(Boolean);
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const sortedMemories = [...trip.memories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const paginatedMemories = sortedMemories.slice(startIndex, endIndex);
+
+        const memoryUserIds = paginatedMemories.map(m => m.uploadedBy?.toString()).filter(Boolean);
         const users = await User.find({ _id: { $in: memoryUserIds } }).lean();
 
         const userMap = {};
@@ -90,13 +98,21 @@ module.exports.getTripDetails = async (req,res)=>{
         });
 
         res.render('trips/trip-details',{
-            trip,
+            trip: {
+                ...trip,
+                memories: paginatedMemories
+            },
             user: req.user,
             owner: trip.createdBy,
             participants: enhancedParticipants,
             isOwner: req.user._id.equals(trip.createdBy._id),
             totalMembers,
-            userMap
+            userMap,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(sortedMemories.length / limit),
+                showPagination: sortedMemories.length > limit
+            }
         });
     } 
     catch (err) {

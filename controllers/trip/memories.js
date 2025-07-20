@@ -1,5 +1,6 @@
 const { cloudinary } = require('../../utils/cloudinary');
 const Trip = require('../../models/trip');
+const User = require('../../models/users');
 
 module.exports.postUpdateTripCoverImage = async (req, res) => {
     const { tripId } = req.params;
@@ -111,6 +112,45 @@ module.exports.postDeleteMemory = async (req, res) => {
         res.json({ success: true });
     } catch (err) {
         console.error('Failed to delete memory:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+module.exports.getAllMemories = async (req, res) => {
+    const { tripId } = req.params;
+
+    try {
+        const trip = await Trip.findOne({
+            _id: tripId,
+            $or: [{ createdBy: req.user._id }, { participants: req.user._id }]
+        })
+        .populate('participants', 'name username')
+        .populate('createdBy', 'name username')
+        .lean();
+
+        if (!trip) {
+            return res.status(404).json({ success: false, message: 'Trip not found' });
+        }
+
+        const sortedMemories = [...trip.memories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const uploaderIds = sortedMemories.map(m => m.uploadedBy?.toString()).filter(Boolean);
+        const users = await User.find({ _id: { $in: uploaderIds } }).lean();
+
+        const uploaderMap = {};
+        users.forEach(user => {
+            uploaderMap[user._id.toString()] = user.name || user.username;
+        });
+
+        res.render('trips/all-memories', {
+            trip,
+            memories: sortedMemories,
+            uploaderMap
+        });
+
+    } catch (err) {
+        console.error('Failed to get all memories:', err);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

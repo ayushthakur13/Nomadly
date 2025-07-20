@@ -11,20 +11,7 @@ const favicon = require('serve-favicon');
 
 app.set('view engine','hbs');
 hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
-hbs.registerHelper('formatDate', require('./helpers/formatDate'));
-hbs.registerHelper('calculateTripDuration', require('./helpers/calculateTripDuration'));
-hbs.registerHelper('countCompletedTasks', require('./helpers/countCompletedTasks'));
-hbs.registerHelper('taskProgress', require('./helpers/taskProgress'));
-hbs.registerHelper('daysUntil', require('./helpers/daysUntil'));
-hbs.registerHelper('calculateSpent', require('./helpers/calculateSpent'));
-hbs.registerHelper('calculateRemaining', require('./helpers/calculateRemaining'));
-hbs.registerHelper('getUserName', require('./helpers/getUserName'));
-hbs.registerHelper('ifEquals', require('./helpers/ifEquals'));
-hbs.registerHelper('ifEqualsStr', require('./helpers/ifEqualsStr'));
-hbs.registerHelper('or', require('./helpers/or'));
-hbs.registerHelper('json', require('./helpers/json'));
-hbs.registerHelper('lookup', require('./helpers/lookup'));
-hbs.registerHelper('formatDateTime', require('./helpers/formatDateTime'));
+require('./utils/registerHelpers')();
 
 app.use(express.urlencoded({extended:true}));
 app.use(express.static(path.join(__dirname,'public')));
@@ -45,6 +32,11 @@ app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+    res.locals.user = req.user;
+    next();
+});
 
 app.get('/',(req,res)=>{
     res.redirect('/auth/login')

@@ -38,22 +38,52 @@
 
         </div>
 
-        <div class="memory-grid">
-            {{#each trip.memories}}
-            <div class="memory-card" data-memory-id="{{this._id}}">
-                <img src="{{this.url}}" alt="Memory Image" class="memory-img" loading="lazy" />
-                {{#if this.caption}}
-                    <p class="memory-caption">“{{this.caption}}”</p>
-                {{/if}}
-                <p class="memory-uploader">— {{lookup ../userMap this.uploadedBy}}</p>
+        {{#if trip.memories.length}}  
+            <div class="memory-grid">
+                {{#each trip.memories}}
+                <div class="memory-card" data-memory-id="{{this._id}}">
+                    <img src="{{this.url}}" alt="Memory Image" class="memory-img" loading="lazy" />
+                    {{#if this.caption}}
+                        <p class="memory-caption">“{{this.caption}}”</p>
+                    {{/if}}
+                    <p class="memory-uploader">— {{lookup ../userMap this.uploadedBy}}</p>
 
-                <form class="delete-memory-form">
-                    <input type="hidden" name="memoryId" value="{{this._id}}" />
-                    <button type="submit" class="memory-delete-btn" title="Delete">🗑️</button>
-                </form>
+                    <div class="memory-btn">
+                        <form class="download-memory-form">
+                            <input type="hidden" name="memoryId" value="{{this._id}}" />
+                            <button type="submit" class="memory-download-btn" title="Download">
+                                <i class="fa-solid fa-file-arrow-down"></i>
+                            </button>
+                        </form>
+
+                        <form class="delete-memory-form">
+                            <input type="hidden" name="memoryId" value="{{this._id}}" />
+                            <button type="submit" class="memory-delete-btn" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                </div>
+                {{/each}}
             </div>
-            {{/each}}
-        </div>
+        {{else}}
+            <p style="text-align:center; color:#777; font-size:1.1rem;">No memories found for this trip yet.</p>
+        {{/if}}
+
+        {{#if pagination.showPagination}}
+            <div class="pagination-buttons">
+                {{#if (gt pagination.currentPage 1)}}
+                    <a href="?page={{subtract pagination.currentPage 1}}" class="pagination-btn">⬅ Prev</a>
+                {{/if}}
+
+                {{#if (lt pagination.currentPage pagination.totalPages)}}
+                    <a href="?page={{add pagination.currentPage 1}}" class="pagination-btn">Next ➡</a>
+                {{/if}}
+
+                <a href="/trips/{{trip._id}}/memories" class="pagination-btn view-all-btn">View All</a>
+            </div>
+        {{/if}}
     </div>
 
 </section>

@@ -49,6 +49,7 @@ router.post('/:tripId/cover/update', uploadTripCover.single('image'), tripMemori
 router.post('/:tripId/cover/delete', tripMemoriesController.postDeleteTripCoverImage);
 router.post('/:tripId/memories/add', uploadMemory.single('image'), tripMemoriesController.postAddMemory);
 router.post('/:tripId/memories/delete', tripMemoriesController.postDeleteMemory);
+router.get('/:tripId/memories', tripMemoriesController.getAllMemories);
 
 router.post('/:tripId/publish/', tripPublishController.postPublishTrip);
 router.post('/:tripId/unpublish', tripPublishController.postUnpublishTrip);
