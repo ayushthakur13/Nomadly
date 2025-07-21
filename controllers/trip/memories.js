@@ -109,7 +109,11 @@ module.exports.postDeleteMemory = async (req, res) => {
         memory.deleteOne();
         await trip.save();
 
-        res.json({ success: true });
+        res.json({ 
+            success: true,
+            totalMemoriesAfterDelete: trip.memories.length,
+            pageSize: 2
+         });
     } catch (err) {
         console.error('Failed to delete memory:', err);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -152,5 +156,53 @@ module.exports.getAllMemories = async (req, res) => {
     } catch (err) {
         console.error('Failed to get all memories:', err);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+module.exports.getPaginatedMemories = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { tripId } = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 2;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
+        const trip = await Trip.findOne({
+            _id: tripId,
+            $or: [
+                { createdBy: userId },
+                { participants: userId }
+            ]
+        }).lean();
+
+        if (!trip) return res.status(404).json({ error: 'Trip not found' });
+
+        const sortedMemories = [...trip.memories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const paginatedMemories = sortedMemories.slice(startIndex, endIndex);
+
+        const memoryUserIds = paginatedMemories.map(m => m.uploadedBy?.toString()).filter(Boolean);
+        const users = await User.find({ _id: { $in: memoryUserIds } }).lean();
+
+        const userMap = {};
+        users.forEach(user => {
+            userMap[user._id.toString()] = user.name || user.username;
+        });
+
+        res.json({
+            memories: paginatedMemories,
+            userMap,
+            pagination: {
+                currentPage: page,
+                totalMemories: sortedMemories.length,
+                totalPages: Math.ceil(sortedMemories.length / limit),
+                showPagination: sortedMemories.length > limit
+            }
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
     }
 };

@@ -71,19 +71,17 @@
             <p style="text-align:center; color:#777; font-size:1.1rem;">No memories found for this trip yet.</p>
         {{/if}}
 
-        {{#if pagination.showPagination}}
-            <div class="pagination-buttons">
-                {{#if (gt pagination.currentPage 1)}}
-                    <a href="?page={{subtract pagination.currentPage 1}}" class="pagination-btn">⬅ Prev</a>
-                {{/if}}
-
-                {{#if (lt pagination.currentPage pagination.totalPages)}}
-                    <a href="?page={{add pagination.currentPage 1}}" class="pagination-btn">Next ➡</a>
-                {{/if}}
-
-                <a href="/trips/{{trip._id}}/memories" class="pagination-btn view-all-btn">View All</a>
-            </div>
-        {{/if}}
+        <div id="pagination-container">
+            {{#if pagination.showPagination}}
+                <div id="pagination-controls" class="pagination-buttons">
+                    <button id="prevBtn" class="pagination-btn">⬅ Prev</button>
+                    <span id="pageIndicator" class="page-indicator">Page {{pagination.currentPage}} of {{pagination.totalPages}}</span>
+                    <button id="nextBtn" class="pagination-btn">Next ➡</button>
+                    
+                    <a href="/trips/{{trip._id}}/memories" class="pagination-btn view-all-btn">View All</a>
+                </div>
+            {{/if}}
+        </div>
     </div>
 
 </section>

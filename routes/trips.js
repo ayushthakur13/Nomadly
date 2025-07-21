@@ -50,6 +50,7 @@ router.post('/:tripId/cover/delete', tripMemoriesController.postDeleteTripCoverI
 router.post('/:tripId/memories/add', uploadMemory.single('image'), tripMemoriesController.postAddMemory);
 router.post('/:tripId/memories/delete', tripMemoriesController.postDeleteMemory);
 router.get('/:tripId/memories', tripMemoriesController.getAllMemories);
+router.get('/:tripId/memories/paginated', tripMemoriesController.getPaginatedMemories);
 
 router.post('/:tripId/publish/', tripPublishController.postPublishTrip);
 router.post('/:tripId/unpublish', tripPublishController.postUnpublishTrip);
