@@ -34,7 +34,7 @@ module.exports.postDeleteTripCoverImage = async (req, res) => {
         if (!trip) return res.status(404).json({ success: false, message: 'Trip not found' });
 
         if (trip.imagePublicId) 
-            await cloudinary.uploader.destroy(`Nomadly/TripCovers/${trip.imagePublicId}`);
+            await cloudinary.uploader.destroy(trip.imagePublicId);
 
         trip.imageUrl = '/images/default-trip.jpg';
         await trip.save();
@@ -104,7 +104,7 @@ module.exports.postDeleteMemory = async (req, res) => {
             return res.status(403).json({ success: false, message: 'Not authorized to delete this memory' });
 
         if (memory.public_id) 
-            await cloudinary.uploader.destroy(`Nomadly/Memories/${memory.public_id}`);
+            await cloudinary.uploader.destroy(memory.public_id);
 
         memory.deleteOne();
         await trip.save();
@@ -112,7 +112,7 @@ module.exports.postDeleteMemory = async (req, res) => {
         res.json({ 
             success: true,
             totalMemoriesAfterDelete: trip.memories.length,
-            pageSize: 2
+            pageSize: 10
          });
     } catch (err) {
         console.error('Failed to delete memory:', err);
@@ -165,7 +165,7 @@ module.exports.getPaginatedMemories = async (req, res) => {
         const userId = req.user._id;
         const { tripId } = req.params;
         const page = parseInt(req.query.page) || 1;
-        const limit = 2;
+        const limit = 10;
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
 

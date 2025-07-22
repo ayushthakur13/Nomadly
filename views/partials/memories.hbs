@@ -38,8 +38,8 @@
 
         </div>
 
-        {{#if trip.memories.length}}  
-            <div class="memory-grid">
+        <div class="memory-grid">
+            {{#if trip.memories.length}}  
                 {{#each trip.memories}}
                 <div class="memory-card" data-memory-id="{{this._id}}">
                     <img src="{{this.url}}" alt="Memory Image" class="memory-img" loading="lazy" />
@@ -66,10 +66,10 @@
                     
                 </div>
                 {{/each}}
-            </div>
-        {{else}}
-            <p style="text-align:center; color:#777; font-size:1.1rem;">No memories found for this trip yet.</p>
-        {{/if}}
+            {{else}}
+                <p class="no-memory-message">No memories found for this trip yet.</p>
+            {{/if}} 
+        </div>
 
         <div id="pagination-container">
             {{#if pagination.showPagination}}

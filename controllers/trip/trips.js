@@ -81,7 +81,7 @@ module.exports.getTripDetails = async (req,res)=>{
             isCurrentUser: p._id.toString() === userId.toString()
         }));
 
-        let memoriesLimit = 2;
+        let memoriesLimit = 10;
         const sortedMemories = [...trip.memories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         const previewMemories = sortedMemories.slice(0, memoriesLimit);
 

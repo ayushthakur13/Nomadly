@@ -201,6 +201,17 @@
   background: #f2f2f2;
 }
 
+.memory-grid:has(.no-memory-message) {
+  display: flex;
+  justify-content: center;
+}
+
+.no-memory-message {
+  color: #777;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
 .pagination-buttons {
   display: flex;
   justify-content: center;

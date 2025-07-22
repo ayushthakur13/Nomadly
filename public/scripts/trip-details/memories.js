@@ -6,6 +6,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteCoverForm = document.querySelector(".delete-trip-cover-form");
     const tripCoverImg = document.querySelector(".trip-cover-img");
 
+    function showNoMemoriesMessage() {
+        const grid = document.querySelector(".memory-grid");
+        if (!grid) return;
+
+        const cards = grid.querySelectorAll(".memory-card");
+        if (cards.length === 0) {
+            grid.innerHTML = `
+            <p class="no-memory-message">No memories found for this trip yet.</p>
+            `;
+        }
+    }
+
     // Upload new cover image
     coverInput?.addEventListener("change", async () => {
         if (!coverInput.files[0]) return;
@@ -67,42 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (res.data.success) {
-                const memory = res.data.memory;
-                const uploaderName = window.userMap?.[memory.uploadedBy] || "Someone";
-                const isOwnerOrUploader = window.isOwner || memory.uploadedBy === window.currentUserId;
-
-                const card = document.createElement("div");
-                card.classList.add("memory-card");
-                card.dataset.memoryId = memory._id;
-
-                const caption = memory.caption ? `<p class="memory-caption">“${memory.caption}”</p>` : "";
-
-                const buttons = isOwnerOrUploader
-                    ? `<div class="memory-btn">
-                        <form class="download-memory-form">
-                            <input type="hidden" name="memoryId" value="${memory._id}" />
-                            <button type="submit" class="memory-download-btn" title="Download">
-                                <i class="fa-solid fa-file-arrow-down"></i>
-                            </button>
-                        </form>
-                        <form class="delete-memory-form">
-                            <input type="hidden" name="memoryId" value="${memory._id}" />
-                            <button type="submit" class="memory-delete-btn" title="Delete">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>` : "";
-
-                card.innerHTML = `
-                    <img src="${memory.url}" alt="Memory Image" class="memory-img" />
-                    ${caption}
-                    <p class="memory-uploader">— ${uploaderName}</p>
-                    ${buttons}
-                `;
-
-                card.style.opacity = 0;
+                
                 await loadMemories(1);
-                setTimeout(() => card.style.opacity = 1, 50);
                 imageInput.value = "";
                 captionInput.value = "";
 
@@ -137,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentPage = Math.max(1, newTotalPages);
 
                 await loadMemories(currentPage); 
+                showNoMemoriesMessage();
             }
         } catch (err) {
             console.error("Failed to delete memory:", err.response?.data || err.message);
@@ -146,9 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //Pagination 
     let currentPage = 1;
-
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
 
     const loadMemories = async (page = 1) => {
         try {
@@ -191,9 +167,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (pagination.totalPages > 1) {
                 paginationContainer.innerHTML = `
                     <div class="pagination-buttons">
-                        <button id="prevBtn" class="pagination-btn" ${pagination.currentPage === 1 ? 'disabled' : ''}>⬅ Prev</button>
+                        <button id="prevBtn" class="pagination-btn">⬅ Prev</button>
                         <span id="pageIndicator" class="page-indicator">Page ${pagination.currentPage} of ${pagination.totalPages}</span>
-                        <button id="nextBtn" class="pagination-btn" ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}>Next ➡</button>
+                        <button id="nextBtn" class="pagination-btn">Next ➡</button>
                         <a href="/trips/${tripId}/memories" class="pagination-btn view-all-btn">View All</a>
                     </div>
                 `;
@@ -206,20 +182,28 @@ document.addEventListener("DOMContentLoaded", () => {
             const newNextBtn = document.getElementById('nextBtn');
 
             if (newPrevBtn) {
-                newPrevBtn.addEventListener('click', () => {
-                    if (currentPage > 1) loadMemories(currentPage - 1);
-                });
+                newPrevBtn.onclick = () => {
+                    if (currentPage > 1) 
+                        loadMemories(currentPage - 1);
+                };
+                newPrevBtn.disabled = (pagination.currentPage === 1);
+                newPrevBtn.style.display = (pagination.currentPage === 1) ? 'none' : 'inline-block';
             }
 
             if (newNextBtn) {
-                newNextBtn.addEventListener('click', () => {
-                    if (currentPage < pagination.totalPages) loadMemories(currentPage + 1);
-                });
+                newNextBtn.onclick = () => {
+                    if (currentPage < pagination.totalPages) 
+                        loadMemories(currentPage + 1);
+                };
+                newNextBtn.disabled = (pagination.currentPage === pagination.totalPages);
+                newNextBtn.style.display = (pagination.currentPage === pagination.totalPages) ? 'none' : 'inline-block';
             }
             
             // Tell FontAwesome to scan new DOM changes
             if (window.FontAwesome && window.FontAwesome.dom) 
                 window.FontAwesome.dom.i2svg(); 
+
+            showNoMemoriesMessage();
 
         } catch (err) {
             console.error('Error loading paginated memories:', err);
