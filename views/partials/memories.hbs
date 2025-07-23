@@ -11,13 +11,15 @@
             <div class="trip-cover-actions">
                 <form class="update-trip-cover-form" enctype="multipart/form-data">
                     <label class="cover-upload-label" for="coverImageInput">
-                        <span class="upload-icon">📸</span> Change Cover
+                        <i class="fa-solid fa-camera"></i> Change Cover
                     </label>
                     <input type="file" name="image" id="coverImageInput" accept="image/*" hidden />
                 </form>
 
                 <form class="delete-trip-cover-form">
-                    <button type="submit" class="delete-cover-btn">🗑️ Remove</button>
+                    <button type="submit" class="delete-cover-btn">
+                        <i class="fa-solid fa-trash"></i> Remove
+                    </button>
                 </form>
             </div>
             {{/if}}
@@ -26,16 +28,29 @@
 
     <div class="memories-content">
         <div class="memories-header">
-            <h3>📷 Trip Memories</h3>
+            <h3>
+                Trip Memories 
+                <span id="memoryCount" class="memory-count"></span>
+            </h3>
 
-            <form class="add-memory-form" enctype="multipart/form-data">
-                <label class="memory-image-label">
-                    Add Photo
-                    <input type="file" name="image" id="memoryImage" accept="image/*" hidden />
-                </label>
-                <input type="text" name="caption" placeholder="Add a caption (optional)" class="memory-caption-input" />
-            </form>
+            <div class="memory-actions">
+                <form class="add-memory-form" enctype="multipart/form-data">
+                    <label class="memory-image-label">
+                        Add Photo
+                        <input type="file" name="image" id="memoryImage" accept="image/*" hidden />
+                    </label>
+                </form>
 
+                <button id="downloadAllBtn" title="Download All Memories">
+                    <i class="fa-solid fa-download"></i> All
+                </button>
+
+                {{#if isOwner}}
+                    <button id="deleteAllBtn" title="Delete All Memories">
+                        <i class="fa-solid fa-trash"></i> All
+                    </button>
+                {{/if}}
+            </div>
         </div>
 
         <div class="memory-grid">
@@ -43,18 +58,12 @@
                 {{#each trip.memories}}
                 <div class="memory-card" data-memory-id="{{this._id}}">
                     <img src="{{this.url}}" alt="Memory Image" class="memory-img" loading="lazy" />
-                    {{#if this.caption}}
-                        <p class="memory-caption">“{{this.caption}}”</p>
-                    {{/if}}
                     <p class="memory-uploader">— {{lookup ../userMap this.uploadedBy}}</p>
 
                     <div class="memory-btn">
-                        <form class="download-memory-form">
-                            <input type="hidden" name="memoryId" value="{{this._id}}" />
-                            <button type="submit" class="memory-download-btn" title="Download">
-                                <i class="fa-solid fa-file-arrow-down"></i>
-                            </button>
-                        </form>
+                        <button type="button" class="memory-download-btn" title="Download" data-url="{{this.url}}">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                        </button>
 
                         <form class="delete-memory-form">
                             <input type="hidden" name="memoryId" value="{{this._id}}" />

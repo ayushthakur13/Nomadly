@@ -50,7 +50,6 @@ module.exports.postDeleteTripCoverImage = async (req, res) => {
 
 module.exports.postAddMemory = async (req, res) => {
     const { tripId } = req.params;
-    const { caption } = req.body;
 
     try {
         const trip = await Trip.findOne({ 
@@ -68,7 +67,6 @@ module.exports.postAddMemory = async (req, res) => {
             url: req.file.path,
             public_id: req.file.filename,
             uploadedBy: req.user._id,
-            caption
         };
 
         trip.memories.push(memory);

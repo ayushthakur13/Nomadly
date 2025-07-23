@@ -44,16 +44,16 @@
   transition: background 0.3s;
 }
 
+.cover-upload-label i{
+  margin-right: 3px;
+}
+
 .cover-upload-label:hover {
   background-color: rgba(255, 255, 255, 1);
 }
 
-.upload-icon {
-  margin-right: 6px;
-}
-
 .delete-cover-btn {
-  background-color: rgba(230, 31, 31, 0.85);
+  background-color: var(--color-danger);
   color: white;
   border: none;
   padding: 6px 12px;
@@ -61,6 +61,10 @@
   cursor: pointer;
   font-weight: 500;
   transition: background 0.3s;
+}
+
+.delete-cover-btn i{
+  margin-right: 3px;
 }
 
 .delete-cover-btn:hover {
@@ -83,35 +87,72 @@
   border: 1px solid #e2e2e2;
 }
 
-.memories-header h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.add-memory-form {
+.memories-title{
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   align-items: center;
 }
 
+.memories-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.memory-count {
+  font-size: 1.4rem;
+  color: var(--color-accent);
+}
+
+.memory-actions{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .memory-image-label,
-.memory-caption-input {
+#downloadAllBtn,
+#deleteAllBtn {
   background-color: #ffffff;
   padding: 0.45rem 1rem;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   border: 1px solid #ccc;
   transition: all 0.2s ease;
+}
+
+#downloadAllBtn{
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+}
+
+#deleteAllBtn{
+  background-color: var(--color-danger);
+  color: var(--color-text-light);
+  border: none;
+}
+
+#downloadAllBtn i,
+#deleteAllBtn i {
+  font-size: 1rem;
 }
 
 .memory-image-label:hover {
   background-color: #f0f0f0;
   border-color: #999;
+}
+
+#downloadAllBtn:hover {
+  background-color: var(--color-primary-light);
+}
+
+#deleteAllBtn:hover{
+  background-color: rgb(187, 29, 29);
 }
 
 

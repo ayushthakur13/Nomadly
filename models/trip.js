@@ -90,7 +90,6 @@ const tripSchema = new Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        caption: String,
         createdAt: {
             type: Date,
             default: Date.now
