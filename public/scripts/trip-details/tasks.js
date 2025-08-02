@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const taskItem = e.target.closest(".task-item");
         const taskId = taskItem.dataset.taskId;
-
+        
         try {
             // TOGGLE COMPLETED
             if (toggleForm) {
@@ -54,7 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (res.data.success) {
                     const completed = res.data.completed;
                     taskItem.classList.toggle("completed", completed);
-                    toggleForm.querySelector(".check-btn").textContent = completed ? "✔️" : "⭕";
+                    
+                    const checkBtn = e.submitter || toggleForm.querySelector(".check-btn");
+                    checkBtn.textContent = completed ? "✔️" : "⭕";
                 }
             }
 

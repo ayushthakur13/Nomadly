@@ -42,7 +42,7 @@ module.exports.postToggleTask = async (req, res) => {
         task.completed = !task.completed;
         await trip.save();
 
-        res.json({ success: true });
+        res.json({ success: true, completed: task.completed });
     } 
     catch (err) {
         console.error("Error toggling task:", err);

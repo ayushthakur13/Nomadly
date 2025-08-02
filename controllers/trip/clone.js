@@ -12,15 +12,23 @@ module.exports.postCloneTrip = async (req, res) => {
 
         if (!originalTrip) 
             return res.status(404).send('Trip not found or not available to clone.');
-        
 
         if (originalTrip.createdBy.toString() === userId.toString()) 
             return res.status(400).send("You can't clone your own trip.");
 
+        const {
+            tripName, mainDestination, startDate, endDate,
+            category, description, destinations, tasks,
+            budget, accommodations, imageUrl, imagePublicId
+        } = originalTrip;
+
         const clonedTrip = new Trip({
-            ...originalTrip,
-            _id: undefined,
+            tripName, mainDestination, startDate, endDate,
+            category, description, destinations, tasks,
+            budget, accommodations, imageUrl, imagePublicId,
+            memories: [],
             createdBy: userId,
+            participants: [userId],
             isPublic: false,
             isFeatured: false,
             createdAt: new Date()
