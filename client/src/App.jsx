@@ -1,25 +1,75 @@
-function App() {
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { Toaster } from 'react-hot-toast';
+import store from './store';
+import AuthPage from './pages/auth/AuthPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Welcome from './pages/welcome/Welcome';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from './store/authSlice';
+import api, { setAccessToken } from './services/api';
+import Cookies from 'js-cookie';
+
+function AppContent() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Bootstrap auth by attempting refresh (if cookies present)
+    (async () => {
+      try {
+        const csrf = Cookies.get('csrf_token');
+        if (!csrf) return; // no session cookie, skip
+        const { data } = await api.post('/auth/refresh', {}, {
+          headers: { 'x-csrf-token': csrf },
+        });
+        const { accessToken, user } = data;
+        setAccessToken(accessToken);
+        dispatch(loginSuccess({ token: accessToken, user }));
+      } catch (_) {
+        // ignore
+      }
+    })();
+  }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center">
-      <div className="card p-8 max-w-md mx-auto text-center">
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-primary-700 mb-2">Nomadly</h1>
-          <p className="text-gray-600">Your Travel Planning Companion</p>
-        </div>
+    <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/auth/*" element={<AuthPage />} />
+          
+          {/* Protected Routes */}
+          <Route path="/welcome" element={
+            <ProtectedRoute>
+              <Welcome />
+            </ProtectedRoute>
+          } />
+          
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/welcome" replace />} />
+        </Routes>
         
-        <div className="space-y-4">
-          
-          
-          <div className="flex gap-2">
-            <button className="btn-primary flex-1">Login</button>
-            <button className="btn-secondary flex-1">Sign Up</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  )
+        {/* Toast notifications */}
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+          }}
+        />
+    </Router>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
+  );
+}
+
+export default App;

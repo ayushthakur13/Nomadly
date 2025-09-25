@@ -38,6 +38,11 @@ const userSchema = new Schema({
     googleID: String,
     googleAccessToken: String,
 
+    refreshTokenHash: {
+        type: String,
+        default: null,
+    },
+
     isAdmin: {
         type: Boolean,
         default: false
