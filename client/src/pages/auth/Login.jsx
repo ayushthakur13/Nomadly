@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -32,11 +31,11 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex">
+    <div className="w-full max-w-6xl mx-auto flex min-h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8">
       {/* Left side image */}
-      <div className="hidden pt-16 lg:block w-1/2">
+      <div className="hidden pt-8 xl:block w-1/2 flex-shrink-0">
         <div 
-          className="h-[580px] w-[500px] bg-contain bg-no-repeat ml-8"
+          className="h-[580px] w-full max-w-[500px] bg-contain bg-no-repeat bg-center"
           style={{
             backgroundImage: "url('/images/illustrations/auth-container-image.png')"
           }}
@@ -44,19 +43,10 @@ const Login = () => {
       </div>
       
       {/* Right side auth box */}
-      <div className="w-full lg:w-1/2 max-w-md mx-auto pt-16 lg:mx-0 lg:mt-12">
+      <div className="w-full xl:w-1/2 max-w-md mx-auto pt-8 lg:pt-12 xl:mx-0 xl:ml-8">
         {/* Title */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div 
-              className="w-8 h-8 bg-contain bg-no-repeat mr-2"
-              style={{
-                backgroundImage: "url('/images/icon/Nomadly_icon_white-removebg.png')"
-              }}
-            ></div>
-            <span className="text-xl text-[#2E2E2E] font-medium">Nomadly</span>
-          </div>
-          <h1 className="text-3xl font-bold text-[#2E2E2E] mb-8">Welcome back, Nomad.</h1>
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#2E2E2E] mb-4 sm:mb-8">Welcome back, Nomad.</h1>
         </div>
 
         {/* Error Message */}
@@ -67,73 +57,68 @@ const Login = () => {
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 items-center">
-          <input
-            {...register('username', { 
-              required: 'Username or Email is required'
-            })}
-            type="text"
-            className="w-4/5 p-3 border border-[#aaa] rounded-lg text-base transition-all duration-300 focus:outline-none focus:border-[#4a90e2] focus:shadow-[0_0_5px_rgba(74,144,226,0.4)]"
-            placeholder="Username or Email"
-          />
-          {errors.username && (
-            <p className="text-red-600 text-sm w-4/5">{errors.username.message}</p>
-          )}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full">
+          <div className="w-full">
+            <input
+              {...register('username', { 
+                required: 'Username or Email is required'
+              })}
+              type="text"
+              className="w-full p-3 border border-[#aaa] rounded-lg text-base transition-all duration-300 focus:outline-none focus:border-[#4a90e2] focus:shadow-[0_0_5px_rgba(74,144,226,0.4)]"
+              placeholder="Username or Email"
+            />
+            {errors.username && (
+              <p className="text-red-600 text-sm mt-1">{errors.username.message}</p>
+            )}
+          </div>
 
-          <input
-            {...register('password', { 
-              required: 'Password is required'
-            })}
-            type="password"
-            className="w-4/5 p-3 border border-[#aaa] rounded-lg text-base transition-all duration-300 focus:outline-none focus:border-[#4a90e2] focus:shadow-[0_0_5px_rgba(74,144,226,0.4)]"
-            placeholder="Enter Password"
-          />
-          {errors.password && (
-            <p className="text-red-600 text-sm w-4/5">{errors.password.message}</p>
-          )}
+          <div className="w-full">
+            <input
+              {...register('password', { 
+                required: 'Password is required'
+              })}
+              type="password"
+              className="w-full p-3 border border-[#aaa] rounded-lg text-base transition-all duration-300 focus:outline-none focus:border-[#4a90e2] focus:shadow-[0_0_5px_rgba(74,144,226,0.4)]"
+              placeholder="Enter Password"
+            />
+            {errors.password && (
+              <p className="text-red-600 text-sm mt-1">{errors.password.message}</p>
+            )}
+          </div>
 
           <button
             type="submit"
             disabled={loading || authBusy}
-            className="w-4/5 p-2 bg-[#4FB286] text-white border-none rounded-lg text-xl cursor-pointer transition-colors duration-300 hover:bg-[#3F9470] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full p-3 bg-[#4FB286] text-white border-none rounded-lg text-lg sm:text-xl font-medium cursor-pointer transition-colors duration-300 hover:bg-[#3F9470] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading || authBusy ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
-        {/* Redirect */}
-        <div className="text-center mt-4 text-base text-[#444]">
-          Don't have an account?{' '}
-          <Link 
-            to="/auth/signup" 
-            className="font-bold text-[#4FB286] no-underline transition-colors duration-300 hover:text-[#3F9470]"
-          >
-            Register
-          </Link>
-        </div>
 
         {/* Separator */}
-        <div className="flex items-center text-center my-8 text-[#888] text-sm">
+        <div className="flex items-center text-center my-6 sm:my-8 text-[#888] text-sm">
           <div className="flex-1 border-b border-[#ccc] mr-3"></div>
-          <span>OR CONTINUE WITH</span>
+          <span className="px-2">OR CONTINUE WITH</span>
           <div className="flex-1 border-b border-[#ccc] ml-3"></div>
         </div>
 
         {/* Third Party Login */}
-        <div className="flex gap-3 mt-9">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             type="button"
             disabled={authBusy || loading}
             onClick={() => { if (!(authBusy || loading)) toast('Facebook login coming soon'); }}
-            className="w-1/2 p-3 text-center font-medium text-sm rounded-md transition-all duration-200 bg-[#1877f2] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 p-3 text-center font-medium text-sm rounded-md transition-all duration-200 bg-[#1877f2] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div 
-              className="w-5 h-5 bg-contain bg-no-repeat mr-2"
+              className="w-5 h-5 bg-contain bg-no-repeat mr-2 flex-shrink-0"
               style={{
                 backgroundImage: "url('/images/icon/facebook-icon-white.png')"
               }}
             ></div>
-            Login with Facebook
+            <span className="hidden sm:inline">Login with Facebook</span>
+            <span className="sm:hidden">Facebook</span>
           </button>
           <button
             type="button"
@@ -189,15 +174,16 @@ const Login = () => {
                 setAuthBusy(false);
               }
             }}
-            className="w-1/2 p-3 text-center font-medium text-sm rounded-md transition-all duration-200 bg-white text-[#444] border border-[#ccc] hover:bg-[#f0f0f0] hover:-translate-y-0.5 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 p-3 text-center font-medium text-sm rounded-md transition-all duration-200 bg-white text-[#444] border border-[#ccc] hover:bg-[#f0f0f0] hover:-translate-y-0.5 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div 
-              className="w-5 h-5 bg-contain bg-no-repeat mr-2"
+              className="w-5 h-5 bg-contain bg-no-repeat mr-2 flex-shrink-0"
               style={{
                 backgroundImage: "url('/images/icon/google-icon.png')"
               }}
             ></div>
-            Login with Google
+            <span className="hidden sm:inline">Login with Google</span>
+            <span className="sm:hidden">Google</span>
           </button>
         </div>
       </div>

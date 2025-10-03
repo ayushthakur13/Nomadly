@@ -4,15 +4,15 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Login from './Login';
 import Signup from './Signup';
+import Navbar from '../../components/common/Navbar';
 
 const AuthPage = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to welcome page if already authenticated
     if (isAuthenticated) {
-      navigate('/welcome', { replace: true });
+      navigate('/home', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -21,12 +21,15 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="">
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/" element={<Navigate to="/auth/login" replace />} />
-      </Routes>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="pt-4">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        </Routes>
+      </div>
     </div>
   );
 };
