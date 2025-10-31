@@ -7,15 +7,23 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginSuccess, setInitialized } from './store/authSlice';
+import { closeCreateTripModal } from './store/createTripModalSlice';
 import api, { setAccessToken } from './services/api';
 import Cookies from 'js-cookie';
 import Landing from './pages/landing/Landing';
 import Dashboard from './pages/dashboard/Dashboard';
+import Explore from './pages/explore/Explore';
+import ExploreTrip from './pages/explore/ExploreTrip';
 import MyTrips from './pages/trips/MyTrips';
+import TripDetails from './pages/trips/TripDetails';
+import CreateTripModal from './components/trips/CreateTripModal';
+import LandingRoute from './components/auth/LandingRoute';
+import PublicRoute from './components/auth/PublicRoute';
 
 function AppContent() {
   const dispatch = useDispatch();
   const { initialized } = useSelector((state) => state.auth);
+  const { isOpen } = useSelector((state) => state.createTripModal);
 
   useEffect(() => {
     // Bootstrap auth by attempting refresh (if cookies present)
@@ -32,7 +40,7 @@ function AppContent() {
         const { accessToken, user } = data;
         setAccessToken(accessToken);
         dispatch(loginSuccess({ token: accessToken, user }));
-      } catch (_) {
+      } catch {
         dispatch(setInitialized());
       }
     })();
@@ -54,8 +62,31 @@ function AppContent() {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Landing />} />
+        <Route
+          path="/"
+          element={
+            <LandingRoute>
+              <Landing />
+            </LandingRoute>
+          }
+        />
         <Route path="/auth/*" element={<AuthPage />} />
+        <Route
+          path="/explore"
+          element={
+            <PublicRoute>
+              <Explore />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/explore/trips/:tripId"
+          element={
+            <PublicRoute>
+              <ExploreTrip />
+            </PublicRoute>
+          }
+        />
 
         {/* Protected Routes */}
         <Route
@@ -74,7 +105,23 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/trips/:tripId"
+          element={
+            <ProtectedRoute>
+              <TripDetails />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
+
+        {/* Create Trip Modal */}
+        {isOpen && (
+          <CreateTripModal
+            isOpen={isOpen}
+            onClose={() => dispatch(closeCreateTripModal())}
+          />
+        )}
 
       {/* Toast notifications */}
       <Toaster

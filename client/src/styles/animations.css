@@ -103,24 +103,6 @@ a:focus-visible {
   transform: translateY(-4px);
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: theme('colors.emerald.500');
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: theme('colors.emerald.600');
-}
-
 /* Mobile-first responsive animations */
 @media (max-width: 768px) {
   .animate-float {

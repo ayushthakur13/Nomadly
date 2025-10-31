@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useRef, useEffect } from 'react';
 import { logout } from '../../store/authSlice';
+import { openCreateTripModal } from '../../store/createTripModalSlice';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';
@@ -15,6 +16,14 @@ const Navbar = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   
+  const handleCreateTrip = () => {
+    if (isAuthenticated) {
+      dispatch(openCreateTripModal());
+    } else {
+      navigate('/auth/login');
+    }
+    setIsMobileMenuOpen(false);
+  };
   // Check if we're on auth pages or landing page
   const isAuthPage = location.pathname.startsWith('/auth');
   const isLoginPage = location.pathname.includes('/login');
@@ -53,9 +62,23 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Navigation guard for links
   const handleProtectedClick = (path) => {
-    if (isAuthenticated) navigate(path);
-    else navigate('/auth/login');
+    if (isAuthenticated) {
+      // Authenticated users should never go to landing page
+      if (path === '/') {
+        navigate('/home');
+      } else {
+        navigate(path);
+      }
+    } else {
+      // Unauthenticated users can only access /, /explore, /aboutus
+      if (['/', '/explore', '/aboutus', '/contact'].includes(path)) {
+        navigate(path);
+      } else {
+        navigate('/');
+      }
+    }
     setIsMobileMenuOpen(false);
   };
 
@@ -77,7 +100,7 @@ const Navbar = () => {
       await api.post('/auth/logout', {}, {
         headers: { 'x-csrf-token': csrf },
       });
-    } catch (_) {
+    } catch {
       // ignore server errors
     } finally {
       dispatch(logout());
@@ -92,10 +115,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="h-20 flex items-center justify-between">
           {/* Logo */}
-          <Link 
-            to={isAuthenticated ? "/home" : "/"} 
+          <button
             className="flex items-center gap-0 flex-shrink-0"
-            onClick={() => setIsMobileMenuOpen(false)}
+            onClick={() => handleProtectedClick(isAuthenticated ? "/home" : "/")}
+            style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
           >
             <img 
               src="/images/icon/Nomadly_icon_white-removebg.png" 
@@ -103,39 +126,43 @@ const Navbar = () => {
               className="w-12 h-12" 
             />
             <div className="text-3xl font-bold text-gray-900">Nomadly</div>
-          </Link>
+          </button>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-6 lg:gap-8 text-gray-700">
             {isAuthenticated ? (
               // Authenticated user navigation
               <>
-                <Link to="/home" className={getLinkClasses('/home')}>Home</Link>
-                <Link 
-                  to="/trips" 
-                  className={`${getLinkClasses('/trips')} flex items-center gap-2`}
+                <button 
+                    className={getLinkClasses('/home')} 
+                    onClick={() => handleProtectedClick('/home')}>
+                  Home
+                </button>
+                <button
+                    className={getLinkClasses('/trips')}
+                    onClick={() => handleProtectedClick('/trips')}
                 >
-                  <i className={`fas fa-folder ${isActiveLink('/trips') ? 'text-emerald-600' : 'text-gray-600'}`}></i>
-                  <span>Trips</span>
-                </Link>
-                <Link to="/explore" className={getLinkClasses('/explore')}>Explore</Link>
+                  Trips
+                </button>
                 <Link 
-                  to="/trips/create" 
-                  className={`px-3 py-2 rounded-lg font-medium transition-colors flex items-center gap-1 shadow-sm ${
-                    isActiveLink('/trips/create') 
-                      ? 'bg-emerald-700 text-white' 
-                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  }`}
+                    to="/explore" 
+                    className={getLinkClasses('/explore')}
+                >
+                  Explore
+                </Link>
+                <button
+                    onClick={handleCreateTrip}
+                    className="px-3 py-2 rounded-lg font-medium transition-colors flex items-center gap-1 shadow-sm bg-emerald-600 text-white hover:bg-emerald-700"
                 >
                   <i className="fas fa-plus text-sm"></i>
                   <span>Create Trip</span>
-                </Link>
+                </button>
               </>
             ) : isAuthPage ? (
               // Auth page navigation (minimal)
               <>
                 <Link to="/" className={getLinkClasses('/')}>Home</Link>
-                <Link to="/aboutus" className={getLinkClasses('/aboutus')}>About</Link>
+                <button className={getLinkClasses('/aboutus')} onClick={() => handleProtectedClick('/aboutus')}>About</button>
                 <Link to="/explore" className={getLinkClasses('/explore')}>Explore</Link>
               </>
             ) : isLandingPage ? (
@@ -287,9 +314,8 @@ const Navbar = () => {
               {isAuthenticated ? (
                 // Authenticated mobile navigation
                 <>
-                  <Link 
-                    to="/home" 
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  <button
+                    onClick={() => handleProtectedClick('/home')}
                     className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg ${
                       isActiveLink('/home') 
                         ? 'text-emerald-600 bg-emerald-50' 
@@ -297,23 +323,19 @@ const Navbar = () => {
                     }`}
                   >
                     Home
-                  </Link>
-                  <Link 
-                    to="/trips" 
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  </button>
+                  <button
+                    onClick={() => handleProtectedClick('/trips')}
                     className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg flex items-center gap-2 ${
                       isActiveLink('/trips') 
                         ? 'text-emerald-600 bg-emerald-50' 
                         : 'text-gray-700'
                     }`}
                   >
-                    <i className={`fas fa-folder ${
-                      isActiveLink('/trips') ? 'text-emerald-600' : 'text-gray-600'
-                    }`}></i>
-                    <span>Trips</span>
-                  </Link>
-                  <Link 
-                    to="/explore" 
+                    Trips
+                  </button>
+                  <Link
+                    to="/explore"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg ${
                       isActiveLink('/explore') 
@@ -323,18 +345,13 @@ const Navbar = () => {
                   >
                     Explore
                   </Link>
-                  <Link 
-                    to="/trips/create" 
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`px-4 py-2 font-medium transition-colors rounded-lg flex items-center gap-2 mx-4 mt-2 ${
-                      isActiveLink('/trips/create') 
-                        ? 'bg-emerald-700 text-white' 
-                        : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    }`}
+                    <button
+                      onClick={handleCreateTrip}
+                      className="px-4 py-2 font-medium transition-colors rounded-lg flex items-center gap-2 mx-4 mt-2 bg-emerald-600 text-white hover:bg-emerald-700"
                   >
                     <i className="fas fa-plus text-sm"></i>
                     <span>Create Trip</span>
-                  </Link>
+                    </button>
                   
                   {/* Mobile Profile Section */}
                   <div className="pt-3 mt-3 border-t border-gray-200">
@@ -410,9 +427,8 @@ const Navbar = () => {
                       >
                         Explore
                       </Link>
-                      <Link 
-                        to="/aboutus" 
-                        onClick={() => setIsMobileMenuOpen(false)}
+                      <button
+                        onClick={() => handleProtectedClick('/aboutus')}
                         className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg ${
                           isActiveLink('/aboutus') 
                             ? 'text-emerald-600 bg-emerald-50' 
@@ -420,7 +436,7 @@ const Navbar = () => {
                         }`}
                       >
                         About Us
-                      </Link>
+                      </button>
                       {/* <Link 
                         to="/pricing" 
                         onClick={() => setIsMobileMenuOpen(false)}

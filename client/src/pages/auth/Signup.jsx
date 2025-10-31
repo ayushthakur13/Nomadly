@@ -204,7 +204,7 @@ const Signup = () => {
                 };
                 window.addEventListener('focus', onFocus);
                 codeClient.requestCode();
-              } catch (e) {
+              } catch {
                 setAuthBusy(false);
               }
             }}

@@ -31,6 +31,12 @@ app.get('/',(req,res)=>{
     res.status(200).send('Nomadly API');
 })
 
+const apiAuthRoutes = require('./routes/api/auth');
+const apiTripsRoutes = require('./routes/api/trips');
+
+app.use('/api/auth', apiAuthRoutes);
+app.use('/api/trips', apiTripsRoutes);
+
 const homeRoute = require('./routes/home');
 const profileRoute = require('./routes/profile');
 const tripRoute = require('./routes/trips');
@@ -47,10 +53,46 @@ app.use('/explore',exploreRoute);
 app.use('/user',userRoute);
 app.use('/contact',contactUsRoute);
 
-const apiAuthRoutes = require('./routes/api/auth');
-app.use('/api/auth', apiAuthRoutes);
+// ERROR HANDLING
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({
+            success: false,
+            error: err.message
+        });
+    }
+    
+    if (err.name === 'CastError') {
+        return res.status(400).json({
+            success: false,
+            error: 'Invalid ID format'
+        });
+    }
+    
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid token'
+        });
+    }
+    
+    res.status(err.status || 500).json({
+        success: false,
+        error: err.message || 'Internal server error'
+    });
+});
 
+// 404 handler
 app.use((req, res) => {
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({
+            success: false,
+            error: 'API endpoint not found'
+        });
+    }
+    
     res.status(404).render('404');
 });
 

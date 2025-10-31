@@ -18,7 +18,7 @@ const Dashboard = () => {
       await api.post('/auth/logout', {}, {
         headers: { 'x-csrf-token': csrf },
       });
-    } catch (_) {
+    } catch {
       // ignore server errors
     } finally {
       dispatch(logoutAction());
@@ -32,7 +32,7 @@ const Dashboard = () => {
       icon: "✈️",
       title: "Create New Trip",
       description: "Start planning your next adventure",
-      action: () => navigate('/trips/create'),
+      action: () => navigate('/trips'),
       color: "bg-emerald-500"
     },
     {
