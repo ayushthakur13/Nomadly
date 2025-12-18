@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 // Import routes
 import authRoutes from './routes/auth.routes';
 import tripRoutes from './routes/trip.routes';
+import userRoutes from './routes/user.routes';
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', tripRoutes);
+app.use('/api/users', userRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

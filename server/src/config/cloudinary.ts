@@ -12,29 +12,28 @@ cloudinary.config({
 
 const profileStorage = new CloudinaryStorage({
   cloudinary,
-  params: async () => ({
+  params: {
     folder: "nomadly/profiles",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
     transformation: [{ width: 500, height: 500, crop: "fill" }],
-  }),
+  } as any,
 });
 
 const tripCoverStorage = new CloudinaryStorage({
   cloudinary,
-  params: async () => ({
+  params: {
     folder: "nomadly/trip_covers",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
     transformation: [{ width: 1200, height: 600, crop: "fill" }],
-  }),
+  } as any,
 });
 
 const memoryStorage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => ({
+  params: {
     folder: "nomadly/memories",
-    resource_type: file.mimetype.startsWith("video") ? "video" : "image",
     allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov"],
-  }),
+  } as any,
 });
 
 export { cloudinary, profileStorage, tripCoverStorage, memoryStorage };

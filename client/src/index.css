@@ -4,6 +4,16 @@
 
 /* Custom styles */
 
+/* Prevent horizontal scroll globally */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 @layer components {
   /* Buttons */
   .btn-primary {

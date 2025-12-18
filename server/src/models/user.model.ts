@@ -10,8 +10,8 @@ export interface IUser extends Document {
   // name/profile
   name?: string;
   bio?: string;
-  profilePicUrl?: string;
-  profilePicPublicId?: string;
+  profilePicUrl?: string | null;
+  profilePicPublicId?: string | null;
   // public profile flag and admin flag
   isPublic: boolean;
   isAdmin?: boolean;
