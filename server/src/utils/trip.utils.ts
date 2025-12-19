@@ -24,7 +24,7 @@ export async function generateUniqueSlug(tripName: string, tripId?: Types.Object
 }
 
 /**
- * Calculate trip status based on dates
+ * Calculate trip status based on dates (preserves draft status)
  */
 export function calculateTripStatus(startDate: Date, endDate: Date, currentStatus: TripStatus): TripStatus {
   // Don't auto-update draft status
@@ -44,20 +44,55 @@ export function calculateTripStatus(startDate: Date, endDate: Date, currentStatu
 }
 
 /**
+ * Calculate trip status based on dates (for publishing - ignores draft)
+ */
+export function calculateTripStatusForPublish(startDate: Date, endDate: Date): TripStatus {
+  const now = new Date();
+  
+  if (now < startDate) {
+    return TripStatus.UPCOMING;
+  } else if (now >= startDate && now <= endDate) {
+    return TripStatus.ONGOING;
+  } else {
+    return TripStatus.COMPLETED;
+  }
+}
+
+/**
  * Check if user is member of trip
  */
 export function isTripMember(trip: ITrip, userId: Types.ObjectId | string): boolean {
   const userIdStr = userId.toString();
-  return trip.members.some(m => m.userId.toString() === userIdStr);
+  return trip.members.some((m: any) => {
+    const memberId = (m.userId && typeof m.userId === 'object' && (m.userId as any)._id)
+      ? (m.userId as any)._id
+      : m.userId;
+    return memberId && memberId.toString() === userIdStr;
+  });
 }
 
 /**
- * Get member role in trip
+ * Normalize stored role values to the new model (creator/member)
+ * Legacy values 'editor' or 'viewer' are treated as 'member'.
  */
-export function getMemberRole(trip: ITrip, userId: Types.ObjectId | string): 'creator' | 'editor' | 'viewer' | null {
+export function normalizeMemberRole(role: string): 'creator' | 'member' {
+  if (role === 'creator') return 'creator';
+  return 'member';
+}
+
+/**
+ * Get member role in trip (handles populated userId objects)
+ */
+export function getMemberRole(trip: ITrip, userId: Types.ObjectId | string): 'creator' | 'member' | null {
   const userIdStr = userId.toString();
-  const member = trip.members.find(m => m.userId.toString() === userIdStr);
-  return member ? member.role : null;
+  const member = trip.members.find(m => {
+    const memberId = (m.userId && typeof m.userId === 'object' && (m.userId as any)._id)
+      ? (m.userId as any)._id
+      : m.userId;
+    return memberId && memberId.toString() === userIdStr;
+  });
+  if (!member) return null;
+  return normalizeMemberRole(member.role as any);
 }
 
 /**
@@ -65,7 +100,7 @@ export function getMemberRole(trip: ITrip, userId: Types.ObjectId | string): 'cr
  */
 export function canEditTrip(trip: ITrip, userId: Types.ObjectId | string): boolean {
   const role = getMemberRole(trip, userId);
-  return role === 'creator' || role === 'editor';
+  return role === 'creator' || role === 'member';
 }
 
 /**
@@ -81,7 +116,7 @@ export function isTripCreator(trip: ITrip, userId: Types.ObjectId | string): boo
 export function addMemberToTrip(
   trip: ITrip,
   userId: Types.ObjectId,
-  role: 'editor' | 'viewer',
+  role: 'member',
   invitedBy?: Types.ObjectId
 ): void {
   // Check if member already exists
@@ -119,7 +154,7 @@ export function removeMemberFromTrip(trip: ITrip, userId: Types.ObjectId): void 
 export function updateMemberRole(
   trip: ITrip,
   userId: Types.ObjectId,
-  newRole: 'editor' | 'viewer'
+  newRole: 'member'
 ): void {
   // Don't allow changing creator role
   if (isTripCreator(trip, userId)) {
@@ -140,6 +175,7 @@ export function updateMemberRole(
 export function canAccessTrip(trip: ITrip, userId?: Types.ObjectId | string): boolean {
   if (trip.isPublic) return true;
   if (!userId) return false;
+  if (isTripCreator(trip, userId)) return true;
   return isTripMember(trip, userId);
 }
 
@@ -182,6 +218,7 @@ export function validateTripDates(startDate: Date, endDate: Date): { valid: bool
 export default {
   generateUniqueSlug,
   calculateTripStatus,
+  calculateTripStatusForPublish,
   isTripMember,
   getMemberRole,
   canEditTrip,
@@ -191,5 +228,6 @@ export default {
   updateMemberRole,
   canAccessTrip,
   calculateTripProgress,
-  validateTripDates
+  validateTripDates,
+  normalizeMemberRole
 };

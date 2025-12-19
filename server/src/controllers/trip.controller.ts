@@ -331,23 +331,27 @@ class TripController {
         return;
       }
 
-      // Cloudinary URL and public_id are added by multer middleware
-      const imageUrl = req.file.path;
-      const publicId = req.file.filename;
+      // Cloudinary URL and public_id are added by multer-storage-cloudinary
+      const file: any = req.file;
+      const imageUrl = file?.secure_url || file?.path;
+      const publicId = file?.public_id || file?.filename;
 
       if (!imageUrl || !publicId) {
+        console.error('Cloudinary file properties:', file);
         res.status(500).json({ 
           success: false, 
-          message: 'Image upload failed' 
+          message: 'Image upload failed (missing url or public id)' 
         });
         return;
       }
 
       const { trip, oldPublicId } = await tripService.updateCoverImage(tripId, userId, imageUrl, publicId);
 
-      // Delete old image from Cloudinary
+      // Delete old image from Cloudinary in background (don't block response)
       if (oldPublicId) {
-        await deleteFromCloudinary(oldPublicId);
+        deleteFromCloudinary(oldPublicId).catch((err) => {
+          console.error(`Background deletion failed for ${oldPublicId}:`, err);
+        });
       }
 
       res.json({
@@ -583,25 +587,10 @@ class TripController {
         data: { locations: results }
       });
     } catch (error: any) {
-      if (error.message.includes('Mapbox')) {
-        // Fallback to OpenStreetMap
-        try {
-          const results = await mapService.searchLocationFallback(req.query.query as string);
-          res.json({
-            success: true,
-            data: { locations: results },
-            message: 'Using fallback geocoding service'
-          });
-          return;
-        } catch (fallbackError) {
-          res.status(503).json({ 
-            success: false, 
-            message: 'Location search service unavailable' 
-          });
-          return;
-        }
-      }
-      next(error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Location search service unavailable' 
+      });
     }
   }
 }

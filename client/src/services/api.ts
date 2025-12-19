@@ -16,12 +16,17 @@ export function getAccessToken() {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
 api.interceptors.request.use(
   (config) => {
+    // Don't set Content-Type for FormData (let browser set it with boundary)
+    if (!(config.data instanceof FormData)) {
+      if (!config.headers['Content-Type']) {
+        config.headers['Content-Type'] = 'application/json';
+      }
+    }
     if (accessToken) {
       (config.headers as any).Authorization = `Bearer ${accessToken}`;
     }

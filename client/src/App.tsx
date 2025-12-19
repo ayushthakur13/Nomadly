@@ -15,6 +15,7 @@ import Explore from './pages/explore/Explore';
 import ExploreTrip from './pages/explore/ExploreTrip';
 import MyTrips from './pages/trips/MyTrips';
 import TripDetails from './pages/trips/TripDetails';
+import CreateTrip from './pages/trips/CreateTrip';
 import Profile from './pages/profile/Profile';
 import CreateTripModal from './components/trips/CreateTripModal';
 import LandingRoute from './components/auth/LandingRoute';
@@ -99,6 +100,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <MyTrips />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trips/new"
+          element={
+            <ProtectedRoute>
+              <CreateTrip />
             </ProtectedRoute>
           }
         />

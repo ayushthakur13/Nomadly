@@ -2,6 +2,7 @@ import User from '../models/user.model';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { hashToken, compareToken } from '../utils/hash';
 import { OAuth2Client } from 'google-auth-library';
+import { uploadFromUrl } from '../utils/cloudinary.utils';
 
 export const AUTH_ERRORS = {
   USERNAME_TAKEN: 'USERNAME_TAKEN',
@@ -210,16 +211,38 @@ export async function googleLogin(idToken: string) {
       counter++;
     }
 
+    // Upload Google profile picture to Cloudinary
+    let cloudinaryUrl = undefined;
+    let cloudinaryPublicId = undefined;
+    
+    if (picture) {
+      const uploadResult = await uploadFromUrl(picture, 'nomadly/profiles');
+      if (uploadResult) {
+        cloudinaryUrl = uploadResult.url;
+        cloudinaryPublicId = uploadResult.publicId;
+      }
+    }
+
     user = new User({
       username,
       email,
       name,
-      profilePicUrl: picture,
+      profilePicUrl: cloudinaryUrl || picture,
+      profilePicPublicId: cloudinaryPublicId,
       googleId
     });
   } else if (!user.googleId) {
     // Link Google ID to existing account
     user.googleId = googleId;
+    
+    // Update profile picture if user doesn't have one
+    if (!user.profilePicUrl && picture) {
+      const uploadResult = await uploadFromUrl(picture, 'nomadly/profiles');
+      if (uploadResult) {
+        user.profilePicUrl = uploadResult.url;
+        user.profilePicPublicId = uploadResult.publicId;
+      }
+    }
   }
 
   // Generate tokens

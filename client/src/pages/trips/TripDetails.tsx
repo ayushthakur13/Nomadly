@@ -30,6 +30,7 @@ const TripDetails = () => {
     category: '',
     description: ''
   });
+  const [coverAction, setCoverAction] = useState<null | 'upload' | 'delete'>(null);
 
   // Fetch trip data
   useEffect(() => {
@@ -58,22 +59,34 @@ const TripDetails = () => {
     if (!file) return;
 
     try {
+      setCoverAction('upload');
       const formData = new FormData();
       formData.append('image', file);
       await dispatch(updateTripCover({ tripId, formData }) as any).unwrap();
       toast.success('Cover image updated successfully');
+      // Reset file input
+      e.target.value = '';
     } catch (error: any) {
-      toast.error(error || 'Failed to update cover image');
+      const errorMsg = error?.message || error?.data?.message || error || 'Failed to update cover image';
+      console.error('Cover upload error:', errorMsg);
+      toast.error(errorMsg);
+      // Reset file input
+      e.target.value = '';
+    } finally {
+      setCoverAction(null);
     }
   };
 
   // Handle cover image delete
   const handleDeleteCover = async () => {
     try {
+      setCoverAction('delete');
       await dispatch(deleteTripCover(tripId!) as any).unwrap();
       toast.success('Cover image removed successfully');
     } catch (error: any) {
       toast.error(error || 'Failed to remove cover image');
+    } finally {
+      setCoverAction(null);
     }
   };
 
@@ -91,10 +104,6 @@ const TripDetails = () => {
 
   // Handle trip delete
   const handleDeleteTrip = async () => {
-    if (!window.confirm('Are you sure you want to delete this trip? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       await dispatch(deleteTrip(tripId!) as any).unwrap();
       toast.success('Trip deleted successfully');
@@ -130,7 +139,7 @@ const TripDetails = () => {
     );
   }
 
-  if (error || !trip) {
+  if (!trip) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -162,10 +171,15 @@ const TripDetails = () => {
           <div className="relative h-[300px] rounded-xl overflow-hidden mb-8">
             {/* Cover Image */}
             <img
-              src={trip.imageUrl || '/images/default-trip.jpg'}
+              src={trip.coverImageUrl || '/images/default-trip.jpg'}
               alt={trip.tripName}
               className="w-full h-full object-cover"
             />
+            {coverAction && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
+              </div>
+            )}
             {isOwner && (
               <div className="absolute top-4 right-4 flex gap-2">
                 <label className="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white cursor-pointer transition-colors">
@@ -174,13 +188,15 @@ const TripDetails = () => {
                     accept="image/*"
                     onChange={handleCoverUpload}
                     className="hidden"
+                    disabled={!!coverAction}
                   />
                   <i className="fas fa-camera mr-2"></i>
                   Change Cover
                 </label>
-                {!trip.imageUrl?.includes('default-trip.jpg') && (
+                {trip.coverImageUrl && (
                   <button
                     onClick={handleDeleteCover}
+                    disabled={!!coverAction}
                     className="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-lg hover:bg-white transition-colors text-red-600"
                   >
                     <i className="fas fa-trash mr-2"></i>
@@ -256,13 +272,16 @@ const TripDetails = () => {
                       required
                     >
                       <option value="">Select a category</option>
-                      <option value="🗻 Mountains">🗻 Mountains</option>
-                      <option value="🏕️ Adventure">🏕️ Adventure</option>
-                      <option value="🏖️ Beach">🏖️ Beach</option>
-                      <option value="🏰 Historical">🏰 Historical</option>
-                      <option value="🛶 Nature">🛶 Nature</option>
-                      <option value="🙏🏻 Spiritual">🙏🏻 Spiritual</option>
-                      <option value="Other">Other</option>
+                      <option value="adventure">🗻 Adventure</option>
+                      <option value="leisure">🏖️ Leisure</option>
+                      <option value="business">💼 Business</option>
+                      <option value="family">👨‍👩‍👧‍👦 Family</option>
+                      <option value="solo">🧳 Solo</option>
+                      <option value="couple">💑 Couple</option>
+                      <option value="friends">👯 Friends</option>
+                      <option value="backpacking">🎒 Backpacking</option>
+                      <option value="luxury">✨ Luxury</option>
+                      <option value="budget">💰 Budget</option>
                     </select>
                   </div>
                   <div>

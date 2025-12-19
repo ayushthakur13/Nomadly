@@ -26,13 +26,16 @@ const CreateTripModal = ({ isOpen, onClose }: Props) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const categories = [
-    '🗻 Mountains',
-    '🏕️ Adventure',
-    '🏖️ Beach',
-    '🏰 Historical',
-    '🛶 Nature',
-    '🙏🏻 Spiritual',
-    'Other'
+    { value: 'adventure', label: '🗻 Adventure' },
+    { value: 'leisure', label: '🏖️ Leisure' },
+    { value: 'business', label: '💼 Business' },
+    { value: 'family', label: '👨‍👩‍👧‍👦 Family' },
+    { value: 'solo', label: '🧳 Solo' },
+    { value: 'couple', label: '💑 Couple' },
+    { value: 'friends', label: '👯 Friends' },
+    { value: 'backpacking', label: '🎒 Backpacking' },
+    { value: 'luxury', label: '✨ Luxury' },
+    { value: 'budget', label: '💰 Budget' },
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -219,8 +222,8 @@ const CreateTripModal = ({ isOpen, onClose }: Props) => {
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
                 </option>
               ))}
             </select>

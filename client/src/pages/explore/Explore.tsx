@@ -13,13 +13,16 @@ const Explore = () => {
   const navigate = useNavigate();
 
   const categories = [
-    '🗻 Mountains',
-    '🏕️ Adventure',
-    '🏖️ Beach',
-    '🏰 Historical',
-    '🛶 Nature',
-    '🙏🏻 Spiritual',
-    'Other'
+    { value: 'adventure', label: '🗻 Adventure' },
+    { value: 'leisure', label: '🏖️ Leisure' },
+    { value: 'business', label: '💼 Business' },
+    { value: 'family', label: '👨‍👩‍👧‍👦 Family' },
+    { value: 'solo', label: '🧳 Solo' },
+    { value: 'couple', label: '💑 Couple' },
+    { value: 'friends', label: '👯 Friends' },
+    { value: 'backpacking', label: '🎒 Backpacking' },
+    { value: 'luxury', label: '✨ Luxury' },
+    { value: 'budget', label: '💰 Budget' },
   ];
 
   useEffect(() => {
@@ -73,15 +76,15 @@ const Explore = () => {
             </button>
             {categories.map((category) => (
               <button
-                key={category}
-                onClick={() => setActiveCategory(category)}
+                key={category.value}
+                onClick={() => setActiveCategory(category.value)}
                 className={`px-4 py-2 rounded-full font-medium transition-colors ${
-                  activeCategory === category
+                  activeCategory === category.value
                     ? 'bg-emerald-600 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                 }`}
               >
-                {category}
+                {category.label}
               </button>
             ))}
           </div>

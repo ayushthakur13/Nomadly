@@ -23,7 +23,7 @@ export const fetchTrips = createAsyncThunk(
       const response = await api.get(`/trips?${params.toString()}`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch trips');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to fetch trips');
     }
   }
 );
@@ -35,7 +35,7 @@ export const fetchTripById = createAsyncThunk(
       const response = await api.get(`/trips/${tripId}`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch trip');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to fetch trip');
     }
   }
 );
@@ -47,7 +47,7 @@ export const createTrip = createAsyncThunk(
       const response = await api.post('/trips', tripData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to create trip');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to create trip');
     }
   }
 );
@@ -59,7 +59,7 @@ export const updateTrip = createAsyncThunk(
       const response = await api.put(`/trips/${tripId}`, updates);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update trip');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to update trip');
     }
   }
 );
@@ -71,7 +71,7 @@ export const deleteTrip = createAsyncThunk(
       const response = await api.delete(`/trips/${tripId}`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete trip');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to delete trip');
     }
   }
 );
@@ -80,12 +80,13 @@ export const updateTripCover = createAsyncThunk(
   'trips/updateTripCover',
   async ({ tripId, formData }: { tripId: string; formData: FormData }, { rejectWithValue }) => {
     try {
+      // Let Axios set the correct multipart boundary automatically
       const response = await api.post(`/trips/${tripId}/cover`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update trip cover');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to update trip cover');
     }
   }
 );
@@ -97,7 +98,7 @@ export const deleteTripCover = createAsyncThunk(
       const response = await api.delete(`/trips/${tripId}/cover`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete trip cover');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to delete trip cover');
     }
   }
 );
@@ -109,7 +110,7 @@ export const publishTrip = createAsyncThunk(
       const response = await api.patch(`/trips/${tripId}/publish`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to publish trip');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to publish trip');
     }
   }
 );
@@ -121,7 +122,7 @@ export const unpublishTrip = createAsyncThunk(
       const response = await api.patch(`/trips/${tripId}/unpublish`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to unpublish trip');
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to unpublish trip');
     }
   }
 );
@@ -164,7 +165,12 @@ const tripsSlice = createSlice({
       })
       .addCase(fetchTripById.rejected, (state, action: any) => { state.loading = false; state.error = action.payload; })
       .addCase(createTrip.pending, (state) => { state.createLoading = true; state.error = null; })
-      .addCase(createTrip.fulfilled, (state) => { state.createLoading = false; })
+      .addCase(createTrip.fulfilled, (state, action) => { 
+        state.createLoading = false; 
+        const payload: any = action.payload || {};
+        const created = (payload.data && payload.data.trip) || payload.trip || null;
+        if (created) state.selectedTrip = created;
+      })
       .addCase(createTrip.rejected, (state, action: any) => { state.createLoading = false; state.error = action.payload; })
       .addCase(updateTrip.pending, (state) => { state.updateLoading = true; state.error = null; })
       .addCase(updateTrip.fulfilled, (state, action) => { 
@@ -179,13 +185,24 @@ const tripsSlice = createSlice({
       .addCase(updateTripCover.fulfilled, (state, action) => {
         if (state.selectedTrip) {
           const payload: any = action.payload || {};
-          state.selectedTrip.imageUrl = (payload.data && payload.data.imageUrl) || payload.imageUrl || state.selectedTrip.imageUrl;
+          const updatedTrip = (payload.data && payload.data.trip) || payload.trip;
+          if (updatedTrip) {
+            state.selectedTrip.coverImageUrl = updatedTrip.coverImageUrl || state.selectedTrip.coverImageUrl;
+            state.selectedTrip.coverImagePublicId = updatedTrip.coverImagePublicId || state.selectedTrip.coverImagePublicId;
+          }
         }
       })
       .addCase(deleteTripCover.fulfilled, (state, action) => {
         if (state.selectedTrip) {
           const payload: any = action.payload || {};
-          state.selectedTrip.imageUrl = (payload.data && payload.data.imageUrl) || payload.imageUrl || '/images/default-trip.jpg';
+          const updatedTrip = (payload.data && payload.data.trip) || payload.trip;
+          if (updatedTrip) {
+            state.selectedTrip.coverImageUrl = updatedTrip.coverImageUrl || '';
+            state.selectedTrip.coverImagePublicId = updatedTrip.coverImagePublicId || '';
+          } else {
+            state.selectedTrip.coverImageUrl = '' as any;
+            state.selectedTrip.coverImagePublicId = '' as any;
+          }
         }
       })
       .addCase(publishTrip.fulfilled, (state) => {

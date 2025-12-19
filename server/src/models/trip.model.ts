@@ -5,22 +5,9 @@ import { Schema, model, Document, Types } from "mongoose";
  */
 export interface ITripMember {
   userId: Types.ObjectId;
-  role: "creator" | "editor" | "viewer";
+  role: "creator" | "member";
   joinedAt: Date;
   invitedBy?: Types.ObjectId;
-}
-
-/**
- * Location Interface
- */
-export interface ILocation {
-  name: string;
-  address?: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-  placeId?: string;
 }
 
 /**
@@ -50,6 +37,19 @@ export enum TripCategory {
 }
 
 /**
+ * Location Interface
+ */
+export interface ILocation {
+  name: string;
+  address?: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  placeId?: string;
+}
+
+/**
  * Trip Document Interface
  */
 export interface ITrip extends Document {
@@ -64,6 +64,10 @@ export interface ITrip extends Document {
   destinationCoordinates?: {
     lat: number;
     lng: number;
+  };
+  destinationPoint?: {
+    type: 'Point';
+    coordinates: [number, number];
   };
   coverImageUrl?: string;
   coverImagePublicId?: string;
@@ -103,8 +107,8 @@ const TripMemberSchema = new Schema<ITripMember>(
     },
     role: {
       type: String,
-      enum: ['creator', 'editor', 'viewer'],
-      default: 'viewer',
+      enum: ['creator', 'member'],
+      default: 'member',
       required: true
     },
     joinedAt: {
@@ -175,6 +179,17 @@ const tripSchema = new Schema<ITrip>(
       lat: { type: Number },
       lng: { type: Number }
     },
+    destinationPoint: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number],
+        default: [0, 0]
+      }
+    },
     coverImageUrl: { type: String, default: null },
     coverImagePublicId: { type: String, default: null },
     category: {
@@ -225,7 +240,7 @@ tripSchema.index({ isPublic: 1, isFeatured: 1, createdAt: -1 });
 tripSchema.index({ isPublic: 1, status: 1 });
 tripSchema.index({ startDate: 1, endDate: 1 });
 tripSchema.index({ tripName: 'text', mainDestination: 'text', description: 'text' });
-tripSchema.index({ 'destinationCoordinates': '2dsphere' });
+tripSchema.index({ 'destinationPoint': '2dsphere' });
 
 /**
  * Virtual: Trip duration in days

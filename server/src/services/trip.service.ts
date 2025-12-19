@@ -1,5 +1,7 @@
 import { Types } from 'mongoose';
 import Trip, { ITrip, TripStatus } from '../models/trip.model';
+// Ensure Destination model is registered before population
+import '../models/destination.model';
 import User from '../models/user.model';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters, CloneTripOptions } from '../types/trip.types';
 import mapService from './map.service';
@@ -22,6 +24,12 @@ class TripService {
       }
     }
 
+    // Prepare destinationPoint (GeoJSON) if coordinates exist
+    let destinationPoint: any = undefined;
+    if (data.destinationCoordinates) {
+      destinationPoint = mapService.buildGeoPoint(data.destinationCoordinates.lat, data.destinationCoordinates.lng);
+    }
+
     if (data.sourceLocation?.coordinates) {
       const { lat, lng } = data.sourceLocation.coordinates;
       if (!mapService.validateCoordinates(lat, lng)) {
@@ -40,9 +48,11 @@ class TripService {
     // Generate unique slug
     const slug = await tripUtils.generateUniqueSlug(data.tripName);
 
-    // Create trip data
-    const tripData = {
-      ...data,
+    // Create trip data - exclude destinationCoordinates as it's converted to destinationPoint
+    const { destinationCoordinates, ...cleanData } = data;
+    
+    const tripData: any = {
+      ...cleanData,
       slug,
       startDate,
       endDate,
@@ -57,6 +67,10 @@ class TripService {
       membersCount: 1,
       status: TripStatus.DRAFT
     };
+
+    if (destinationPoint) {
+      tripData.destinationPoint = destinationPoint;
+    }
 
     const trip = new Trip(tripData);
     await trip.save();
@@ -90,32 +104,48 @@ class TripService {
 
     // Build query
     const query: any = {};
+    const conditions: any[] = [];
 
-    // User filter
+    // User/membership filter
     if (userId) {
-      query.$or = [
-        { createdBy: new Types.ObjectId(userId) },
-        { 'members.userId': new Types.ObjectId(userId) }
-      ];
+      const membershipCondition = {
+        $or: [
+          { createdBy: new Types.ObjectId(userId) },
+          { 'members.userId': new Types.ObjectId(userId) }
+        ]
+      };
       
       if (requestingUserId !== userId) {
-        query.isPublic = true;
+        membershipCondition.$or = membershipCondition.$or.map(c => ({ ...c, isPublic: true }));
       }
+      
+      conditions.push(membershipCondition);
     } else {
       query.isPublic = true;
     }
 
+    // Status and category filters
     if (status) query.status = status;
     if (category) query.category = category;
     if (isPublic !== undefined) query.isPublic = isPublic;
     if (isFeatured !== undefined) query.isFeatured = isFeatured;
 
+    // Search filter (preserves membership constraints)
     if (search) {
-      query.$or = [
-        { tripName: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { mainDestination: { $regex: search, $options: 'i' } }
-      ];
+      conditions.push({
+        $or: [
+          { tripName: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { mainDestination: { $regex: search, $options: 'i' } }
+        ]
+      });
+    }
+
+    // Merge conditions
+    if (conditions.length > 1) {
+      query.$and = conditions;
+    } else if (conditions.length === 1) {
+      Object.assign(query, conditions[0]);
     }
 
     if (destination) {
@@ -215,12 +245,13 @@ class TripService {
       throw new Error('INSUFFICIENT_PERMISSIONS');
     }
 
-    // Validate coordinates
+    // Validate coordinates and prepare destinationPoint
     if (updates.destinationCoordinates) {
       const { lat, lng } = updates.destinationCoordinates;
       if (!mapService.validateCoordinates(lat, lng)) {
         throw new Error('Invalid destination coordinates');
       }
+      (updates as any).destinationPoint = mapService.buildGeoPoint(lat, lng);
     }
 
     if (updates.sourceLocation?.coordinates) {
@@ -286,9 +317,8 @@ class TripService {
     }
 
     trip.isPublic = true;
-    if (trip.status === TripStatus.DRAFT) {
-      trip.status = tripUtils.calculateTripStatus(trip.startDate, trip.endDate, trip.status);
-    }
+    // Update status to reflect current date position when publishing
+    trip.status = tripUtils.calculateTripStatusForPublish(trip.startDate, trip.endDate);
 
     await trip.save();
     return trip;
@@ -345,8 +375,8 @@ class TripService {
       throw new Error('INSUFFICIENT_PERMISSIONS');
     }
 
-    trip.coverImageUrl = '' as any;
-    trip.coverImagePublicId = '' as any;
+    trip.coverImageUrl = null as any;
+    trip.coverImagePublicId = null as any;
     await trip.save();
 
     return trip;
@@ -454,7 +484,7 @@ class TripService {
   async getTripsNearLocation(lat: number, lng: number, maxDistanceKm = 100, limit = 20): Promise<ITrip[]> {
     return Trip.find({
       isPublic: true,
-      destinationCoordinates: {
+      destinationPoint: {
         $near: {
           $geometry: { type: 'Point', coordinates: [lng, lat] },
           $maxDistance: maxDistanceKm * 1000

@@ -37,7 +37,7 @@ const ExploreTrip = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="relative h-[300px] rounded-xl overflow-hidden mb-8">
             <img
-              src={trip.imageUrl || '/images/default-trip.jpg'}
+              src={trip.coverImageUrl || '/images/default-trip.jpg'}
               alt={trip.tripName}
               className="w-full h-full object-cover"
             />

@@ -100,6 +100,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
         });
     }
 
+    // Cloudinary/network timeout errors during upload
+    if (err.code === 'ETIMEDOUT' || err.code === 'ENETUNREACH') {
+        return res.status(503).json({
+            success: false,
+            message: 'Image upload service temporarily unavailable. Please try again.'
+        });
+    }
+
     // Default error
     res.status(err.statusCode || 500).json({
         success: false,

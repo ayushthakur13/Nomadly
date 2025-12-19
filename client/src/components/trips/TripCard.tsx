@@ -38,7 +38,49 @@ const TripCard = ({ trip, onClick }: { trip: Trip; onClick: () => void }) => {
   const daysUntil = getDaysUntil();
   return (
     <div onClick={onClick} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden cursor-pointer group">
-      {/* identical JSX as JS version */}
+      {/* Cover Image */}
+      <div className="relative h-40 w-full overflow-hidden">
+        <img
+          src={trip.coverImageUrl || '/images/default-trip.jpg'}
+          alt={trip.tripName}
+          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
+          onError={(e: any) => { e.currentTarget.src = '/images/default-trip.jpg'; }}
+        />
+        <div className="absolute top-3 left-3">
+          {getStatusBadge()}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold text-gray-900 truncate">{trip.tripName}</h3>
+            <p className="text-sm text-gray-600 truncate">{trip.mainDestination}</p>
+          </div>
+          {daysUntil && (
+            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full whitespace-nowrap">
+              {daysUntil}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="truncate">{getTripDuration()}</span>
+          </div>
+          <div className="text-right truncate">
+            {formatDate(trip.startDate)} – {formatDate(trip.endDate)}
+          </div>
+        </div>
+
+        {trip.category && (
+          <div className="mt-3">
+            <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">{trip.category}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

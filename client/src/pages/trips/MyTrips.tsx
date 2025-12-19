@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import TripCard from '../../components/trips/TripCard';
-import CreateTripModal from '../../components/trips/CreateTripModal';
 import toast from 'react-hot-toast';
 import useTripsCache from '../../hooks/useTripsCache';
 
@@ -13,7 +12,6 @@ const MyTrips = () => {
   const { trips, loading, error } = useSelector((state: any) => state.trips);
   const { user } = useSelector((state: any) => state.auth);
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('createdAt');
@@ -27,7 +25,18 @@ const MyTrips = () => {
 
   useEffect(() => { if (error) toast.error(error); }, [error]);
 
-  const categories = ['🗻 Mountains','🏕️ Adventure','🏖️ Beach','🏰 Historical','🛶 Nature','🙏🏻 Spiritual','Other'];
+  const categories = [
+    { value: 'adventure', label: '🗻 Adventure' },
+    { value: 'leisure', label: '🏖️ Leisure' },
+    { value: 'business', label: '💼 Business' },
+    { value: 'family', label: '👨‍👩‍👧‍👦 Family' },
+    { value: 'solo', label: '🧳 Solo' },
+    { value: 'couple', label: '💑 Couple' },
+    { value: 'friends', label: '👯 Friends' },
+    { value: 'backpacking', label: '🎒 Backpacking' },
+    { value: 'luxury', label: '✨ Luxury' },
+    { value: 'budget', label: '💰 Budget' },
+  ];
 
   const getTripsToDisplay = () => { if (activeTab === 'all') return trips.all || []; return trips[activeTab] || []; };
   const displayTrips = getTripsToDisplay();
@@ -63,8 +72,8 @@ const MyTrips = () => {
               >
                 <option value="">All Categories</option>
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
                   </option>
                 ))}
               </select>
@@ -149,10 +158,10 @@ const MyTrips = () => {
           </div>
 
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => navigate('/trips/new')}
             className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium whitespace-nowrap flex items-center gap-2"
           >
-            <i className="fas fa-plus"></i>
+            <span className="text-lg">+</span>
             <span className="hidden sm:inline">Create Trip</span>
           </button>
         </div>
@@ -175,7 +184,7 @@ const MyTrips = () => {
               Start planning your next adventure by creating your first trip!
             </p>
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => navigate('/trips/new')}
               className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
             >
               Create Your First Trip
@@ -198,14 +207,6 @@ const MyTrips = () => {
       </div>
 
       <Footer />
-
-      {/* Create Trip Modal */}
-      {showCreateModal && (
-        <CreateTripModal
-          isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-        />
-      )}
     </div>
   );
 };

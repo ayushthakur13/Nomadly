@@ -125,7 +125,7 @@ export interface CloudinaryUploadResult {
 export interface InviteMemberDTO {
   email?: string;
   username?: string;
-  role: 'editor' | 'viewer';
+  role: 'member';
   message?: string;
 }
 
