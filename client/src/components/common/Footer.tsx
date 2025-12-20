@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { openCreateTripModal } from "../../store/createTripModalSlice";
+// Removed modal usage
 
 const Footer = () => {
   const { isAuthenticated } = useSelector((s: any) => s.auth);
@@ -14,7 +14,7 @@ const Footer = () => {
 
   const handleCreateTrip = () => {
     if (isAuthenticated) {
-      dispatch(openCreateTripModal());
+      navigate("/trips/new");
     } else {
       navigate("/auth/signup");
     }

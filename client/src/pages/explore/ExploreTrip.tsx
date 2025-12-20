@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Navbar from '../../components/common/Navbar';
+import Navbar from '../../components/common/PublicNavbar';
 import Footer from '../../components/common/Footer';
 import toast from 'react-hot-toast';
 

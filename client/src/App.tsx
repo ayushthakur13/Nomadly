@@ -1,15 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
+import type { ReactNode } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import store from './store';
 import AuthPage from './pages/auth/AuthPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { loginSuccess, setInitialized } from './store/authSlice';
-import { closeCreateTripModal } from './store/createTripModalSlice';
 import api, { setAccessToken } from './services/api';
-import Navbar from './components/common/Navbar';
+import PublicNavbar from './components/common/PublicNavbar';
+import AppLayout from './components/layout/AppLayout';
 import Landing from './pages/landing/Landing';
 import Dashboard from './pages/dashboard/Dashboard';
 import Explore from './pages/explore/Explore';
@@ -18,14 +19,28 @@ import MyTrips from './pages/trips/MyTrips';
 import TripDetails from './pages/trips/TripDetails';
 import CreateTrip from './pages/trips/CreateTrip';
 import Profile from './pages/profile/Profile';
-import CreateTripModal from './components/trips/CreateTripModal';
 import LandingRoute from './components/auth/LandingRoute';
 import PublicRoute from './components/auth/PublicRoute';
+
+const PublicLayout = ({ children }: { children: ReactNode }) => (
+  <>
+    <PublicNavbar />
+    <div className="bg-gray-50 pt-16">{children}</div>
+  </>
+);
+
+const ConditionalLayout = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated } = useSelector((state: any) => state.auth);
+  return isAuthenticated ? (
+    <AppLayout>{children}</AppLayout>
+  ) : (
+    <PublicLayout>{children}</PublicLayout>
+  );
+};
 
 function AppContent() {
   const dispatch = useDispatch();
   const { initialized } = useSelector((state: any) => state.auth);
-  const { isOpen } = useSelector((state: any) => state.createTripModal);
 
   useEffect(() => {
     (async () => {
@@ -61,84 +76,104 @@ function AppContent() {
 
   return (
     <>
-      <Navbar />
-      <div className="bg-gray-50 pt-16">
-        <Routes>
+      <Routes>
         <Route
           path="/"
           element={
             <LandingRoute>
-              <Landing />
+              <PublicLayout>
+                <Landing />
+              </PublicLayout>
             </LandingRoute>
-          }
-        />
-        <Route path="/auth/*" element={<AuthPage />} />
-        <Route
-          path="/explore"
-          element={
-            <PublicRoute>
-              <Explore />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/explore/trips/:tripId"
-          element={
-            <PublicRoute>
-              <ExploreTrip />
-            </PublicRoute>
           }
         />
 
         <Route
-          path="/home"
+          path="/auth/*"
+          element={
+            <PublicLayout>
+              <AuthPage />
+            </PublicLayout>
+          }
+        />
+
+        <Route
+          path="/explore"
+          element={
+            <ConditionalLayout>
+              <PublicRoute>
+                <Explore />
+              </PublicRoute>
+            </ConditionalLayout>
+          }
+        />
+
+        <Route
+          path="/explore/trips/:tripId"
+          element={
+            <ConditionalLayout>
+              <PublicRoute>
+                <ExploreTrip />
+              </PublicRoute>
+            </ConditionalLayout>
+          }
+        />
+
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/trips"
           element={
             <ProtectedRoute>
-              <MyTrips />
+              <AppLayout>
+                <MyTrips />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/trips/new"
           element={
             <ProtectedRoute>
-              <CreateTrip />
+              <AppLayout>
+                <CreateTrip />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/trips/:tripId"
           element={
             <ProtectedRoute>
-              <TripDetails />
+              <AppLayout>
+                <TripDetails />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
-              <Profile />
+              <AppLayout>
+                <Profile />
+              </AppLayout>
             </ProtectedRoute>
           }
         />
       </Routes>
-      </div>
-
-      {isOpen && (
-        <CreateTripModal
-          isOpen={isOpen}
-          onClose={() => dispatch(closeCreateTripModal())}
-        />
-      )}
 
       <Toaster
         position="bottom-right"

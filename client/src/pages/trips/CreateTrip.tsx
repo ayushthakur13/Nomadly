@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { createTrip, updateTripCover } from '../../store/tripsSlice';
 import toast from 'react-hot-toast';
 import { ChevronRight, ChevronLeft, MapPin, Image as ImageIcon } from 'lucide-react';
-import Navbar from '../../components/common/Navbar';
 import LocationSearchInput from '../../components/trips/LocationSearchInput';
 import CoverImageUploader from '../../components/trips/CoverImageUploader';
 

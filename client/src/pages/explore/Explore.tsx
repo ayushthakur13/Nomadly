@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import api from '../../services/api';
-import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import toast from 'react-hot-toast';
 
@@ -11,6 +11,7 @@ const Explore = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('');
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state: any) => state.auth);
 
   const categories = [
     { value: 'adventure', label: '🗻 Adventure' },
@@ -185,7 +186,7 @@ const Explore = () => {
         )}
       </div>
 
-      <Footer />
+      {!isAuthenticated && <Footer />}
     </div>
   );
 };

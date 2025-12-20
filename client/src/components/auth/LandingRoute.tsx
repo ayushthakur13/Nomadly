@@ -7,7 +7,7 @@ interface Props { children: ReactNode }
 const LandingRoute = ({ children }: Props) => {
   const { isAuthenticated } = useSelector((state: any) => state.auth);
   if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   return children as React.ReactElement;
 };

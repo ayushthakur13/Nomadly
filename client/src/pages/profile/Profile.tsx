@@ -1,16 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import {
   updateProfileStart,
   updateProfileSuccess,
   updateProfileFailure,
+  logout,
 } from "../../store/authSlice";
 import api from "../../services/api";
-import Navbar from "../../components/common/Navbar";
 import AvatarManager from "../../components/profile/AvatarManager";
 import SecuritySection from "../../components/profile/SecuritySection";
+import { secureLogout } from "../../utils/auth";
 
 interface ProfileFormData {
   username: string;
@@ -21,6 +23,7 @@ interface ProfileFormData {
 
 export default function Profile() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, loading } = useSelector((state: any) => state.auth);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -246,6 +249,18 @@ export default function Profile() {
 
   const bioValue = watch("bio") || "";
 
+  const handleLogout = async () => {
+    try {
+      await secureLogout();
+      dispatch(logout());
+      toast.success('Logged out successfully');
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('Logout failed. Please try again.');
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gray-50 py-8 overflow-x-hidden">
@@ -408,6 +423,30 @@ export default function Profile() {
                     pwdLoading={pwdLoading}
                     onChangePassword={handleChangePassword}
                   />
+
+                  {/* Danger Zone - Logout */}
+                  <div className="mt-8 pt-8 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Logout</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Sign out of your account on this device
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M16 17l5-5-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Logout
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

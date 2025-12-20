@@ -1,33 +1,20 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { logout } from '../../store/authSlice';
-import { openCreateTripModal } from '../../store/createTripModalSlice';
-import toast from 'react-hot-toast';
-import { secureLogout } from '../../utils/auth';
+import { useState, useEffect, useCallback } from 'react';
 
-const Navbar = () => {
-  const { isAuthenticated, user } = useSelector((s: any) => s.auth);
-  const dispatch = useDispatch();
+const PublicNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   
   const isAuthPage = location.pathname.startsWith('/auth');
   const isLoginPage = location.pathname.includes('/login');
-  const isLandingPage = location.pathname === '/' && !isAuthenticated;
+  const isLandingPage = location.pathname === '/';
 
   const isActiveLink = useCallback((path: string) => {
     if (path === '/' && isLandingPage) return true;
-    if (path === '/home' && location.pathname === '/home') return true;
-    if (path === '/trips' && location.pathname.startsWith('/trips')) return true;
     if (path === '/explore' && location.pathname.startsWith('/explore')) return true;
     if (path === '/pricing' && location.pathname.startsWith('/pricing')) return true;
-    if (path === '/profile' && location.pathname === '/profile') return true;
-    if (path === '/settings' && location.pathname === '/settings') return true;
     return false;
   }, [location.pathname, isLandingPage]);
 
@@ -36,16 +23,6 @@ const Navbar = () => {
     const active = "text-emerald-600 border-b-2 border-emerald-600";
     return isActiveLink(path) ? `${base} ${active}` : base;
   }, [isActiveLink]);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Scroll detection for shadow effect
   useEffect(() => {
@@ -58,17 +35,8 @@ const Navbar = () => {
   }, []);
 
   const handleLogoClick = useCallback(() => {
-    navigate(isAuthenticated ? '/home' : '/');
-  }, [isAuthenticated, navigate]);
-
-  const handleCreateTrip = useCallback(() => {
-    if (isAuthenticated) {
-      dispatch(openCreateTripModal());
-    } else {
-      navigate('/auth/login');
-    }
-    setIsMobileMenuOpen(false);
-  }, [isAuthenticated, dispatch, navigate]);
+    navigate('/');
+  }, [navigate]);
 
   const scrollToFeatures = useCallback(() => {
     const section = document.getElementById('features');
@@ -76,21 +44,7 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, []);
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await secureLogout();
-      dispatch(logout());
-      toast.success('Logged out successfully');
-      navigate('/', { replace: true });
-      setIsProfileDropdownOpen(false);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      toast.error('Logout failed. Please try again.');
-    }
-  }, [dispatch, navigate]);
-
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const toggleProfileDropdown = () => setIsProfileDropdownOpen(!isProfileDropdownOpen);
 
   // ============ RENDER HELPERS ============
 
@@ -182,75 +136,7 @@ const Navbar = () => {
     );
   };
 
-  const renderDesktopAuthenticatedLinks = () => (
-    <>
-      <Link to="/home" className={getLinkClasses('/home')}>Home</Link>
-      <Link to="/trips" className={getLinkClasses('/trips')}>Trips</Link>
-      <Link to="/explore" className={getLinkClasses('/explore')}>Explore</Link>
-      <button
-        onClick={handleCreateTrip}
-        className="px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm bg-emerald-600 text-white hover:bg-emerald-700"
-      >
-        <i className="fas fa-plus text-sm"></i>
-        <span>Create Trip</span>
-      </button>
-    </>
-  );
 
-  const renderProfileDropdown = () => (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={toggleProfileDropdown}
-        className="w-10 h-10 rounded-full bg-gray-200 bg-cover bg-center border-2 border-gray-300 flex items-center justify-center hover:border-emerald-400 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-        style={{ backgroundImage: user?.profilePicUrl ? `url('${user.profilePicUrl}')` : 'none' }}
-        aria-label="Profile menu"
-        aria-expanded={isProfileDropdownOpen}
-      >
-        {!user?.profilePicUrl && <i className="fas fa-user text-gray-600"></i>}
-      </button>
-
-      {isProfileDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-          <div className="px-4 py-2 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-900 truncate">{user?.name || user?.username}</p>
-            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-          </div>
-          <Link
-            to="/profile"
-            onClick={() => setIsProfileDropdownOpen(false)}
-            className={`flex items-center px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
-              isActiveLink('/profile') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-            }`}
-          >
-            <i className={`fas fa-user mr-3 ${
-              isActiveLink('/profile') ? 'text-emerald-600' : 'text-gray-400'
-            }`}></i>
-            Profile
-          </Link>
-          <Link
-            to="/settings"
-            onClick={() => setIsProfileDropdownOpen(false)}
-            className={`flex items-center px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
-              isActiveLink('/settings') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-            }`}
-          >
-            <i className={`fas fa-cog mr-3 ${
-              isActiveLink('/settings') ? 'text-emerald-600' : 'text-gray-400'
-            }`}></i>
-            Settings
-          </Link>
-          <hr className="my-1 border-gray-100" />
-          <button
-            onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <i className="fas fa-sign-out-alt mr-3 text-red-400"></i>
-            Logout
-          </button>
-        </div>
-      )}
-    </div>
-  );
 
   const renderMobileAuthLinks = () => {
     if (isLandingPage) {
@@ -350,90 +236,7 @@ const Navbar = () => {
     );
   };
 
-  const renderMobileAuthenticatedMenu = () => (
-    <>
-      <Link
-        to="/home"
-        onClick={() => setIsMobileMenuOpen(false)}
-        className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg ${
-          isActiveLink('/home') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-        }`}
-      >
-        Home
-      </Link>
-      <Link
-        to="/trips"
-        onClick={() => setIsMobileMenuOpen(false)}
-        className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg ${
-          isActiveLink('/trips') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-        }`}
-      >
-        Trips
-      </Link>
-      <Link
-        to="/explore"
-        onClick={() => setIsMobileMenuOpen(false)}
-        className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg ${
-          isActiveLink('/explore') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-        }`}
-      >
-        Explore
-      </Link>
-      <button
-        onClick={handleCreateTrip}
-        className="px-4 py-2 font-medium transition-colors rounded-lg flex items-center gap-2 mx-4 mt-2 bg-emerald-600 text-white hover:bg-emerald-700"
-      >
-        <i className="fas fa-plus text-sm"></i>
-        <span>Create Trip</span>
-      </button>
 
-      <div className="pt-3 mt-3 border-t border-gray-200">
-        <div className="px-4 py-2 flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full bg-gray-200 bg-cover bg-center border-2 border-gray-300 flex items-center justify-center flex-shrink-0"
-            style={{ backgroundImage: user?.profilePicUrl ? `url('${user.profilePicUrl}')` : 'none' }}
-          >
-            {!user?.profilePicUrl && <i className="fas fa-user text-gray-600 text-sm"></i>}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">{user?.name || user?.username}</p>
-            <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-          </div>
-        </div>
-        <Link
-          to="/profile"
-          onClick={() => setIsMobileMenuOpen(false)}
-          className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg flex items-center gap-3 ${
-            isActiveLink('/profile') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-          }`}
-        >
-          <i className={`fas fa-user ${
-            isActiveLink('/profile') ? 'text-emerald-600' : 'text-gray-400'
-          }`}></i>
-          Profile
-        </Link>
-        <Link
-          to="/settings"
-          onClick={() => setIsMobileMenuOpen(false)}
-          className={`px-4 py-2 hover:text-gray-900 hover:bg-gray-50 font-medium transition-colors rounded-lg flex items-center gap-3 ${
-            isActiveLink('/settings') ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-          }`}
-        >
-          <i className={`fas fa-cog ${
-            isActiveLink('/settings') ? 'text-emerald-600' : 'text-gray-400'
-          }`}></i>
-          Settings
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 text-red-600 hover:bg-red-50 font-medium transition-colors rounded-lg flex items-center gap-3 w-full text-left"
-        >
-          <i className="fas fa-sign-out-alt text-red-400"></i>
-          Logout
-        </button>
-      </div>
-    </>
-  );
 
   // ============ MAIN RENDER ============
 
@@ -445,12 +248,12 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8 text-gray-700">
-            {isAuthenticated ? renderDesktopAuthenticatedLinks() : renderDesktopAuthLinks()}
+            {renderDesktopAuthLinks()}
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
-            {isAuthenticated ? renderProfileDropdown() : renderDesktopAuthActions()}
+            {renderDesktopAuthActions()}
           </div>
 
           {/* Mobile Menu Button */}
@@ -474,16 +277,10 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200 bg-gray-50">
             <div className="flex flex-col space-y-2">
-              {isAuthenticated ? (
-                renderMobileAuthenticatedMenu()
-              ) : (
-                <>
-                  {renderMobileAuthLinks()}
-                  <div className="pt-3 mt-3 border-t border-gray-200">
-                    {renderMobileAuthActions()}
-                  </div>
-                </>
-              )}
+              {renderMobileAuthLinks()}
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                {renderMobileAuthActions()}
+              </div>
             </div>
           </div>
         )}
@@ -492,4 +289,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default PublicNavbar;

@@ -10,7 +10,7 @@ import {
   publishTrip,
   unpublishTrip
 } from '../../store/tripsSlice';
-import Navbar from '../../components/common/Navbar';
+import Navbar from '../../components/common/PublicNavbar';
 import Footer from '../../components/common/Footer';
 import toast from 'react-hot-toast';
 
