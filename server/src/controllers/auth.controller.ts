@@ -64,7 +64,7 @@ function isNonEmptyString(value: unknown): value is string {
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { username, password, name, email } = req.body;
+    const { username, password, email } = req.body;
     
     if (!isNonEmptyString(username) || !isNonEmptyString(password) || !isNonEmptyString(email)) {
       res.status(400).json({
@@ -73,6 +73,9 @@ export async function register(req: Request, res: Response, next: NextFunction):
       });
       return;
     }
+
+    // Use username as default name if not provided
+    const name = isNonEmptyString(req.body.name) ? req.body.name : username;
 
     const result = await authService.registerUser({ username, password, name, email });
 

@@ -1,4 +1,3 @@
-import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import Hero from '../../components/landing/Hero';
 import HowItWorks from '../../components/landing/HowItWorks';
@@ -11,9 +10,7 @@ import FinalCTA from '../../components/landing/FinalCTA';
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-
+    <>
       <main>
         <Hero />
         <HowItWorks />
@@ -26,7 +23,7 @@ const Landing = () => {
       </main>
 
       <Footer />
-    </div>
+    </>
   );
 };
 

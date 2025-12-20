@@ -163,7 +163,6 @@ const TripDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       {/* Header Section */}
       <div className="bg-white border-b">

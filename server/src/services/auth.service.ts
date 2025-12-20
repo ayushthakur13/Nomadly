@@ -42,7 +42,8 @@ export async function registerUser(data: RegisterDTO) {
   const { username, email, password, name, profilePicUrl } = data;
   const normalizedUsername = username.trim();
   const normalizedEmail = email.trim().toLowerCase();
-  const safeName = name?.trim();
+  // Use username as fallback if name not provided
+  const safeName = name?.trim() || normalizedUsername;
   const safeProfilePicUrl = profilePicUrl?.trim();
 
   // Check for existing username or email

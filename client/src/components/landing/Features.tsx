@@ -78,27 +78,30 @@ const Features = () => {
   const activeCategory = features[active];
 
   return (
-    <section id="features" className="py-24 bg-white relative overflow-hidden">
+    <section id="features" className="py-24 sm:py-32 bg-gray-50 relative overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Heading */}
-        <div className="text-center mb-14">
+        {/* Heading with improved hierarchy */}
+        <div className="text-center mb-16 sm:mb-20">
           <div className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 bg-emerald-100/80 px-4 py-2 rounded-full mb-6 backdrop-blur-sm">
             <span>✨</span> Powerful Features
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
             Everything You Need for
             <br />
-            <span className="text-emerald-700">Smarter Travel</span>
+            <span className="text-emerald-600">Smarter Travel</span>
           </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto mt-4 text-base sm:text-lg">
+            Designed for modern travelers who want to plan smarter, not harder.
+          </p>
         </div>
 
-        {/* Feature Tabs Navigation */}
-        <div className="flex flex-wrap justify-center gap-4 mb-16">
+        {/* Feature Tabs Navigation - improved spacing */}
+        <div className="flex flex-wrap justify-center gap-3 mb-16 sm:mb-20">
           {features.map((category, i) => (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`px-6 py-3 rounded-full font-semibold transition-colors duration-200 border ${
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-semibold transition-all duration-200 border ${
                 i === active 
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/25'
                   : 'bg-white text-gray-600 border-gray-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200'

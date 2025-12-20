@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginSuccess, setInitialized } from './store/authSlice';
 import { closeCreateTripModal } from './store/createTripModalSlice';
 import api, { setAccessToken } from './services/api';
+import Navbar from './components/common/Navbar';
 import Landing from './pages/landing/Landing';
 import Dashboard from './pages/dashboard/Dashboard';
 import Explore from './pages/explore/Explore';
@@ -59,8 +60,10 @@ function AppContent() {
   }
 
   return (
-    <Router>
-      <Routes>
+    <>
+      <Navbar />
+      <div className="bg-gray-50 pt-16">
+        <Routes>
         <Route
           path="/"
           element={
@@ -128,6 +131,7 @@ function AppContent() {
           }
         />
       </Routes>
+      </div>
 
       {isOpen && (
         <CreateTripModal
@@ -143,14 +147,16 @@ function AppContent() {
           style: { background: '#363636', color: '#fff' },
         }}
       />
-    </Router>
+    </>
   );
 }
 
 function App() {
   return (
     <Provider store={store}>
-      <AppContent />
+      <Router>
+        <AppContent />
+      </Router>
     </Provider>
   );
 }
