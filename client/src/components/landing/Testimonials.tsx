@@ -1,3 +1,5 @@
+import Icon from '../icon/Icon';
+
 const Testimonials = () => {
   const testimonials = [
     {
@@ -45,9 +47,7 @@ const Testimonials = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative">
                 <div className="mb-6">
-                  <svg className="w-8 h-8 text-emerald-500 mb-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4 7a3 3 0 013-3h2a3 3 0 013 3v7a3 3 0 01-3 3H7a3 3 0 01-3-3V7zM7 5a1 1 0 000 2h2a1 1 0 100-2H7z" clipRule="evenodd" />
-                  </svg>
+                  <Icon name="quote" size={32} className="text-emerald-500 mb-4" />
                   <p className="text-gray-700 text-lg leading-relaxed italic">"{testimonial.text}"</p>
                 </div>
                 <div className="flex items-center pt-4 border-t border-gray-100">

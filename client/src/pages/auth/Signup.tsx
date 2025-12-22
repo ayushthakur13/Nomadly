@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import Icon from "../../components/icon/Icon";
 import { loginStart, loginSuccess, loginFailure } from "../../store/authSlice";
 import api from "../../services/api";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
@@ -173,7 +173,7 @@ const Signup = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-emerald-600 transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <Icon name="eyeOff" size={20} /> : <Icon name="eye" size={20} />}
               </button>
             </div>
             {errors.password && (

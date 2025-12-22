@@ -1,5 +1,7 @@
+import nomadlyIcon from "../../assets/logos/b-icon-no-bg.svg"
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
+import Icon from '../icon/Icon';
 
 const PublicNavbar = () => {
   const navigate = useNavigate();
@@ -55,7 +57,7 @@ const PublicNavbar = () => {
       style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
       aria-label="Nomadly home"
     >
-      <img src="/images/icon/Nomadly_icon_white-removebg.png" alt="" className="w-12 h-12" />
+      <img src={nomadlyIcon} alt="" className="w-12 h-12" />
       <div className="text-3xl font-bold text-gray-900">Nomadly</div>
     </button>
   );
@@ -263,13 +265,7 @@ const PublicNavbar = () => {
             aria-expanded={isMobileMenuOpen}
             aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            <Icon name={isMobileMenuOpen ? "close" : "menu"} size={24} />
           </button>
         </div>
 

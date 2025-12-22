@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import AppNavbar from '../common/AppNavbar';
 import Sidebar from '../common/Sidebar';
 import MobileSidebar from '../common/MobileSidebar';
@@ -8,6 +9,7 @@ interface AppLayoutProps {
 }
 
 const AppLayout = ({ children }: AppLayoutProps) => {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -18,6 +20,14 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       setCollapsed(!isDesktop); // collapsed on <1024px
     }
   }, []);
+
+  // Keep sidebar closed on the create-trip page to reduce distractions
+  useEffect(() => {
+    if (location.pathname.startsWith('/trips/new')) {
+      setCollapsed(true);
+      setMobileOpen(false);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-gray-50">

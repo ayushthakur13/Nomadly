@@ -11,7 +11,6 @@ import {
   unpublishTrip
 } from '../../store/tripsSlice';
 import Navbar from '../../components/common/PublicNavbar';
-import Footer from '../../components/common/Footer';
 import toast from 'react-hot-toast';
 
 const TripDetails = () => {
@@ -406,8 +405,6 @@ const TripDetails = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

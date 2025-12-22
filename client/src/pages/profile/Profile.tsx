@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import Icon from "../../components/icon/Icon";
 import {
   updateProfileStart,
   updateProfileSuccess,
@@ -438,11 +439,7 @@ export default function Profile() {
                         onClick={handleLogout}
                         className="px-6 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm"
                       >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M16 17l5-5-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <Icon name="logout" size={16} />
                         Logout
                       </button>
                     </div>

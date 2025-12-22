@@ -1,3 +1,4 @@
+import nomadlyIcon from "../../assets/logos/w-icon-no-bg.svg"
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 // Removed modal usage
@@ -37,9 +38,9 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <img
-                src="/images/icon/Nomadly_icon-removebg.png"
+                src={nomadlyIcon}
                 alt="Nomadly Logo"
-                className="w-6 h-6"
+                className="w-8 h-8"
               />
               <span className="text-xl font-bold text-white">Nomadly</span>
             </div>

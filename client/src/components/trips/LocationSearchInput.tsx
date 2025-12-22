@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Search, MapPin, Loader2 } from 'lucide-react';
+import Icon from '../icon/Icon';
 import { debounce } from '../../utils/debounce';
 import api from '../../services/api';
 
@@ -74,6 +74,11 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     searchLocations(searchQuery);
   }, [searchQuery]);
 
+  // Sync when parent-provided initial value changes (e.g., returning to a step)
+  useEffect(() => {
+    setSearchQuery(initialValue);
+  }, [initialValue]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -101,7 +106,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+        <Icon name="search" className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
         <input
           ref={inputRef}
           type="text"
@@ -111,7 +116,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
           placeholder={placeholder}
           className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
         />
-        {loading && <Loader2 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-emerald-600 animate-spin" size={20} />}
+        {loading && <Icon name="loader" className="absolute right-4 top-1/2 transform -translate-y-1/2 text-emerald-600 animate-spin" size={20} />}
       </div>
 
       {/* Dropdown Results */}
@@ -125,7 +130,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
               className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
             >
               <div className="flex items-start gap-3">
-                <MapPin size={18} className="text-emerald-600 mt-0.5 flex-shrink-0" />
+                <Icon name="location" size={18} className="text-emerald-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900">{location.name}</p>
                   {location.address && <p className="text-xs text-gray-500">{location.address}</p>}

@@ -1,6 +1,8 @@
+import nomadlyIcon from "../../assets/logos/b-icon-no-bg.svg"
 import { useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import Icon from '../icon/Icon';
 
 interface AppNavbarProps {
   onToggleSidebar?: () => void;
@@ -22,10 +24,11 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
+  const path = location.pathname;
   const displayName = user?.firstName || user?.name || 'Nomad';
+  const showAddTrip = !path.startsWith('/trips/new');
 
   // Mobile title: Nomadly or mapped page title
-  const path = location.pathname;
   const mobileTitle = (() => {
     if (path.startsWith('/dashboard')) return 'Dashboard';
     if (path.startsWith('/trips/new')) return 'New Trip';
@@ -36,7 +39,7 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
   })();
 
   return (
-    <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+    <header className="fixed top-0 inset-x-0 z-40 bg-gray-50 border-b border-gray-200 shadow-sm">
       <div className="flex items-center h-16 px-4 gap-4">
         {/* Left: Mobile hamburger (md:hidden) */}
         <div className="flex items-center md:hidden">
@@ -46,9 +49,7 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
             aria-label="Open menu"
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />
-            </svg>
+            <Icon name="menu" size={24} className="text-gray-700" />
           </button>
         </div>
 
@@ -63,7 +64,7 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
             className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
           >
             <img 
-              src="/images/icon/Nomadly_icon_white-removebg.png" 
+              src={nomadlyIcon}
               alt="Nomadly" 
               className="w-10 h-10" 
             />
@@ -89,39 +90,33 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
         <div className="flex-1 min-w-0 hidden md:block">
           <div className="relative md:max-w-sm lg:max-w-2xl mx-auto">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M21 21l-4.35-4.35" strokeLinecap="round" />
-              </svg>
+              <Icon name="search" size={16} />
             </span>
             <input
               type="search"
               placeholder="Search trips, destinations, people..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
             />
           </div>
         </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={handleAddTrip}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
-            aria-label="Add trip"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="font-semibold text-sm hidden lg:inline">Add Trip</span>
-          </button>
+          {showAddTrip && (
+            <button
+              onClick={handleAddTrip}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
+              aria-label="Add trip"
+            >
+              <Icon name="add" size={16} />
+              <span className="font-semibold text-sm hidden lg:inline">Add Trip</span>
+            </button>
+          )}
           <button
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
             aria-label="Notifications"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Icon name="bell" size={20} />
           </button>
           <button
             onClick={handleToggleTheme}
@@ -130,14 +125,9 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
             title="Toggle light/dark"
           >
             {theme === 'light' ? (
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="5" />
-                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeLinecap="round" />
-              </svg>
+              <Icon name="sun" size={20} />
             ) : (
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
+              <Icon name="moon" size={20} />
             )}
           </button>
         </div>

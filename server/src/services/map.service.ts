@@ -179,6 +179,8 @@ class MapService {
       }
 
       const feature = response.data.features[0];
+      const country = this.extractContext(feature.context, 'country');
+      const city = this.extractContext(feature.context, 'place');
 
       return {
         name: feature.text,
@@ -186,9 +188,9 @@ class MapService {
         coordinates: { lng: feature.center[0], lat: feature.center[1] },
         placeId: feature.id,
         type: feature.place_type?.[0],
-        country: this.extractContext(feature.context, 'country'),
-        city: this.extractContext(feature.context, 'place')
-      } as any;
+        ...(country && { country }),
+        ...(city && { city })
+      };
     } catch (error: any) {
       console.error('Reverse geocode error:', error.message);
       throw new Error(`Reverse geocoding failed: ${error.message}`);

@@ -131,11 +131,28 @@ class TripController {
         return;
       }
 
-      const trips = await tripService.getUserTrips(userId, true);
+      const { status, category, search, sort = 'createdAt', order = 'desc', page, limit } = req.query;
+
+      const filters: TripQueryFilters = {
+        userId,
+        status: status as TripStatus,
+        category: category as string,
+        search: search as string,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 100,
+        sortBy: sort as 'createdAt' | 'startDate' | 'viewsCount' | 'likesCount' | 'updatedAt',
+        sortOrder: order as 'asc' | 'desc'
+      };
+
+      const result = await tripService.getTrips(filters, userId);
 
       res.json({
         success: true,
-        data: { trips, count: trips.length }
+        data: { 
+          trips: result.trips, 
+          count: result.trips.length,
+          pagination: result.pagination
+        }
       });
     } catch (error) {
       next(error);

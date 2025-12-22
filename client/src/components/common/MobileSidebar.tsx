@@ -1,6 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import Icon from '../icon/Icon';
 
 interface MobileSidebarProps {
   onClose: () => void;
@@ -144,66 +145,39 @@ const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
 };
 
 const iconHome = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V12H9v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+  <Icon name="home" size={20} />
 );
 
 const iconTrips = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 6h18M3 10h18M9 14h12M9 18h12M7 4v2m0 4v2m0 4v2" strokeLinecap="round" />
-  </svg>
+  <Icon name="compass" size={20} />
 );
 
 const iconCompass = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M9 15l1.5-4.5L15 9l-1.5 4.5L9 15z" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+  <Icon name="compass" size={20} />
 );
 
 const iconSparkle = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M5 19l1 2M4 21h2M19 5l1 2M18 7h2" strokeLinecap="round" />
-  </svg>
+  <Icon name="sparkles" size={20} />
 );
 
 const iconBookmark = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+  <Icon name="bookmark" size={20} />
 );
 
 const iconUsers = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" strokeLinecap="round" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" />
-  </svg>
+  <Icon name="users" size={20} />
 );
 
 const iconUser = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
+  <Icon name="user" size={20} />
 );
 
 const iconSettings = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
+  <Icon name="settings" size={20} />
 );
 
 const iconHelp = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 2-3 4" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M12 17h.01" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="12" cy="12" r="9" />
-  </svg>
+  <Icon name="help" size={20} />
 );
 
 export default MobileSidebar;

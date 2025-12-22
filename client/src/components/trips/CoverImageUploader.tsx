@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, X, CheckCircle } from 'lucide-react';
+import Icon from '../icon/Icon';
 import toast from 'react-hot-toast';
 
 interface CoverImageUploaderProps {
@@ -110,7 +110,7 @@ const CoverImageUploader: React.FC<CoverImageUploaderProps> = ({ onImageSelect, 
         {/* File Info */}
         <div className="flex items-start justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
           <div className="flex items-center gap-3">
-            <CheckCircle size={20} className="text-emerald-600" />
+            <Icon name="checkCircle" size={20} className="text-emerald-600" />
             <div>
               <p className="font-semibold text-emerald-900">Cover Image Ready</p>
               <p className="text-sm text-emerald-700">{fileName}</p>
@@ -121,7 +121,7 @@ const CoverImageUploader: React.FC<CoverImageUploaderProps> = ({ onImageSelect, 
             onClick={handleRemoveImage}
             className="p-2 hover:bg-emerald-100 rounded-lg transition-colors"
           >
-            <X size={20} className="text-emerald-600" />
+            <Icon name="close" size={20} className="text-emerald-600" />
           </button>
         </div>
 
@@ -142,7 +142,7 @@ const CoverImageUploader: React.FC<CoverImageUploaderProps> = ({ onImageSelect, 
         onClick={handleClickUpload}
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 sm:p-12 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition-all"
       >
-        <Upload className="mx-auto mb-4 text-gray-400" size={32} />
+        <Icon name="upload" className="mx-auto mb-4 text-gray-400" size={32} />
         <p className="font-semibold text-gray-900 mb-1">Drag and drop your image</p>
         <p className="text-sm text-gray-600 mb-4">or click to browse from your device</p>
         <p className="text-xs text-gray-500">JPEG, PNG or WebP • Max 5MB</p>

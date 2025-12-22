@@ -1,3 +1,4 @@
+import heroIllustraion from "../../assets/illustrations/hero-travelers-1.webp"
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -57,7 +58,7 @@ const Hero = () => {
 
         <div className="hidden md:block">
           <img 
-            src="/images/illustrations/Travelers-pana.png" 
+            src={heroIllustraion}
             alt="Travel planning illustration"
             className="w-full h-auto rounded-xl"
           />

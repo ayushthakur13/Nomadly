@@ -1,5 +1,5 @@
 import React from 'react';
-import { Upload, X, User } from 'lucide-react';
+import Icon from '../icon/Icon';
 
 interface AvatarManagerProps {
   user: any;
@@ -36,7 +36,7 @@ export default function AvatarManager({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-emerald-100">
-              <User size={48} className="text-emerald-600" />
+              <Icon name="user" size={48} className="text-emerald-600" />
             </div>
           )}
         </div>
@@ -66,7 +66,7 @@ export default function AvatarManager({
           disabled={uploading}
           className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-emerald-500 text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Upload size={18} />
+          <Icon name="upload" size={18} />
           <span>Upload Photo</span>
         </button>
 
@@ -77,7 +77,7 @@ export default function AvatarManager({
             disabled={uploading}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <X size={18} />
+            <Icon name="close" size={18} />
             <span>Remove Photo</span>
           </button>
         )}

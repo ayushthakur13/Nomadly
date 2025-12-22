@@ -8,7 +8,7 @@ import initSocket from "./sockets/index";
 dotenv.config();
 
 const PORT = process.env.PORT || 4444;
-const MONGO_URL = process.env.MONGO_URL || "";
+const MONGO_URI = process.env.MONGO_URI || "";
 
 // HTTP + Socket.io Server
 const server = http.createServer(app);
@@ -26,7 +26,7 @@ initSocket(io);
 
 // MongoDB Connection
 mongoose
-    .connect(MONGO_URL)
+    .connect(MONGO_URI)
     .then(() => {
         console.log("🟢 Connected to MongoDB");
         server.listen(PORT, () => {
