@@ -59,8 +59,8 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
         }`}>
           <button
             type="button"
-            onClick={onToggleSidebar}
-            aria-label="Toggle sidebar"
+            onClick={() => navigate('/dashboard')}
+            aria-label="Go to dashboard"
             className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
           >
             <img 

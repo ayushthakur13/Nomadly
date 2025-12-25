@@ -36,12 +36,20 @@ import {
   Bell,
   Plane,
   LucideIcon,
+  Edit2,
+  DollarSign,
+  MessageCircle,
+  Layout,
+  Check,
+  MoreVertical,
+  Zap,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
   add: Plus,
   delete: Trash2,
   edit: Edit,
+  edit2: Edit2,
   search: Search,
   map: Map,
   user: User,
@@ -55,6 +63,7 @@ const ICONS: Record<string, LucideIcon> = {
   upload: Upload,
   close: X,
   location: MapPin,
+  mapPin: MapPin,
   image: ImageIcon,
   clock: Clock,
   bookmark: Bookmark,
@@ -74,7 +83,14 @@ const ICONS: Record<string, LucideIcon> = {
   arrowRight: ArrowRight,
   lock: Lock,
   globe: Globe,
-  plane: Plane
+  plane: Plane,
+  dollarSign: DollarSign,
+  messageCircle: MessageCircle,
+  layout: Layout,
+  check: Check,
+  checkSquare: CheckCircle,
+  moreVertical: MoreVertical,
+  zap: Zap,
 };
 
 type IconName = keyof typeof ICONS;

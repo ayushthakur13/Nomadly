@@ -16,7 +16,14 @@ import Dashboard from './pages/dashboard/Dashboard';
 import Explore from './pages/explore/Explore';
 import ExploreTrip from './pages/explore/ExploreTrip';
 import MyTrips from './pages/trips/MyTrips';
-import TripDetails from './pages/trips/TripDetails';
+import TripDashboard from './pages/trips/TripDashboard';
+import TripDestinations from './pages/trips/TripDestinations';
+import TripTasks from './pages/trips/TripTasks';
+import TripBudget from './pages/trips/TripBudget';
+import TripAccommodations from './pages/trips/TripAccommodations';
+import TripMembers from './pages/trips/TripMembers';
+import TripMemories from './pages/trips/TripMemories';
+import TripChat from './pages/trips/TripChat';
 import CreateTrip from './pages/trips/CreateTrip';
 import Profile from './pages/profile/Profile';
 import LandingRoute from './components/auth/LandingRoute';
@@ -152,13 +159,12 @@ function AppContent() {
           }
         />
 
+        {/* Trip nested routes with shared TripDashboard layout */}
         <Route
-          path="/trips/:tripId"
+          path="/trips/:tripId/*"
           element={
             <ProtectedRoute>
-              <AppLayout>
-                <TripDetails />
-              </AppLayout>
+              <TripDashboard />
             </ProtectedRoute>
           }
         />

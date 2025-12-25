@@ -213,7 +213,7 @@ const CreateTrip: React.FC = () => {
             e?.message ||
             e?.data?.message ||
             e ||
-            "Cover upload failed. You can set it from trip details.";
+            "Cover upload failed. You can set it from the trip dashboard.";
           toast.error(errorMsg);
         } finally {
           setCoverUploadLoading(false);
