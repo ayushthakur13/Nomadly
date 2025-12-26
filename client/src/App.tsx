@@ -15,19 +15,12 @@ import Landing from './pages/landing/Landing';
 import Dashboard from './pages/dashboard/Dashboard';
 import Explore from './pages/explore/Explore';
 import ExploreTrip from './pages/explore/ExploreTrip';
-import MyTrips from './pages/trips/MyTrips';
-import TripDashboard from './pages/trips/TripDashboard';
-import TripDestinations from './pages/trips/TripDestinations';
-import TripTasks from './pages/trips/TripTasks';
-import TripBudget from './pages/trips/TripBudget';
-import TripAccommodations from './pages/trips/TripAccommodations';
-import TripMembers from './pages/trips/TripMembers';
-import TripMemories from './pages/trips/TripMemories';
-import TripChat from './pages/trips/TripChat';
-import CreateTrip from './pages/trips/CreateTrip';
 import Profile from './pages/profile/Profile';
 import LandingRoute from './components/auth/LandingRoute';
 import PublicRoute from './components/auth/PublicRoute';
+import { MyTripsPage } from '@/features/trips/list';
+import { CreateTripPage } from '@/features/trips/create';
+import { TripDashboardPage } from '@/features/trips/dashboard';
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
   <>
@@ -142,7 +135,7 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <MyTrips />
+                <MyTripsPage />
               </AppLayout>
             </ProtectedRoute>
           }
@@ -153,18 +146,18 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <CreateTrip />
+                <CreateTripPage />
               </AppLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* Trip nested routes with shared TripDashboard layout */}
+        {/* Trip nested routes with feature-first dashboard */}
         <Route
           path="/trips/:tripId/*"
           element={
             <ProtectedRoute>
-              <TripDashboard />
+              <TripDashboardPage />
             </ProtectedRoute>
           }
         />
