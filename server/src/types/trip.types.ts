@@ -1,4 +1,17 @@
-import { TripStatus, TripCategory } from '../models/trip.model';
+import { TripLifecycleStatus, TripCategory } from '../models/trip.model';
+
+/**
+ * Location DTO (unified structure for source and destination)
+ */
+export interface LocationDTO {
+  name: string;
+  address?: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  placeId?: string;
+}
 
 /**
  * DTO for creating a new trip
@@ -8,20 +21,8 @@ export interface CreateTripDTO {
   description?: string;
   startDate: string | Date;
   endDate: string | Date;
-  mainDestination: string;
-  sourceLocation?: {
-    name: string;
-    address?: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-    placeId?: string;
-  };
-  destinationCoordinates?: {
-    lat: number;
-    lng: number;
-  };
+  sourceLocation?: LocationDTO;
+  destinationLocation: LocationDTO;
   category?: TripCategory | string;
   tags?: string[];
   isPublic?: boolean;
@@ -35,24 +36,12 @@ export interface UpdateTripDTO {
   description?: string;
   startDate?: string | Date;
   endDate?: string | Date;
-  mainDestination?: string;
-  sourceLocation?: {
-    name: string;
-    address?: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-    placeId?: string;
-  };
-  destinationCoordinates?: {
-    lat: number;
-    lng: number;
-  };
+  sourceLocation?: LocationDTO;
+  destinationLocation?: LocationDTO;
   category?: TripCategory | string;
   tags?: string[];
   isPublic?: boolean;
-  status?: TripStatus;
+  lifecycleStatus?: TripLifecycleStatus;
 }
 
 /**
@@ -60,7 +49,7 @@ export interface UpdateTripDTO {
  */
 export interface TripQueryFilters {
   userId?: string;
-  status?: TripStatus;
+  lifecycleStatus?: TripLifecycleStatus;
   category?: TripCategory | string;
   isPublic?: boolean;
   isFeatured?: boolean;
@@ -71,7 +60,7 @@ export interface TripQueryFilters {
   destination?: string;
   page?: number;
   limit?: number;
-  sortBy?: 'createdAt' | 'startDate' | 'viewsCount' | 'likesCount' | 'updatedAt';
+  sortBy?: 'createdAt' | 'startDate' | 'engagement.views' | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
 }
 

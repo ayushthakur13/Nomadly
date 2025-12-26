@@ -4,8 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchTripById,
   publishTrip,
-  unpublishTrip,
-  deleteTrip
+  unpublishTrip
 } from '../../store/tripsSlice';
 import AppLayout from '../../components/layout/AppLayout';
 import { TripLayout, TripOverview } from '../../components/trip-dashboard';
@@ -32,20 +31,6 @@ const TripDashboard = () => {
       dispatch(fetchTripById(tripId) as any);
     }
   }, [dispatch, tripId]);
-
-  // Handle trip delete
-  const handleDeleteTrip = async () => {
-    const confirmed = window.confirm('Are you sure you want to delete this trip?');
-    if (!confirmed) return;
-
-    try {
-      await dispatch(deleteTrip(tripId!) as any).unwrap();
-      toast.success('Trip deleted successfully');
-      navigate('/trips');
-    } catch (error: any) {
-      toast.error(error || 'Failed to delete trip');
-    }
-  };
 
   // Handle trip publish/unpublish
   const handlePublishToggle = async () => {
@@ -127,7 +112,7 @@ const TripDashboard = () => {
         isOwner={isOwner}
         onEditClick={() => {}}
         onPublishToggle={handlePublishToggle}
-        onDeleteClick={handleDeleteTrip}
+        onDeleteClick={() => {}}
       >
         {renderContent()}
       </TripLayout>

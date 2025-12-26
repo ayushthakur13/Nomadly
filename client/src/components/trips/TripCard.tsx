@@ -217,7 +217,7 @@ const TripCard = ({
               className="text-emerald-500 flex-shrink-0"
             />
             <p className="text-sm font-medium truncate">
-              {trip.mainDestination}
+              {trip.destinationLocation?.name || trip.mainDestination || '—'}
             </p>
           </div>
           <p className="text-xs text-gray-500">{formatDateRange()}</p>

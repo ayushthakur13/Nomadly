@@ -156,7 +156,7 @@ const Explore = () => {
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-gray-600 text-sm">
                       <i className="fas fa-map-marker-alt w-5 text-emerald-600"></i>
-                      <span className="ml-2">{trip.mainDestination}</span>
+                      <span className="ml-2">{trip.destinationLocation?.name || trip.mainDestination || '—'}</span>
                     </div>
 
                     <div className="flex items-center text-gray-600 text-sm">

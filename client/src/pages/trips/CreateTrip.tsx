@@ -19,8 +19,12 @@ interface TripFormData {
     coordinates: { lat: number; lng: number };
     placeId?: string;
   };
-  mainDestination: string;
-  destinationCoordinates?: { lat: number; lng: number };
+  destinationLocation?: {
+    name: string;
+    address?: string;
+    coordinates: { lat: number; lng: number };
+    placeId?: string;
+  };
   isPublic: boolean;
   coverImage?: File;
 }
@@ -38,7 +42,7 @@ const CreateTrip: React.FC = () => {
     category: "",
     startDate: "",
     endDate: "",
-    mainDestination: "",
+    destinationLocation: undefined,
     isPublic: false,
   });
 
@@ -82,8 +86,8 @@ const CreateTrip: React.FC = () => {
         if (end < start)
           newErrors.endDate = "End date must be after start date";
       }
-      if (!formData.mainDestination.trim()) {
-        newErrors.mainDestination = "Destination is required";
+      if (!formData.destinationLocation?.name.trim()) {
+        newErrors.destinationLocation = "Destination is required";
       }
     }
 
@@ -118,8 +122,12 @@ const CreateTrip: React.FC = () => {
       } else {
         setFormData((prev) => ({
           ...prev,
-          mainDestination: location.name,
-          destinationCoordinates: { lat: location.lat, lng: location.lng },
+          destinationLocation: {
+            name: location.name,
+            address: location.address,
+            coordinates: { lat: location.lat, lng: location.lng },
+            placeId: location.placeId,
+          },
         }));
       }
     },
@@ -186,8 +194,7 @@ const CreateTrip: React.FC = () => {
         startDate: formData.startDate,
         endDate: formData.endDate,
         sourceLocation: formData.sourceLocation,
-        mainDestination: formData.mainDestination.trim(),
-        destinationCoordinates: formData.destinationCoordinates,
+        destinationLocation: formData.destinationLocation,
         isPublic: formData.isPublic,
       };
 
@@ -399,26 +406,26 @@ const CreateTrip: React.FC = () => {
                     onSelect={(location) =>
                       handleLocationSelect(location, "destination")
                     }
-                    initialValue={formData.mainDestination}
+                    initialValue={formData.destinationLocation?.name || ""}
                     placeholder="Where are you going?"
                   />
-                  {formData.mainDestination && (
+                  {formData.destinationLocation && (
                     <div className="mt-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                       <p className="font-semibold text-emerald-900">
-                        {formData.mainDestination}
+                        {formData.destinationLocation.name}
                       </p>
-                      {formData.destinationCoordinates && (
+                      {formData.destinationLocation.coordinates && (
                         <p className="text-sm text-emerald-700">
-                          {formData.destinationCoordinates.lat.toFixed(4)},
+                          {formData.destinationLocation.coordinates.lat.toFixed(4)},
                           &nbsp;
-                          {formData.destinationCoordinates.lng.toFixed(4)}
+                          {formData.destinationLocation.coordinates.lng.toFixed(4)}
                         </p>
                       )}
                     </div>
                   )}
-                  {errors.mainDestination && (
+                  {errors.destinationLocation && (
                     <p className="text-red-600 text-sm mt-1">
-                      {errors.mainDestination}
+                      {errors.destinationLocation}
                     </p>
                   )}
                 </div>
@@ -575,7 +582,7 @@ const CreateTrip: React.FC = () => {
                     </div>
                     <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
                       <p className="text-xs text-gray-500 mb-1">Destination</p>
-                      <p className="font-semibold text-gray-900 truncate">{formData.mainDestination || '—'}</p>
+                      <p className="font-semibold text-gray-900 truncate">{formData.destinationLocation?.name || '—'}</p>
                     </div>
                     <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
                       <p className="text-xs text-gray-500 mb-1">Category</p>

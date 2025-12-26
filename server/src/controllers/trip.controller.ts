@@ -3,7 +3,7 @@ import tripService from '../services/trip.service';
 import mapService from '../services/map.service';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters } from '../types/trip.types';
 import { deleteFromCloudinary } from '../utils/cloudinary.utils';
-import { TripStatus } from '../models/trip.model';
+import { TripLifecycleStatus } from '../models/trip.model';
 
 /**
  * Extended Request with authenticated user
@@ -37,7 +37,7 @@ class TripController {
 
       const filters: TripQueryFilters = {
         isPublic: true,
-        status: TripStatus.UPCOMING,
+        lifecycleStatus: TripLifecycleStatus.PUBLISHED,
         category: category as string,
         search: search as string,
         page: page ? Number(page) : 1,
@@ -84,8 +84,8 @@ class TripController {
         return;
       }
 
-      if (!tripData.mainDestination) {
-        res.status(400).json({ success: false, message: 'Main destination is required' });
+      if (!tripData.destinationLocation) {
+        res.status(400).json({ success: false, message: 'Destination location is required' });
         return;
       }
 
@@ -131,16 +131,16 @@ class TripController {
         return;
       }
 
-      const { status, category, search, sort = 'createdAt', order = 'desc', page, limit } = req.query;
+      const { status: lifecycleStatus, category, search, sort = 'createdAt', order = 'desc', page, limit } = req.query;
 
       const filters: TripQueryFilters = {
         userId,
-        status: status as TripStatus,
+        lifecycleStatus: lifecycleStatus as TripLifecycleStatus,
         category: category as string,
         search: search as string,
         page: page ? Number(page) : 1,
         limit: limit ? Number(limit) : 100,
-        sortBy: sort as 'createdAt' | 'startDate' | 'viewsCount' | 'likesCount' | 'updatedAt',
+        sortBy: (sort as string) as 'createdAt' | 'startDate' | 'engagement.views' | 'updatedAt',
         sortOrder: order as 'asc' | 'desc'
       };
 

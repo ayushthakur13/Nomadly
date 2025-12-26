@@ -11,13 +11,12 @@ export interface ITripMember {
 }
 
 /**
- * Trip Status Enum
+ * Trip Lifecycle Status Enum
  */
-export enum TripStatus {
+export enum TripLifecycleStatus {
   DRAFT = 'draft',
-  UPCOMING = 'upcoming',
-  ONGOING = 'ongoing',
-  COMPLETED = 'completed'
+  PUBLISHED = 'published',
+  ARCHIVED = 'archived',
 }
 
 /**
@@ -37,16 +36,27 @@ export enum TripCategory {
 }
 
 /**
- * Location Interface
+ * Location Interface (Canonical GeoJSON-style location)
  */
 export interface ILocation {
-  name: string;
-  address?: string;
-  coordinates: {
-    lat: number;
-    lng: number;
+  name: string;              // Display name (Lucknow, Goa, etc.)
+  address?: string;          // Optional formatted address
+  placeId?: string;          // Google / Mapbox place id
+  point: {
+    type: 'Point';
+    coordinates: [number, number]; // [lng, lat]
   };
-  placeId?: string;
+}
+
+/**
+ * Engagement Counter Interface
+ */
+export interface IEngagement {
+  likes: number;
+  saves: number;
+  shares: number;
+  views: number;
+  clones: number;
 }
 
 /**
@@ -55,44 +65,36 @@ export interface ILocation {
 export interface ITrip extends Document {
   _id: Types.ObjectId;
   tripName: string;
-  slug: string;
+  slug?: string;
   description?: string;
   startDate: Date;
   endDate: Date;
-  mainDestination: string;
   sourceLocation?: ILocation;
-  destinationCoordinates?: {
-    lat: number;
-    lng: number;
-  };
-  destinationPoint?: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
+  destinationLocation: ILocation;
   coverImageUrl?: string;
   coverImagePublicId?: string;
   category?: TripCategory | string;
   tags?: string[];
   isPublic: boolean;
   isFeatured: boolean;
-  status: TripStatus;
+  lifecycleStatus: TripLifecycleStatus;
   createdBy: Types.ObjectId;
   members: ITripMember[];
   destinations: Types.ObjectId[];
   tasksCount: number;
-  membersCount: number;
-  likesCount: number;
-  savesCount: number;
-  sharesCount: number;
+  membersCount: number; // Cached value derived from members.length - always update from service layer
+  engagement: IEngagement;
   budgetSummary?: {
     total: number;
     spent: number;
-    remaining: number;
+    // remaining is redundant - calculated as total - spent
   };
-  viewsCount: number;
-  clonesCount: number;
   createdAt: Date;
   updatedAt: Date;
+  // Derived virtuals
+  timeStatus?: 'upcoming' | 'ongoing' | 'completed';
+  isOngoing?: boolean;
+  durationDays?: number;
 }
 
 /**
@@ -124,6 +126,60 @@ const TripMemberSchema = new Schema<ITripMember>(
 );
 
 /**
+ * Location Schema (embedded - unified for source and destination)
+ */
+const LocationSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    address: {
+      type: String,
+      trim: true
+    },
+    placeId: {
+      type: String
+    },
+    point: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [lng, lat] - GeoJSON standard
+        required: true,
+        validate: {
+          validator: function(v: any) {
+            return Array.isArray(v) && v.length === 2 &&
+              Number.isFinite(v[0]) && Number.isFinite(v[1]) &&
+              v[0] >= -180 && v[0] <= 180 && v[1] >= -90 && v[1] <= 90;
+          },
+          message: 'Coordinates must be valid [lng, lat] pair'
+        }
+      }
+    }
+  },
+  { _id: false }
+);
+
+/**
+ * Engagement Schema (grouped counters)
+ */
+const EngagementSchema = new Schema<IEngagement>(
+  {
+    likes: { type: Number, default: 0, min: 0 },
+    saves: { type: Number, default: 0, min: 0 },
+    shares: { type: Number, default: 0, min: 0 },
+    views: { type: Number, default: 0, min: 0 },
+    clones: { type: Number, default: 0, min: 0 }
+  },
+  { _id: false }
+);
+
+/**
  * Trip Schema Definition
  */
 const tripSchema = new Schema<ITrip>(
@@ -138,6 +194,7 @@ const tripSchema = new Schema<ITrip>(
     slug: {
       type: String,
       unique: true,
+      sparse: true,
       index: true
     },
     description: {
@@ -160,50 +217,44 @@ const tripSchema = new Schema<ITrip>(
         message: 'End date must be after or equal to start date'
       }
     },
-    mainDestination: {
-      type: String,
-      required: [true, 'Main destination is required'],
-      index: true,
-      trim: true
-    },
     sourceLocation: {
-      name: { type: String },
-      address: { type: String },
-      coordinates: {
-        lat: { type: Number },
-        lng: { type: Number }
-      },
-      placeId: { type: String }
+      type: LocationSchema,
+      required: false
     },
-    destinationCoordinates: {
-      lat: { type: Number },
-      lng: { type: Number }
+    destinationLocation: {
+      type: LocationSchema,
+      required: [true, 'Destination location is required']
     },
-    destinationPoint: {
-      type: {
-        type: String,
-        enum: ['Point'],
-        default: 'Point'
-      },
-      coordinates: {
-        type: [Number],
-        default: [0, 0]
-      }
+    coverImageUrl: { 
+      type: String, 
+      default: null 
     },
-    coverImageUrl: { type: String, default: null },
-    coverImagePublicId: { type: String, default: null },
+    coverImagePublicId: { 
+      type: String, 
+      default: null 
+    },
     category: {
-      type: String,
-      enum: Object.values(TripCategory),
-      default: TripCategory.LEISURE
+      type: String
     },
-    tags: [{ type: String, trim: true, lowercase: true }],
-    isPublic: { type: Boolean, default: false, index: true },
-    isFeatured: { type: Boolean, default: false, index: true },
-    status: {
+    tags: [{ 
+      type: String, 
+      trim: true, 
+      lowercase: true 
+    }],
+    isPublic: { 
+      type: Boolean, 
+      default: false, 
+      index: true 
+    },
+    isFeatured: { 
+      type: Boolean, 
+      default: false, 
+      index: true 
+    },
+    lifecycleStatus: {
       type: String,
-      enum: Object.values(TripStatus),
-      default: TripStatus.DRAFT,
+      enum: Object.values(TripLifecycleStatus),
+      default: TripLifecycleStatus.DRAFT,
       index: true
     },
     createdBy: {
@@ -212,20 +263,40 @@ const tripSchema = new Schema<ITrip>(
       required: [true, 'Trip creator is required'],
       index: true
     },
-    members: { type: [TripMemberSchema], default: [] },
-    destinations: [{ type: Schema.Types.ObjectId, ref: 'Destination' }],
-    tasksCount: { type: Number, default: 0, min: 0 },
-    membersCount: { type: Number, default: 1, min: 0 },
-    likesCount: { type: Number, default: 0, min: 0 },
-    savesCount: { type: Number, default: 0, min: 0 },
-    sharesCount: { type: Number, default: 0, min: 0 },
+    members: { 
+      type: [TripMemberSchema], 
+      default: [] 
+    },
+    destinations: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Destination' 
+    }],
+    tasksCount: { 
+      type: Number, 
+      default: 0, 
+      min: 0 
+    },
+    membersCount: { 
+      type: Number, 
+      default: 1, 
+      min: 0 
+      // Cached value for read performance - always update from members.length in service layer
+    },
+    engagement: {
+      type: EngagementSchema,
+      default: () => ({
+        likes: 0,
+        saves: 0,
+        shares: 0,
+        views: 0,
+        clones: 0
+      })
+    },
     budgetSummary: {
       total: { type: Number, default: 0 },
-      spent: { type: Number, default: 0 },
-      remaining: { type: Number, default: 0 }
-    },
-    viewsCount: { type: Number, default: 0, min: 0 },
-    clonesCount: { type: Number, default: 0, min: 0 }
+      spent: { type: Number, default: 0 }
+      // remaining is redundant - calculated as total - spent
+    }
   },
   {
     timestamps: true,
@@ -237,10 +308,19 @@ const tripSchema = new Schema<ITrip>(
 // Compound indexes for efficient querying
 tripSchema.index({ createdBy: 1, createdAt: -1 });
 tripSchema.index({ isPublic: 1, isFeatured: 1, createdAt: -1 });
-tripSchema.index({ isPublic: 1, status: 1 });
+tripSchema.index({ isPublic: 1, lifecycleStatus: 1 });
 tripSchema.index({ startDate: 1, endDate: 1 });
-tripSchema.index({ tripName: 'text', mainDestination: 'text', description: 'text' });
-tripSchema.index({ 'destinationPoint': '2dsphere' });
+tripSchema.index({ tripName: 'text', 'destinationLocation.name': 'text', description: 'text' });
+tripSchema.index({ 'destinationLocation.point': '2dsphere' });
+
+/**
+ * Pre-save hook: Sync membersCount with members.length
+ * Ensures membersCount stays in sync with the members array
+ */
+tripSchema.pre<ITrip>('save', function(next) {
+  this.membersCount = this.members.length;
+  next();
+});
 
 /**
  * Virtual: Trip duration in days
@@ -251,9 +331,19 @@ tripSchema.virtual('durationDays').get(function(this: ITrip) {
 });
 
 /**
- * Virtual: Is trip active (ongoing)
+ * Virtual: Time-based status (derived from dates)
  */
-tripSchema.virtual('isActive').get(function(this: ITrip) {
+tripSchema.virtual('timeStatus').get(function(this: ITrip) {
+  const now = new Date();
+  if (now < this.startDate) return 'upcoming';
+  if (now > this.endDate) return 'completed';
+  return 'ongoing';
+});
+
+/**
+ * Virtual: Is trip ongoing
+ */
+tripSchema.virtual('isOngoing').get(function(this: ITrip) {
   const now = new Date();
   return now >= this.startDate && now <= this.endDate;
 });

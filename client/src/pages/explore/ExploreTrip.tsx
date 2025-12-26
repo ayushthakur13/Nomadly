@@ -48,7 +48,7 @@ const ExploreTrip = () => {
                 {trip.tripName}
               </h1>
               <p className="text-xl text-gray-600 mb-4">
-                {trip.mainDestination}
+                {trip.destinationLocation?.name || trip.mainDestination}
               </p>
               <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-6">
                 <div>

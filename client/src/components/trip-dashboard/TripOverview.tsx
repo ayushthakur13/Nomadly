@@ -4,7 +4,10 @@ import Icon from '../icon/Icon';
 interface OverviewProps {
   trip: {
     tripName: string;
-    mainDestination: string;
+    destinationLocation?: {
+      name: string;
+    };
+    mainDestination?: string;
     startDate: string;
     endDate: string;
     category: string;

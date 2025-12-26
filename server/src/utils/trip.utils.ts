@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import slugify from 'slugify';
-import Trip, { ITrip, TripStatus } from '../models/trip.model';
+import Trip, { ITrip, TripLifecycleStatus } from '../models/trip.model';
 
 /**
  * Utility functions for Trip operations
@@ -20,43 +20,7 @@ export async function generateUniqueSlug(tripName: string, tripId?: Types.Object
     counter++;
   }
   
-  return slug;
-}
-
-/**
- * Calculate trip status based on dates (preserves draft status)
- */
-export function calculateTripStatus(startDate: Date, endDate: Date, currentStatus: TripStatus): TripStatus {
-  // Don't auto-update draft status
-  if (currentStatus === TripStatus.DRAFT) {
-    return TripStatus.DRAFT;
-  }
-  
-  const now = new Date();
-  
-  if (now < startDate) {
-    return TripStatus.UPCOMING;
-  } else if (now >= startDate && now <= endDate) {
-    return TripStatus.ONGOING;
-  } else {
-    return TripStatus.COMPLETED;
-  }
-}
-
-/**
- * Calculate trip status based on dates (for publishing - ignores draft)
- */
-export function calculateTripStatusForPublish(startDate: Date, endDate: Date): TripStatus {
-  const now = new Date();
-  
-  if (now < startDate) {
-    return TripStatus.UPCOMING;
-  } else if (now >= startDate && now <= endDate) {
-    return TripStatus.ONGOING;
-  } else {
-    return TripStatus.COMPLETED;
-  }
-}
+  return slug;}
 
 /**
  * Check if user is member of trip
@@ -217,8 +181,6 @@ export function validateTripDates(startDate: Date, endDate: Date): { valid: bool
 
 export default {
   generateUniqueSlug,
-  calculateTripStatus,
-  calculateTripStatusForPublish,
   isTripMember,
   getMemberRole,
   canEditTrip,

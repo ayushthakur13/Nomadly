@@ -176,7 +176,13 @@ const tripsSlice = createSlice({
       .addCase(updateTrip.fulfilled, (state, action) => { 
         state.updateLoading = false; 
         const payload: any = action.payload || {};
-        state.selectedTrip = (payload.data && payload.data.trip) || payload.trip || state.selectedTrip;
+        const updatedTrip = (payload.data && payload.data.trip) || payload.trip;
+        if (updatedTrip && state.selectedTrip) {
+          // Merge updated data with existing trip to preserve all fields (especially createdBy)
+          state.selectedTrip = { ...state.selectedTrip, ...updatedTrip };
+        } else if (updatedTrip) {
+          state.selectedTrip = updatedTrip;
+        }
       })
       .addCase(updateTrip.rejected, (state, action: any) => { state.updateLoading = false; state.error = action.payload; })
       .addCase(deleteTrip.pending, (state) => { state.deleteLoading = true; state.error = null; })

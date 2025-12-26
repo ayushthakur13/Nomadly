@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import Trip, { ITrip, TripStatus } from '../models/trip.model';
+import Trip, { ITrip, TripLifecycleStatus } from '../models/trip.model';
 // Ensure Destination model is registered before population
 import '../models/destination.model';
 import User from '../models/user.model';
@@ -16,20 +16,17 @@ class TripService {
    * Create a new trip
    */
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
-    // Validate coordinates if provided
-    if (data.destinationCoordinates) {
-      const { lat, lng } = data.destinationCoordinates;
-      if (!mapService.validateCoordinates(lat, lng)) {
-        throw new Error('Invalid destination coordinates');
-      }
+    // Validate and prepare destination location
+    if (!data.destinationLocation) {
+      throw new Error('Destination location is required');
+    }
+    
+    const { lat: destLat, lng: destLng } = data.destinationLocation.coordinates;
+    if (!mapService.validateCoordinates(destLat, destLng)) {
+      throw new Error('Invalid destination coordinates');
     }
 
-    // Prepare destinationPoint (GeoJSON) if coordinates exist
-    let destinationPoint: any = undefined;
-    if (data.destinationCoordinates) {
-      destinationPoint = mapService.buildGeoPoint(data.destinationCoordinates.lat, data.destinationCoordinates.lng);
-    }
-
+    // Validate source location if provided
     if (data.sourceLocation?.coordinates) {
       const { lat, lng } = data.sourceLocation.coordinates;
       if (!mapService.validateCoordinates(lat, lng)) {
@@ -48,14 +45,32 @@ class TripService {
     // Generate unique slug
     const slug = await tripUtils.generateUniqueSlug(data.tripName);
 
-    // Create trip data - exclude destinationCoordinates as it's converted to destinationPoint
-    const { destinationCoordinates, ...cleanData } = data;
+    // Convert coordinates to GeoJSON Point format [lng, lat]
+    const destinationLocation = {
+      ...data.destinationLocation,
+      point: mapService.buildGeoPoint(destLat, destLng)
+    };
+
+    const sourceLocation = data.sourceLocation ? {
+      ...data.sourceLocation,
+      point: mapService.buildGeoPoint(
+        data.sourceLocation.coordinates.lat,
+        data.sourceLocation.coordinates.lng
+      )
+    } : undefined;
     
     const tripData: any = {
-      ...cleanData,
+      tripName: data.tripName,
+      description: data.description,
       slug,
       startDate,
       endDate,
+      destinationLocation,
+      sourceLocation,
+      category: data.category,
+      tags: data.tags || [],
+      isPublic: data.isPublic || false,
+      lifecycleStatus: TripLifecycleStatus.DRAFT,
       createdBy: new Types.ObjectId(userId),
       members: [
         {
@@ -63,14 +78,9 @@ class TripService {
           role: 'creator' as const,
           joinedAt: new Date()
         }
-      ],
-      membersCount: 1,
-      status: TripStatus.DRAFT
+      ]
+      // membersCount will be derived from members.length
     };
-
-    if (destinationPoint) {
-      tripData.destinationPoint = destinationPoint;
-    }
 
     const trip = new Trip(tripData);
     await trip.save();
@@ -87,7 +97,7 @@ class TripService {
   async getTrips(filters: TripQueryFilters, requestingUserId?: string) {
     const {
       userId,
-      status,
+      lifecycleStatus,
       category,
       isPublic,
       isFeatured,
@@ -125,7 +135,7 @@ class TripService {
     }
 
     // Status and category filters
-    if (status) query.status = status;
+    if (lifecycleStatus) query.lifecycleStatus = lifecycleStatus;
     if (category) query.category = category;
     if (isPublic !== undefined) query.isPublic = isPublic;
     if (isFeatured !== undefined) query.isFeatured = isFeatured;
@@ -136,7 +146,7 @@ class TripService {
         $or: [
           { tripName: { $regex: search, $options: 'i' } },
           { description: { $regex: search, $options: 'i' } },
-          { mainDestination: { $regex: search, $options: 'i' } }
+          { 'destinationLocation.name': { $regex: search, $options: 'i' } }
         ]
       });
     }
@@ -149,7 +159,7 @@ class TripService {
     }
 
     if (destination) {
-      query.mainDestination = { $regex: destination, $options: 'i' };
+      query['destinationLocation.name'] = { $regex: destination, $options: 'i' };
     }
 
     if (startDateFrom || startDateTo) {
@@ -227,7 +237,7 @@ class TripService {
     // Increment view count (only if not member)
     const isMember = requestingUserId && tripUtils.isTripMember(trip as ITrip, requestingUserId);
     if (!isMember) {
-      await Trip.findByIdAndUpdate(trip._id, { $inc: { viewsCount: 1 } });
+      await Trip.findByIdAndUpdate(trip._id, { $inc: { 'engagement.views': 1 } });
     }
 
     return trip as ITrip;
@@ -245,20 +255,28 @@ class TripService {
       throw new Error('INSUFFICIENT_PERMISSIONS');
     }
 
-    // Validate coordinates and prepare destinationPoint
-    if (updates.destinationCoordinates) {
-      const { lat, lng } = updates.destinationCoordinates;
+    // Process destination location if provided
+    if (updates.destinationLocation) {
+      const { lat, lng } = updates.destinationLocation.coordinates;
       if (!mapService.validateCoordinates(lat, lng)) {
         throw new Error('Invalid destination coordinates');
       }
-      (updates as any).destinationPoint = mapService.buildGeoPoint(lat, lng);
+      (updates as any).destinationLocation = {
+        ...updates.destinationLocation,
+        point: mapService.buildGeoPoint(lat, lng)
+      };
     }
 
-    if (updates.sourceLocation?.coordinates) {
+    // Process source location if provided
+    if (updates.sourceLocation) {
       const { lat, lng } = updates.sourceLocation.coordinates;
       if (!mapService.validateCoordinates(lat, lng)) {
         throw new Error('Invalid source coordinates');
       }
+      (updates as any).sourceLocation = {
+        ...updates.sourceLocation,
+        point: mapService.buildGeoPoint(lat, lng)
+      };
     }
 
     // Validate dates
@@ -282,8 +300,13 @@ class TripService {
     if (updates.startDate) updates.startDate = new Date(updates.startDate);
     if (updates.endDate) updates.endDate = new Date(updates.endDate);
 
-    Object.assign(trip, updates);
+    // Merge with existing trip data (preserve createdBy and other immutable fields)
+    const updatedTrip = { ...trip.toObject(), ...updates };
+    Object.assign(trip, updatedTrip);
     await trip.save();
+
+    // Populate createdBy to match the structure from getTripById
+    await trip.populate('createdBy', 'username name profilePicUrl email');
 
     return trip;
   }
@@ -317,8 +340,7 @@ class TripService {
     }
 
     trip.isPublic = true;
-    // Update status to reflect current date position when publishing
-    trip.status = tripUtils.calculateTripStatusForPublish(trip.startDate, trip.endDate);
+    trip.lifecycleStatus = TripLifecycleStatus.PUBLISHED;
 
     await trip.save();
     return trip;
@@ -336,6 +358,8 @@ class TripService {
     }
 
     trip.isPublic = false;
+    trip.lifecycleStatus = TripLifecycleStatus.DRAFT;
+
     await trip.save();
     return trip;
   }
@@ -427,27 +451,29 @@ class TripService {
       isPublic: false,
       createdBy: new Types.ObjectId(userId),
       members: [{ userId: new Types.ObjectId(userId), role: 'creator' as const, joinedAt: new Date() }],
-      membersCount: 1,
-      status: TripStatus.DRAFT,
-      viewsCount: 0,
-      likesCount: 0,
-      savesCount: 0,
-      sharesCount: 0,
-      clonesCount: 0
+      lifecycleStatus: TripLifecycleStatus.DRAFT,
+      // membersCount will be derived from members.length via pre-save hook
+      engagement: {
+        likes: 0,
+        saves: 0,
+        shares: 0,
+        views: 0,
+        clones: 0
+      }
     };
 
     if (includeBudget && originalTrip.budgetSummary) {
       clonedData.budgetSummary = {
         total: originalTrip.budgetSummary.total,
-        spent: 0,
-        remaining: originalTrip.budgetSummary.total
+        spent: 0
+        // remaining is calculated as total - spent
       };
     }
 
     const clonedTrip = new Trip(clonedData);
     await clonedTrip.save();
 
-    await Trip.findByIdAndUpdate(tripId, { $inc: { clonesCount: 1 } });
+    await Trip.findByIdAndUpdate(tripId, { $inc: { 'engagement.clones': 1 } });
     await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': 1 } });
 
     return clonedTrip;
@@ -459,7 +485,7 @@ class TripService {
   async getFeaturedTrips(limit = 10): Promise<ITrip[]> {
     return Trip.find({ isFeatured: true, isPublic: true })
       .populate('createdBy', 'username name profilePicUrl')
-      .sort({ likesCount: -1, viewsCount: -1, createdAt: -1 })
+      .sort({ 'engagement.likes': -1, 'engagement.views': -1, createdAt: -1 })
       .limit(limit)
       .lean();
   }
@@ -470,11 +496,11 @@ class TripService {
   async searchByDestination(destinationName: string, limit = 10): Promise<ITrip[]> {
     return Trip.find({
       isPublic: true,
-      mainDestination: { $regex: destinationName, $options: 'i' }
+      'destinationLocation.name': { $regex: destinationName, $options: 'i' }
     })
       .limit(limit)
       .populate('createdBy', 'username name profilePicUrl')
-      .sort({ likesCount: -1, viewsCount: -1 })
+      .sort({ 'engagement.likes': -1, 'engagement.views': -1 })
       .lean();
   }
 
