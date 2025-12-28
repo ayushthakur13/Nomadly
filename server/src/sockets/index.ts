@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
-import Message from "../models/message.model";
-import User from "../models/user.model";
+import Message from "../modules/trips/chat/message.model";
+import User from "../modules/users/user.model";
 
 interface JoinRoomPayload {
   tripId: string;

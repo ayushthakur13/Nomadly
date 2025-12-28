@@ -9,10 +9,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Import routes
-import authRoutes from './routes/auth.routes';
-import tripRoutes from './routes/trip.routes';
-import userRoutes from './routes/user.routes';
+// Import routers from module barrels
+import { authRouter } from './modules/auth';
+import { tripRouter } from './modules/trips/core';
+import { userRouter } from './modules/users';
 
 dotenv.config();
 
@@ -41,9 +41,9 @@ app.get('/', (req: Request, res: Response) => {
     res.status(200).json({ message: "Nomadly API is alive" });
 })
 
-app.use('/api/auth', authRoutes);
-app.use('/api/trips', tripRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/auth', authRouter);
+app.use('/api/trips', tripRouter);
+app.use('/api/users', userRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
