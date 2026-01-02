@@ -519,7 +519,7 @@ class TripController {
 
   searchLocation = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { query, limit } = req.query;
+      const { query, limit, context, proximityLng, proximityLat } = req.query;
 
       if (!query || typeof query !== 'string') {
         res.status(400).json({ 
@@ -529,8 +529,25 @@ class TripController {
         return;
       }
 
+      // Parse proximity coordinates if provided
+      const proximity = (proximityLng && proximityLat) ? {
+        lng: parseFloat(proximityLng as string),
+        lat: parseFloat(proximityLat as string)
+      } : undefined;
+
+      // Validate proximity if provided
+      if (proximity && (!mapService.validateCoordinates(proximity.lat, proximity.lng))) {
+        res.status(400).json({ 
+          success: false, 
+          message: 'Invalid proximity coordinates' 
+        });
+        return;
+      }
+
       const results = await mapService.searchLocation(query, {
-        limit: limit ? parseInt(limit as string) : 5
+        limit: limit ? parseInt(limit as string) : 5,
+        context: (context === 'destination' || context === 'trip') ? context : 'trip',
+        proximity
       });
 
       res.json({

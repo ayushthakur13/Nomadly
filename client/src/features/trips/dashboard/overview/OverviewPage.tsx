@@ -1,4 +1,4 @@
-import { QuickInfoStrip, TimelineSnapshot, RoutePreview, NeedsAttention, PlanningStatus, QuickAccessCards } from './components';
+import { QuickInfoStrip, TimelineSnapshot, LocationPreview, NeedsAttention, PlanningStatus, QuickAccessCards } from './components';
 import { useOverviewMetrics, useQuickInfo, useTimelineProgress, useNeedsAttention, usePlanningStatus, useQuickAccessCards } from './hooks';
 import { useTripStatus } from '@/features/trips/dashboard/domain/hooks/useTripStatus';
 import { useNavigate } from 'react-router-dom';
@@ -8,10 +8,20 @@ interface OverviewPageProps {
     _id: string;
     tripName: string;
     sourceLocation?: {
-      name: string;
+      name?: string;
+      address?: string;
+      point?: {
+        type: 'Point';
+        coordinates: [number, number];
+      };
     };
     destinationLocation?: {
-      name: string;
+      name?: string;
+      address?: string;
+      point?: {
+        type: 'Point';
+        coordinates: [number, number];
+      };
     };
     mainDestination?: string;
     startDate: string;
@@ -49,10 +59,12 @@ const OverviewPage = ({ trip }: OverviewPageProps) => {
       {/* Section 2 & 3: Timeline Snapshot (left) + Route Preview (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <TimelineSnapshot model={timelineModel} />
-        <RoutePreview
-          sourceLocation={trip.sourceLocation?.name}
-          destinationName={trip.destinationLocation?.name || trip.mainDestination}
+        <LocationPreview
+          destinationLocation={trip.destinationLocation || { name: trip.mainDestination }}
+          sourceLocation={trip.sourceLocation}
+          hasDestinations={(metrics?.destinationStats?.total || 0) > 0}
           onAddStops={() => navigate(`/trips/${trip._id}/destinations`)}
+          onEditLocation={() => navigate(`/trips/${trip._id}/edit`)}
         />
       </div>
 

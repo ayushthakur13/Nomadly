@@ -44,6 +44,9 @@ import {
   Check,
   MoreVertical,
   Zap,
+  NotebookPen,
+  Pencil,
+  GripVertical,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -93,6 +96,9 @@ const ICONS: Record<string, LucideIcon> = {
   checkSquare: CheckCircle,
   moreVertical: MoreVertical,
   zap: Zap,
+  notes: NotebookPen,
+  pencil: Pencil,
+  grip: GripVertical,
 };
 
 type IconName = keyof typeof ICONS;

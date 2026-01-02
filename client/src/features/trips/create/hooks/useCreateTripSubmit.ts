@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { createTrip, updateTripCover } from '@/store/tripsSlice';
 import toast from 'react-hot-toast';
+import { useAsyncAction } from '@/hooks/useAsyncAction';
+import { TOAST_MESSAGES } from '@/constants/toastMessages';
 import { TripFormData } from './useCreateTripForm';
 
 /**
@@ -12,6 +14,16 @@ import { TripFormData } from './useCreateTripForm';
 export const useCreateTripSubmit = (onUpdateLoadingStates: (state: any) => void) => {
   const dispatch = useDispatch<any>();
   const navigate = useNavigate();
+  const createdTripIdRef = useRef<string | null>(null);
+  
+  const { execute: submitTrip, isLoading: isSubmitting } = useAsyncAction({
+    showToast: false,
+    onSuccess: () => {
+      if (createdTripIdRef.current) {
+        navigate(`/trips/${createdTripIdRef.current}`);
+      }
+    }
+  });
 
   const handleSubmit = useCallback(
     async (formData: TripFormData, lastStepChangeAt: number) => {
@@ -30,61 +42,60 @@ export const useCreateTripSubmit = (onUpdateLoadingStates: (state: any) => void)
       onUpdateLoadingStates({ loading: true });
 
       try {
-        const submitData = {
-          tripName: formData.tripName.trim(),
-          description: formData.description.trim(),
-          category: formData.category,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-          sourceLocation: formData.sourceLocation,
-          destinationLocation: formData.destinationLocation,
-          isPublic: formData.isPublic,
-        };
+        await submitTrip(async () => {
+          const submitData = {
+            tripName: formData.tripName.trim(),
+            description: formData.description.trim(),
+            category: formData.category,
+            startDate: formData.startDate,
+            endDate: formData.endDate,
+            sourceLocation: formData.sourceLocation,
+            destinationLocation: formData.destinationLocation,
+            isPublic: formData.isPublic,
+          };
 
-        const result = await dispatch(createTrip(submitData)).unwrap();
-        const createdId = result?.data?.trip?._id || result?.trip?._id;
+          const result = await dispatch(createTrip(submitData)).unwrap();
+          const createdId = result?.data?.trip?._id || result?.trip?._id;
+          createdTripIdRef.current = createdId;
 
-        // Upload cover image if selected
-        if (formData.coverImage && createdId) {
-          const coverFormData = new FormData();
-          coverFormData.append('image', formData.coverImage);
-          try {
-            onUpdateLoadingStates({ coverUploadLoading: true });
-            await dispatch(
-              updateTripCover({
-                tripId: createdId,
-                formData: coverFormData,
-              })
-            ).unwrap();
-            toast.success('Trip created successfully! 🎉');
-          } catch (e: any) {
-            console.warn('Cover upload failed after creation:', e);
-            const errorMsg =
-              e?.message ||
-              e?.data?.message ||
-              e ||
-              'Cover upload failed. You can set it from the trip dashboard.';
-            toast.error(errorMsg);
-          } finally {
-            onUpdateLoadingStates({ coverUploadLoading: false });
+          // Upload cover image if selected
+          if (formData.coverImage && createdId) {
+            const coverFormData = new FormData();
+            coverFormData.append('image', formData.coverImage);
+            try {
+              onUpdateLoadingStates({ coverUploadLoading: true });
+              await dispatch(
+                updateTripCover({
+                  tripId: createdId,
+                  formData: coverFormData,
+                })
+              ).unwrap();
+              toast.success(TOAST_MESSAGES.TRIP.CREATE_SUCCESS);
+            } catch (e: any) {
+              console.warn('Cover upload failed after creation:', e);
+              const errorMsg =
+                e?.message ||
+                e?.data?.message ||
+                e ||
+                'Cover upload failed. You can set it from the trip dashboard.';
+              toast.error(errorMsg);
+            } finally {
+              onUpdateLoadingStates({ coverUploadLoading: false });
+            }
+          } else {
+            toast.success(TOAST_MESSAGES.TRIP.CREATE_SUCCESS);
           }
-        } else {
-          toast.success('Trip created successfully! 🎉');
-        }
-
-        if (createdId) {
-          navigate(`/trips/${createdId}`);
-        }
+        });
 
         return true;
       } catch (error: any) {
-        toast.error(error || 'Failed to create trip');
+        toast.error(error || TOAST_MESSAGES.GENERIC.ERROR);
         return false;
       } finally {
         onUpdateLoadingStates({ loading: false });
       }
     },
-    [dispatch, navigate, onUpdateLoadingStates]
+    [dispatch, submitTrip, onUpdateLoadingStates]
   );
 
   return { handleSubmit };

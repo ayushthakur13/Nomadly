@@ -6,21 +6,28 @@ import api from '../../services/api';
 interface LocationResult {
   name: string;
   address?: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   placeId?: string;
+  isManual?: boolean; // Flag to indicate user manually entered this
 }
+
+export type SearchContext = 'trip' | 'destination';
 
 interface LocationSearchInputProps {
   onSelect: (location: LocationResult) => void;
   placeholder?: string;
   initialValue?: string;
+  searchContext?: SearchContext;
+  proximity?: { lng: number; lat: number };
 }
 
 const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
   onSelect,
   placeholder = 'Search location...',
   initialValue = '',
+  searchContext = 'trip',
+  proximity,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue);
   const [results, setResults] = useState<LocationResult[]>([]);
@@ -40,9 +47,14 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
 
         setLoading(true);
         try {
-          const response = await api.get('/trips/search-location', {
-            params: { query },
-          });
+          // Build params with context and proximity
+          const params: any = { query, context: searchContext };
+          if (proximity) {
+            params.proximityLng = proximity.lng;
+            params.proximityLat = proximity.lat;
+          }
+
+          const response = await api.get('/trips/search-location', { params });
           const locations = ((response as any)?.data?.data?.locations || []).map((loc: any) => ({
             name: loc?.name ?? loc?.text ?? (loc?.place_name ? String(loc.place_name).split(',')[0] : ''),
             address: loc?.address ?? loc?.place_name ?? undefined,
@@ -67,7 +79,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
           setLoading(false);
         }
       }, 300),
-    []
+    [searchContext, proximity]
   );
 
   useEffect(() => {
@@ -97,6 +109,17 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     onSelect(location);
   };
 
+  const handleManualEntry = () => {
+    if (!searchQuery.trim()) return;
+    const manualLocation: LocationResult = {
+      name: searchQuery.trim(),
+      isManual: true,
+    };
+    setSearchQuery(manualLocation.name);
+    setShowResults(false);
+    onSelect(manualLocation);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
@@ -120,34 +143,52 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
       </div>
 
       {/* Dropdown Results */}
-      {showResults && results.length > 0 && (
+      {showResults && searchQuery.length > 0 && !loading && (
         <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-          {results.map((location, index) => (
+          {results.length > 0 && results.map((location, index) => (
             <button
               key={index}
               type="button"
               onClick={() => handleSelect(location)}
-              className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+              className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 transition-colors"
             >
               <div className="flex items-start gap-3">
                 <Icon name="location" size={18} className="text-emerald-600 mt-0.5 flex-shrink-0" />
-                <div>
+                <div className="w-full">
                   <p className="font-semibold text-gray-900">{location.name}</p>
                   {location.address && <p className="text-xs text-gray-500">{location.address}</p>}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                  </p>
+                  {location.lat && location.lng && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                    </p>
+                  )}
                 </div>
               </div>
             </button>
           ))}
-        </div>
-      )}
-
-      {/* No Results */}
-      {showResults && searchQuery.length > 0 && results.length === 0 && !loading && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center">
-          <p className="text-gray-500">No locations found. Try a different search.</p>
+          
+          {/* Manual Entry Option - Always Available */}
+          <div className={results.length > 0 ? "border-t-2 border-gray-200" : ""}>
+            <button
+              type="button"
+              onClick={handleManualEntry}
+              className="w-full text-left px-4 py-3 hover:bg-emerald-50 transition-colors"
+            >
+              <div className="flex items-start gap-3">
+                <Icon name="edit" size={18} className="text-gray-500 mt-0.5 flex-shrink-0" />
+                <div className="w-full">
+                  <p className="font-medium text-gray-700">Use custom name</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    "{searchQuery.length > 40 ? searchQuery.substring(0, 40) + '...' : searchQuery}"
+                  </p>
+                  <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                    <Icon name="info" size={12} className="flex-shrink-0" />
+                    Maps and routes unavailable
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
       )}
     </div>

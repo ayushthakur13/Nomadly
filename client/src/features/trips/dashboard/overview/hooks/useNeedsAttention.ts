@@ -20,7 +20,7 @@ export const useNeedsAttention = (trip: any, stage: 'Upcoming' | 'Ongoing' | 'Pa
     if (!hasPrimaryDestination) {
       list.push({
         id: 'route',
-        title: 'No route yet',
+        title: 'No itinerary yet',
         why: 'Add your first stop to shape the journey.',
         cta: 'Add first stop',
         icon: 'map',

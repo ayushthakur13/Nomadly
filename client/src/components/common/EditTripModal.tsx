@@ -95,19 +95,27 @@ const EditTripModal = ({
   };
 
   const handleSourceSelect = useCallback((location: any) => {
-    setSourceLocation({
+    setSourceLocation(location.lat && location.lng ? {
       name: location.name,
       address: location.address,
       coordinates: { lat: location.lat, lng: location.lng },
+      placeId: location.placeId
+    } : {
+      name: location.name,
+      address: location.address,
       placeId: location.placeId
     });
   }, []);
 
   const handleDestinationSelect = useCallback((location: any) => {
-    setDestinationLocation({
+    setDestinationLocation(location.lat && location.lng ? {
       name: location.name,
       address: location.address,
       coordinates: { lat: location.lat, lng: location.lng },
+      placeId: location.placeId
+    } : {
+      name: location.name,
+      address: location.address,
       placeId: location.placeId
     });
   }, []);

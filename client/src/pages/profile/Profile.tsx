@@ -11,6 +11,8 @@ import {
   logout,
 } from "../../store/authSlice";
 import api from "../../services/api";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { TOAST_MESSAGES } from "../../constants/toastMessages";
 import AvatarManager from "../../components/profile/AvatarManager";
 import SecuritySection from "../../components/profile/SecuritySection";
 import { secureLogout } from "../../utils/auth";
@@ -28,7 +30,20 @@ export default function Profile() {
   const { user, loading } = useSelector((state: any) => state.auth);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const { execute: fetchProfile, isLoading: profileLoading } = useAsyncAction({
+    showToast: false
+  });
+  const { execute: updateAvatar, isLoading: uploadingAvatar } = useAsyncAction({
+    onSuccess: () => {
+      setAvatarPreview(null);
+      toast.success(TOAST_MESSAGES.PROFILE.AVATAR_UPDATE_SUCCESS);
+    },
+    errorMessage: "Failed to upload avatar"
+  });
+  const { execute: deleteAvatar, isLoading: deletingAvatar } = useAsyncAction({
+    onSuccess: () => toast.success(TOAST_MESSAGES.PROFILE.AVATAR_REMOVE_SUCCESS),
+    errorMessage: "Failed to remove avatar"
+  });
 
   const {
     register,
@@ -39,24 +54,17 @@ export default function Profile() {
   } = useForm<ProfileFormData>();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data } = await api.get("/users/me");
-        const profile = data.data.user;
-
-        reset({
-          username: profile.username ?? "",
-          name: profile.name ?? "",
-          bio: profile.bio ?? "",
-          isPublic: profile.isPublic ?? false,
-        });
-      } catch (err) {
-        toast.error("Failed to load profile");
-      }
-    };
-
-    fetchProfile();
-  }, [reset]);
+    fetchProfile(async () => {
+      const { data } = await api.get("/users/me");
+      const profile = data.data.user;
+      reset({
+        username: profile.username ?? "",
+        name: profile.name ?? "",
+        bio: profile.bio ?? "",
+        isPublic: profile.isPublic ?? false,
+      });
+    });
+  }, [reset, fetchProfile]);
 
   const onSubmit = async (data: ProfileFormData) => {
     const updates: any = {};
@@ -71,7 +79,7 @@ export default function Profile() {
       (data.username || "").trim() !== (user?.username || "");
 
     if (!usernameChanged && Object.keys(updates).length === 0) {
-      toast.error("No changes to save");
+      toast.error(TOAST_MESSAGES.GENERIC.ERROR);
       dispatch(updateProfileFailure("No changes"));
       return;
     }
@@ -87,7 +95,7 @@ export default function Profile() {
         latestUser = response.data.user;
         dispatch(updateProfileSuccess({ user: response.data.user }));
         anySuccess = true;
-        toast.success("Profile updated");
+        toast.success(TOAST_MESSAGES.PROFILE.UPDATE_SUCCESS);
       } catch (error: any) {
         const message =
           error?.response?.data?.message || "Failed to update profile";
@@ -109,7 +117,7 @@ export default function Profile() {
           latestUser = response.data.user;
           dispatch(updateProfileSuccess({ user: response.data.user }));
           anySuccess = true;
-          toast.success("Username updated");
+          toast.success(TOAST_MESSAGES.PROFILE.USERNAME_UPDATE_SUCCESS);
         } catch (error: any) {
           const msg =
             error?.response?.status === 409
@@ -136,74 +144,64 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Only JPG, PNG, and WebP images are allowed");
+      toast.error(TOAST_MESSAGES.IMAGE.INVALID_TYPE);
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be smaller than 5MB");
+      toast.error(TOAST_MESSAGES.IMAGE.TOO_LARGE(5));
       return;
     }
 
-    // Show preview
     const preview = URL.createObjectURL(file);
     setAvatarPreview(preview);
 
-    try {
-      setUploadingAvatar(true);
+    await updateAvatar(async () => {
       const formData = new FormData();
       formData.append("avatar", file);
-
       const { data: response } = await api.post("/users/me/avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
       dispatch(updateProfileSuccess({ user: response.data.user }));
-      toast.success("Avatar updated successfully");
-      setAvatarPreview(null);
       URL.revokeObjectURL(preview);
-    } catch (error: any) {
-      setAvatarPreview(null);
-      URL.revokeObjectURL(preview);
-      const errorMessage =
-        error.response?.data?.message || "Failed to upload avatar";
-      toast.error(errorMessage);
-    } finally {
-      setUploadingAvatar(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDeleteAvatar = async () => {
     if (!user?.profilePicUrl) return;
 
-    try {
-      setUploadingAvatar(true);
+    await deleteAvatar(async () => {
       const { data: response } = await api.delete("/users/me/avatar");
       dispatch(updateProfileSuccess({ user: response.data.user }));
-      toast.success("Avatar removed successfully");
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to remove avatar";
-      toast.error(errorMessage);
-    } finally {
-      setUploadingAvatar(false);
-    }
+    });
   };
 
   // Change password section
   const [hasPassword, setHasPassword] = useState<boolean>(false);
-  const [pwdLoading, setPwdLoading] = useState(false);
+  const { execute: changePassword, isLoading: pwdLoading } = useAsyncAction({
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success(TOAST_MESSAGES.PROFILE.PASSWORD_UPDATE_SUCCESS);
+    },
+    errorMessage: "Failed to update password"
+  });
+  const { execute: performLogout, isLoading: loggingOut } = useAsyncAction({
+    showToast: false,
+    onSuccess: () => {
+      dispatch(logout());
+      navigate('/', { replace: true });
+    }
+  });
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Fetch hasPassword from profile API (MVP local state)
-  // Avoids changing auth controller
   useEffect(() => {
     (async () => {
       try {
@@ -219,24 +217,15 @@ export default function Profile() {
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
-    try {
-      setPwdLoading(true);
+
+    await changePassword(async () => {
       const payload: any = { newPassword };
       if (hasPassword) payload.currentPassword = currentPassword;
       await api.patch("/users/me/password", payload);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      toast.success("Password updated");
-    } catch (error: any) {
-      const msg = error.response?.data?.message || "Failed to update password";
-      toast.error(msg);
-    } finally {
-      setPwdLoading(false);
-    }
+    });
   };
 
   const handleCancel = () => {
@@ -251,15 +240,9 @@ export default function Profile() {
   const bioValue = watch("bio") || "";
 
   const handleLogout = async () => {
-    try {
+    await performLogout(async () => {
       await secureLogout();
-      dispatch(logout());
-      toast.success('Logged out successfully');
-      navigate('/', { replace: true });
-    } catch (error) {
-      console.error('Logout failed:', error);
-      toast.error('Logout failed. Please try again.');
-    }
+    });
   };
 
   return (

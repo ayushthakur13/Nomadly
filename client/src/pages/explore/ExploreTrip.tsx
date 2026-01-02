@@ -1,33 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { useAsyncAction } from '../../hooks/useAsyncAction';
 import Navbar from '../../components/common/PublicNavbar';
 import Footer from '../../components/common/Footer';
-import toast from 'react-hot-toast';
 
 const ExploreTrip = () => {
   const { tripId } = useParams();
   const navigate = useNavigate();
   const [trip, setTrip] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { execute, isLoading: loading, error } = useAsyncAction({
+    showToast: true,
+    errorMessage: 'Failed to fetch trip details'
+  });
 
   useEffect(() => {
-    const fetchTrip = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    if (tripId) {
+      execute(async () => {
         const response = await api.get(`/trips/public/${tripId}`);
         setTrip(response.data.trip);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to fetch trip details');
-        toast.error(err.response?.data?.error || 'Failed to fetch trip details');
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (tripId) fetchTrip();
-  }, [tripId]);
+      });
+    }
+  }, [tripId, execute]);
 
   return (
     <div className="min-h-screen bg-gray-50">

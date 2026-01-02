@@ -1,11 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Icon from "../../components/icon/Icon";
 import { loginStart, loginSuccess, loginFailure } from "../../store/authSlice";
 import api from "../../services/api";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { TOAST_MESSAGES } from "../../constants/toastMessages";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
 
 const Signup = () => {
@@ -18,6 +19,13 @@ const Signup = () => {
     watch,
   } = useForm();
   const [showPassword, setShowPassword] = useState(false);
+  const { execute: signup, isLoading: isSubmitting } = useAsyncAction({
+    showToast: true,
+    errorMessage: TOAST_MESSAGES.GENERIC.ERROR,
+    onSuccess: () => {
+      // Success handled via Redux and automatic toast
+    }
+  });
 
   // Password strength meter
   const passwordValue: string = watch("password") || "";
@@ -39,9 +47,9 @@ const Signup = () => {
   const strengthTextColor = strength < 25 ? "text-red-600" : strength < 50 ? "text-amber-600" : "text-emerald-600";
 
   const onSubmit = async (data: any) => {
-    try {
-      dispatch(loginStart());
+    dispatch(loginStart());
 
+    await signup(async () => {
       const sanitizedUsername = data.username?.trim();
       const sanitizedEmail = data.email?.trim().toLowerCase();
       const sanitizedPassword = data.password?.trim();
@@ -72,13 +80,10 @@ const Signup = () => {
       }
 
       dispatch(loginSuccess({ token: accessToken, user }));
-      toast.success("Account created successfully!");
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || error.message || "Signup failed";
+    }).catch((err) => {
+      const errorMessage = err?.message || "Signup failed";
       dispatch(loginFailure(errorMessage));
-      toast.error(errorMessage);
-    }
+    });
   };
 
   return (

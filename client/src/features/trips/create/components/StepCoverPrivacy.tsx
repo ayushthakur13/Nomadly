@@ -1,5 +1,5 @@
 import Icon from '@/components/icon/Icon';
-import CoverImageUploader from '@/components/trips/CoverImageUploader';
+import CoverImageUploader from './CoverImageUploader';
 
 interface StepCoverPrivacyProps {
   coverImagePreview: string | null;
@@ -35,11 +35,11 @@ const StepCoverPrivacy = ({
 
       {/* Cover Image */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-3">Trip Cover Image (Optional)</label>
         <CoverImageUploader
+          preview={coverImagePreview}
+          onProcessingChange={setCoverProcessing}
           onImageSelect={onImageSelect}
-          onUploadStateChange={setCoverProcessing}
-          preview={coverImagePreview || undefined}
+          className="mb-2"
         />
         {!coverImagePreview && !coverProcessing && (
           <p className="text-sm text-gray-500 mt-2">Best for sharing and discovery. Totally optional!</p>

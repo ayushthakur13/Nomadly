@@ -29,6 +29,13 @@ export const uploadTripCover = multer({
   }),
 });
 
+export const uploadDestination = multer({
+  storage: createStorage({
+    folder: "nomadly/destinations",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+  }),
+});
+
 export const uploadMemory = multer({
   storage: createStorage({
     folder: "nomadly/memories",

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateTrip } from '@/store/tripsSlice';
 import { useTripHeaderMenu, useTripCoverUpload, useTripShare, useTripDelete } from './hooks';
 import { CoverImage, HeaderActions, TripTitle } from './components';
+import ImageLightbox from '@/features/trips/dashboard/modules/destinations/components/ImageLightbox';
 import { useTripStatus } from '@/features/trips/dashboard/domain/hooks/useTripStatus';
 import { useTripDateRange } from '@/features/trips/dashboard/domain/hooks/useTripDateRange';
 
@@ -53,6 +54,7 @@ const TripHeader = ({
   const { formattedDateRange } = useTripDateRange(trip.startDate, trip.endDate);
 
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCoverLightbox, setShowCoverLightbox] = useState(false);
 
   const handleEditSave = async (updates: any) => {
     try {
@@ -85,6 +87,7 @@ const TripHeader = ({
               coverLoading={coverLoading}
               onFileChange={handleCoverFileChange}
               onRemove={handleRemoveCover}
+              onViewImage={() => setShowCoverLightbox(true)}
               fileInputRef={fileInputRef}
             />
 
@@ -121,6 +124,14 @@ const TripHeader = ({
             />
           </div>
         </div>
+      )}
+
+      {showCoverLightbox && trip.coverImageUrl && (
+        <ImageLightbox
+          src={trip.coverImageUrl}
+          title={trip.tripName}
+          onClose={() => setShowCoverLightbox(false)}
+        />
       )}
     </div>
   );

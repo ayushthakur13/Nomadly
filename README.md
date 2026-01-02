@@ -30,10 +30,10 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 - ✅ Toggle trip visibility between public and private
 
 ### 📍 Destinations and Itineraries
-- 🚧 Multi stop trips with detailed destinations
-- 🚧 Location search with map integration
-- 🚧 Store coordinates for accurate mapping
-- 🚧 Visualize trips using routes and pins
+- ✅ Multi stop trips with detailed destinations
+- ✅ Location search with map integration
+- ⏳ Store coordinates for accurate mapping
+- ⏳ Visualize trips using routes and pins
 
 ### ✅ Task Management
 - 🚧 Create and assign tasks to trip members
@@ -128,29 +128,112 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 ### Backend
 ```bash
 src/
-├── config/
-├── controllers/
-├── services/
-├── routes/
-├── middlewares/
-├── models/
-├── utils/
-├── sockets/
-├── app.ts
-└── server.ts
+├── config/               # Configuration files (database, external services)
+├── modules/              # Feature modules with domain-driven design
+│   ├── auth/             # Authentication (login, register, Google OAuth, JWT)
+│   ├── users/            # User profiles and settings
+│   ├── trips/
+│   │   ├── core/         # Trip CRUD operations (model, controller, service, routes)
+│   │   ├── destinations/ # Multi-stop itinerary management
+│   │   ├── members/      # Trip member management and permissions
+│   │   ├── tasks/        # Trip tasks and to-do items
+│   │   ├── budget/       # Budget and expense tracking
+│   │   ├── accommodations/ # Lodging and booking management
+│   │   ├── memories/     # Photo uploads and media storage
+│   │   └── chat/         # Real-time trip chat
+│   └── maps/             # Map integration and location services
+├── shared/               # Shared utilities
+│   ├── middlewares/       # Auth, ownership verification, error handling
+│   ├── common-types/      # TypeScript interfaces and types
+│   └── utils/             # Helper functions
+├── sockets/              # WebSocket handlers for real-time features
+├── app.ts                # Express app configuration
+└── server.ts             # Server entry point
 ```
 
-### Client (key folders)
+### Client (Feature-Driven Organization)
 ```bash
 src/
-├── components/
-├── pages/
-├── store/
-├── services/
-├── hooks/
-├── utils/
-└── main.tsx
+├── assets/               # Static assets (icons, images, logos, illustrations)
+├── components/           # Reusable UI components by domain
+│   ├── auth/             # Google login, protected routes
+│   ├── common/           # Shared components (navbar, sidebar, modals, footer)
+│   ├── icon/             # Icon registry and component
+│   ├── landing/          # Landing page sections
+│   ├── layout/           # Main layout wrapper
+│   ├── profile/          # User profile components
+│   └── trips/            # Trip-related UI components
+├── constants/            # Centralized constants (toastMessages, etc.)
+├── features/             # Feature-specific modules with domain logic
+│   └── trips/            # Trip features (create, list, dashboard)
+├── hooks/                # Custom React hooks
+├── pages/                # Page-level components (routing destinations)
+├── services/             # API and external integrations
+├── store/                # Redux Toolkit slices (auth, trips, ui)
+├── styles/               # Global styles and animations
+├── utils/                # Utility functions (errorHandling, auth, debounce)
+└── main.tsx              # React app entry point
 ```
+
+---
+
+## 🏛️ Architecture & Patterns
+
+### Backend: Domain-Driven Modular Design
+Each module (auth, users, trips, etc.) follows a consistent pattern:
+
+```typescript
+// Module structure example: modules/auth/
+auth/
+├── auth.controller.ts  // Handle HTTP requests/responses
+├── auth.service.ts     // Business logic and database operations
+├── auth.middleware.ts  // Request validation and error handling
+├── auth.routes.ts      // Route definitions
+├── auth.types.ts       // TypeScript types and interfaces
+├── utils/              // Auth-specific utilities (JWT, CSRF)
+└── index.ts            // Module barrel export
+```
+
+**Key Patterns:**
+- **Separation of concerns**: Controller (HTTP layer) → Service (business logic) → Model (database)
+- **Middleware-based auth**: JWT verification, CSRF protection, ownership validation
+- **Error handling**: Centralized error codes and messages
+- **Type safety**: Full TypeScript coverage with strict types
+- **Database models**: Mongoose schemas with validation
+
+### Frontend: Feature-Driven + Centralized Patterns
+Organized by features with shared utilities:
+
+**Async Operation Management** - The `useAsyncAction` hook eliminates boilerplate:
+```typescript
+const { execute, isLoading, error } = useAsyncAction({
+  showToast: true,                    // Auto error toast
+  errorMessage: 'Custom message',
+  onSuccess: () => { /* callback */ }
+});
+
+await execute(async () => {
+  await api.saveData(data);
+  dispatch(updateState());
+});
+```
+
+**Centralized Utilities:**
+- **toastMessages.ts**: Unified messaging (AUTH, PROFILE, TRIP, IMAGE, GENERIC)
+- **errorHandling.ts**: Error extraction and display
+- **useNavigation.ts**: Navigation data and state
+- **useImageUpload.ts**: Image validation and upload
+
+**State Management Strategy:**
+- **Redux Toolkit**: Persisted state (auth token, user, trips)
+- **React Hooks**: Operation state (loading, errors)
+- **Local State**: UI state (modals, pickers, form focus)
+
+---
+
+## 🔧 Code Architecture & Patterns
+
+### Frontend Patterns Detail
 
 ---
 
@@ -158,7 +241,7 @@ src/
 
 ### Backend Setup
 ```bash
-git clone https://github.com/your-username/nomadly.git
+git clone https://github.com/ayushthakur13/nomadly.git
 cd nomadly/server
 npm install
 ```
@@ -180,7 +263,19 @@ cp .env.example .env
 npm run dev
 ```
 
+**Dependencies installed:**
+- React 18 + TypeScript
+- Tailwind CSS for styling
+- Redux Toolkit for state management
+- React Hook Form for form handling
+- Axios for HTTP requests
+- react-hot-toast for notifications
+- Mapbox GL for map visualization
+- Vite as build tool
+
 The client expects `VITE_API_URL` to point to your server (default `http://localhost:4444/api`). The server sets an httpOnly refresh token cookie and the client keeps the access token in memory, using a CSRF token for refresh calls.
+
+**Build optimization:** Uses Vite for fast development and optimized production builds with automatic code splitting.
 
 ### Two-terminal workflow
 - Terminal A (server): `cd server && npm run dev:tsx`
@@ -194,7 +289,7 @@ Optionally, create a root-level script with `concurrently` to run both at once.
 
 ### Server (.env)
 See [server/.env.example](server/.env.example) for a complete list, including:
-- `PORT`, `MONGO_URL`
+- `PORT`, `MONGO_URI`
 - `JWT_SECRET`, `JWT_REFRESH_SECRET`, optional expiries
 - `CLIENT_URL`, `CORS_ORIGIN`
 - `CLOUDINARY_*`
@@ -202,9 +297,9 @@ See [server/.env.example](server/.env.example) for a complete list, including:
 
 ### Client (.env)
 See [client/.env.example](client/.env.example):
-- `VITE_API_URL`
-- `VITE_GOOGLE_CLIENT_ID`
-- `VITE_MAPBOX_TOKEN`
+- `VITE_API_URL` — Backend API base URL (default: `http://localhost:4444/api`)
+- `VITE_GOOGLE_CLIENT_ID` — Google OAuth client ID for authentication
+- `VITE_MAPBOX_TOKEN` — Mapbox access token for map features
 
 ---
 
@@ -217,14 +312,51 @@ See [client/.env.example](client/.env.example):
 
 ---
 
-## 🔌 Minimal API Endpoints
-- `POST /api/auth/login` — username/email + password
-- `POST /api/auth/register` — create account
-- `POST /api/auth/google` — Google ID token sign-in
-- `POST /api/auth/refresh` — refresh access token (requires CSRF header)
-- `POST /api/auth/logout` — revoke refresh token
-- `GET /api/trips` — list trips (auth)
-- `POST /api/trips` — create trip (auth)
+## 🔌 Core API Endpoints
+
+### Authentication
+- `POST /api/auth/register` — Create account with email/password
+- `POST /api/auth/login` — Login with email/username + password
+- `POST /api/auth/google` — Google OAuth sign-in
+- `POST /api/auth/refresh` — Refresh access token (requires CSRF header)
+- `POST /api/auth/logout` — Logout and revoke refresh token
+
+### Users
+- `GET /api/users/me` — Get current user profile
+- `PATCH /api/users/me` — Update profile (name, bio, visibility)
+- `PATCH /api/users/me/username` — Update username
+- `PATCH /api/users/me/password` — Change password
+- `POST /api/users/me/avatar` — Upload avatar
+- `DELETE /api/users/me/avatar` — Remove avatar
+
+### Trips
+- `GET /api/trips` — List user's trips with filters
+- `POST /api/trips` — Create new trip
+- `GET /api/trips/:tripId` — Get trip details
+- `PATCH /api/trips/:tripId` — Update trip info
+- `DELETE /api/trips/:tripId` — Delete trip
+- `POST /api/trips/:tripId/cover` — Upload trip cover
+- `DELETE /api/trips/:tripId/cover` — Remove trip cover
+- `PATCH /api/trips/:tripId/publish` — Publish/unpublish trip
+
+### Trip Destinations
+- `GET /api/trips/:tripId/destinations` — List trip stops
+- `POST /api/trips/:tripId/destinations` — Add destination
+- `PATCH /api/destinations/:destId` — Update destination
+- `DELETE /api/destinations/:destId` — Delete destination
+- `POST /api/destinations/:destId/image` — Upload destination image
+- `DELETE /api/destinations/:destId/image` — Remove destination image
+- `PATCH /api/destinations/:destId/order` — Reorder stops
+
+### Trip Members
+- `GET /api/trips/:tripId/members` — List trip members
+- `POST /api/trips/:tripId/members` — Invite member
+- `PATCH /api/trips/:tripId/members/:memberId` — Update member role
+- `DELETE /api/trips/:tripId/members/:memberId` — Remove member
+
+### Social & Discovery
+- `GET /api/trips?public=true` — Explore public trips
+- `GET /api/users/:userId` — View public profile
 
 ---
 
@@ -232,17 +364,17 @@ See [client/.env.example](client/.env.example):
 
 ### Server
 From [server/package.json](server/package.json):
-- `npm run dev` — nodemon (JS entry)
-- `npm run dev:tsx` — tsx watch for `src/server.ts`
-- `npm run build` — compile TypeScript
-- `npm start` — run compiled server (`dist/server.js`)
+- `npm run dev` — Runs with nodemon (watches JS files)
+- `npm run dev:tsx` — Runs with tsx for TypeScript watch mode (recommended)
+- `npm run build` — Compiles TypeScript to JavaScript
+- `npm start` — Runs compiled server from `dist/server.js`
 
 ### Client
 From [client/package.json](client/package.json):
-- `npm run dev` — Vite dev server
-- `npm run build` — production build
-- `npm run preview` — preview production build
-- `npm run lint` — eslint
+- `npm run dev` — Vite dev server (port 5173)
+- `npm run build` — Production build with optimization
+- `npm run preview` — Preview production build locally
+- `npm run lint` — ESLint with TypeScript support
 
 ---
 

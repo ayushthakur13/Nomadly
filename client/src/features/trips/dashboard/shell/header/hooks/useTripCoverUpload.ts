@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateTripCover, deleteTripCover } from '@/store/tripsSlice';
 import toast from 'react-hot-toast';
+import { useAsyncAction } from '@/hooks/useAsyncAction';
+import { TOAST_MESSAGES } from '@/constants/toastMessages';
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -13,47 +15,42 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 export const useTripCoverUpload = (tripId: string) => {
   const dispatch = useDispatch<any>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [coverLoading, setCoverLoading] = useState(false);
+  const { execute: uploadCover, isLoading: coverLoading } = useAsyncAction({
+    onSuccess: () => toast.success(TOAST_MESSAGES.TRIP.COVER_UPDATE_SUCCESS),
+    errorMessage: 'Failed to update cover'
+  });
+  const { execute: removeCover } = useAsyncAction({
+    onSuccess: () => toast.success(TOAST_MESSAGES.TRIP.COVER_REMOVE_SUCCESS),
+    errorMessage: 'Failed to remove cover'
+  });
 
   const handleCoverFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error('Please upload a JPEG, PNG, or WebP image');
+      toast.error(TOAST_MESSAGES.IMAGE.INVALID_TYPE);
       return;
     }
 
     if (file.size > MAX_SIZE) {
-      toast.error('Image must be less than 5MB');
+      toast.error(TOAST_MESSAGES.IMAGE.TOO_LARGE(5));
       return;
     }
 
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      setCoverLoading(true);
+    await uploadCover(async () => {
+      const formData = new FormData();
+      formData.append('image', file);
       await dispatch(updateTripCover({ tripId, formData })).unwrap();
-      toast.success('Cover updated');
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to update cover');
-    } finally {
-      setCoverLoading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRemoveCover = async () => {
-    try {
-      setCoverLoading(true);
+    await removeCover(async () => {
       await dispatch(deleteTripCover(tripId)).unwrap();
-      toast.success('Cover removed');
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to remove cover');
-    } finally {
-      setCoverLoading(false);
-    }
+    });
   };
 
   return { coverLoading, fileInputRef, handleCoverFileChange, handleRemoveCover };

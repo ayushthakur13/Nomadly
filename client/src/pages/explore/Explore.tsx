@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../../services/api';
+import { useAsyncAction } from '../../hooks/useAsyncAction';
 import Footer from '../../components/common/Footer';
-import toast from 'react-hot-toast';
 
 const Explore = () => {
   const [trips, setTrips] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('');
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state: any) => state.auth);
+  const { execute, isLoading: loading, error } = useAsyncAction({
+    showToast: true,
+    errorMessage: 'Failed to fetch public trips'
+  });
 
   const categories = [
     { value: 'adventure', label: '🗻 Adventure' },
@@ -27,23 +29,13 @@ const Explore = () => {
   ];
 
   useEffect(() => {
-    const fetchPublicTrips = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const params = new URLSearchParams();
-        if (activeCategory) params.append('category', activeCategory);
-        const response = await api.get(`/trips/public?${params.toString()}`);
-        setTrips(response.data.trips);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to fetch public trips');
-        toast.error(err.response?.data?.error || 'Failed to fetch public trips');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPublicTrips();
-  }, [activeCategory]);
+    execute(async () => {
+      const params = new URLSearchParams();
+      if (activeCategory) params.append('category', activeCategory);
+      const response = await api.get(`/trips/public?${params.toString()}`);
+      setTrips(response.data.trips);
+    });
+  }, [activeCategory, execute]);
 
   const handleTripClick = (tripId: string) => { navigate(`/explore/trips/${tripId}`); };
 

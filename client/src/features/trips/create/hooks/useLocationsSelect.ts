@@ -7,10 +7,15 @@ import { useCallback } from 'react';
 export const useLocationsSelect = (onLocationSelect: (location: any, type: 'source' | 'destination') => void) => {
   const handleLocationSelect = useCallback(
     (location: any, type: 'source' | 'destination') => {
-      const mappedLocation = {
+      const mappedLocation = location.lat && location.lng ? {
         name: location.name,
         address: location.address,
         coordinates: { lat: location.lat, lng: location.lng },
+        placeId: location.placeId,
+      } : {
+        // Manual entry without coordinates
+        name: location.name,
+        address: location.address,
         placeId: location.placeId,
       };
       onLocationSelect(mappedLocation, type);

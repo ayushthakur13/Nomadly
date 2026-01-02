@@ -11,8 +11,9 @@ const __dirname = path.dirname(__filename);
 
 // Import routers from module barrels
 import { authRouter } from './modules/auth';
-import { tripRouter } from './modules/trips/core';
 import { userRouter } from './modules/users';
+import { tripRouter } from './modules/trips/core';
+import { destinationRouter, destinationItemRouter } from './modules/trips/destinations';
 
 dotenv.config();
 
@@ -42,8 +43,10 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 app.use('/api/auth', authRouter);
-app.use('/api/trips', tripRouter);
 app.use('/api/users', userRouter);
+app.use('/api/trips', tripRouter);
+app.use('/api/trips/:tripId/destinations', destinationRouter);
+app.use('/api/destinations', destinationItemRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

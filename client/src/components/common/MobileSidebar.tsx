@@ -1,52 +1,20 @@
-import { useMemo, type ReactNode } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useNavigation, type NavItem } from '@/hooks/useNavigation';
 import Icon from '../icon/Icon';
 
 interface MobileSidebarProps {
   onClose: () => void;
 }
 
-type NavItem = {
-  label: string;
-  path?: string;
-  icon: ReactNode;
-  badge?: string;
-  disabled?: boolean;
-};
-
 const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useSelector((state: any) => state.auth);
-
-  const topNavItems: NavItem[] = useMemo(
-    () => [
-      { label: 'Dashboard', path: '/dashboard', icon: iconHome() },
-      { label: 'Trips', path: '/trips', icon: iconTrips() },
-      { label: 'Explore', path: '/explore', icon: iconCompass() },
-      { label: 'AI Planner', icon: iconSparkle(), badge: 'Coming soon', disabled: true },
-      { label: 'Saved Trips', icon: iconBookmark(), badge: 'Soon', disabled: true },
-      { label: 'Community', icon: iconUsers(), badge: 'Soon', disabled: true },
-    ],
-    []
-  );
-
-  const bottomNavItems: NavItem[] = useMemo(
-    () => [
-      { label: 'Settings', icon: iconSettings(), disabled: true },
-    ],
-    []
-  );
+  const { topNavItems, bottomNavItems, isActive, displayName, user } = useNavigation();
 
   const handleNav = (item: NavItem) => {
     if (item.disabled || !item.path) return;
     navigate(item.path);
     onClose();
   };
-
-  const isActive = (path?: string) => path && location.pathname.startsWith(path);
-  const displayName = user?.firstName || user?.name || user?.email || 'Nomad';
 
   return (
     <div className="fixed inset-0 z-50">
@@ -80,7 +48,9 @@ const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
                         : 'text-gray-700 hover:bg-gray-50'
                     } ${item.disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">{item.icon}</span>
+                    <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
+                      <Icon name={item.icon} size={20} />
+                    </span>
                     <span className="flex-1 text-left font-medium truncate">{item.label}</span>
                     {item.badge && (
                       <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
@@ -109,7 +79,9 @@ const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
                     : 'text-gray-700 hover:bg-gray-50'
                 } ${item.disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">{item.icon}</span>
+                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
+                  <Icon name={item.icon} size={20} />
+                </span>
                 <span className="flex-1 text-left font-medium truncate">{item.label}</span>
               </button>
             );
@@ -143,41 +115,5 @@ const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
     </div>
   );
 };
-
-const iconHome = () => (
-  <Icon name="home" size={20} />
-);
-
-const iconTrips = () => (
-  <Icon name="compass" size={20} />
-);
-
-const iconCompass = () => (
-  <Icon name="compass" size={20} />
-);
-
-const iconSparkle = () => (
-  <Icon name="sparkles" size={20} />
-);
-
-const iconBookmark = () => (
-  <Icon name="bookmark" size={20} />
-);
-
-const iconUsers = () => (
-  <Icon name="users" size={20} />
-);
-
-const iconUser = () => (
-  <Icon name="user" size={20} />
-);
-
-const iconSettings = () => (
-  <Icon name="settings" size={20} />
-);
-
-const iconHelp = () => (
-  <Icon name="help" size={20} />
-);
 
 export default MobileSidebar;

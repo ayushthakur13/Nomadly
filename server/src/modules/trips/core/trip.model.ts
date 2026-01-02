@@ -30,7 +30,7 @@ export interface ILocation {
   name: string;
   address?: string;
   placeId?: string;
-  point: {
+  point?: {
     type: 'Point';
     coordinates: [number, number];
   };
@@ -89,10 +89,12 @@ const LocationSchema = new Schema({
     type: { type: String, enum: ['Point'], default: 'Point' },
     coordinates: {
       type: [Number],
-      required: true,
+      required: false, // Allow manual entry without coordinates
       validate: {
         validator: function(v: any) {
-          return Array.isArray(v) && v.length === 2 &&
+          // If coordinates are provided, they must be valid
+          if (!v || !Array.isArray(v)) return true;
+          return v.length === 2 &&
             Number.isFinite(v[0]) && Number.isFinite(v[1]) &&
             v[0] >= -180 && v[0] <= 180 && v[1] >= -90 && v[1] <= 90;
         },

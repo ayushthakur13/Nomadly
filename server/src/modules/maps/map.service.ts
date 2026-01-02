@@ -1,6 +1,16 @@
 import axios from 'axios';
 import { LocationSearchResult } from '../trips/core/trip.types';
 
+// Search context determines which Mapbox types to use
+export type SearchContext = 'trip' | 'destination';
+
+export interface SearchOptions {
+  limit?: number;
+  proximity?: { lng: number; lat: number };
+  types?: string[];
+  context?: SearchContext;
+}
+
 class MapService {
   private mapboxToken: string;
   private mapboxBaseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
@@ -8,6 +18,12 @@ class MapService {
   private hasLoggedMissingToken = false;
   private cache = new Map<string, { data: LocationSearchResult[]; expiresAt: number; provider: 'mapbox' | 'osm' }>();
   private cacheTtlMs = 10 * 60 * 1000;
+
+  // Mapbox types for trip creation: big, stable places (cities, countries, regions)
+  private readonly TRIP_TYPES = ['country', 'region', 'place', 'district'];
+  
+  // Mapbox types for destinations: specific places inside a city (POIs, addresses, neighborhoods)
+  private readonly DESTINATION_TYPES = ['poi', 'address', 'locality', 'neighborhood', 'place'];
 
   constructor() {
     this.mapboxToken = process.env.MAPBOX_ACCESS_TOKEN || '';
@@ -21,7 +37,7 @@ class MapService {
 
   async searchLocation(
     query: string,
-    options: { limit?: number; proximity?: { lng: number; lat: number }; types?: string[] } = {}
+    options: SearchOptions = {}
   ): Promise<LocationSearchResult[]> {
     const trimmed = query?.trim();
     if (!trimmed) {
@@ -29,25 +45,33 @@ class MapService {
     }
 
     const limit = options.limit ?? 5;
+    const context = options.context ?? 'trip';
+    
+    // Determine types based on context if not explicitly provided
+    const types = options.types ?? (context === 'destination' ? this.DESTINATION_TYPES : this.TRIP_TYPES);
+    
+    // Build cache key including context and proximity
+    const proxKey = options.proximity ? `${options.proximity.lng},${options.proximity.lat}` : 'no-prox';
+    const cacheKey = `${context}:${trimmed}:${limit}:${proxKey}`;
 
     if (this.mapboxAvailable) {
-      const cached = this.getFromCache('mapbox', trimmed, limit);
+      const cached = this.getFromCache('mapbox', cacheKey, limit);
       if (cached) return cached;
 
       try {
-        const results = await this.searchLocationMapbox(trimmed, { ...options, limit });
-        this.setCache('mapbox', trimmed, limit, results);
+        const results = await this.searchLocationMapbox(trimmed, { ...options, limit, types });
+        this.setCache('mapbox', cacheKey, limit, results);
         return results;
       } catch (err: any) {
         console.warn('Mapbox search failed, falling back to OSM:', err.message);
       }
     }
 
-    const cachedFallback = this.getFromCache('osm', trimmed, limit);
+    const cachedFallback = this.getFromCache('osm', cacheKey, limit);
     if (cachedFallback) return cachedFallback;
 
     const fallbackResults = await this.searchLocationOSM(trimmed, limit);
-    this.setCache('osm', trimmed, limit, fallbackResults);
+    this.setCache('osm', cacheKey, limit, fallbackResults);
     return fallbackResults;
   }
 

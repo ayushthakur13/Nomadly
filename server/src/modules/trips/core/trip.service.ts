@@ -12,15 +12,45 @@ class TripService {
       throw new Error('Destination location is required');
     }
     
-    const { lat: destLat, lng: destLng } = data.destinationLocation.coordinates;
-    if (!mapService.validateCoordinates(destLat, destLng)) {
-      throw new Error('Invalid destination coordinates');
+    // Validate destination coordinates if provided
+    let destinationLocation: any;
+    if (data.destinationLocation.coordinates) {
+      const { lat: destLat, lng: destLng } = data.destinationLocation.coordinates;
+      if (!mapService.validateCoordinates(destLat, destLng)) {
+        throw new Error('Invalid destination coordinates');
+      }
+      destinationLocation = {
+        ...data.destinationLocation,
+        point: mapService.buildGeoPoint(destLat, destLng)
+      };
+    } else {
+      // Manual entry without coordinates
+      destinationLocation = {
+        name: data.destinationLocation.name,
+        address: data.destinationLocation.address,
+        placeId: data.destinationLocation.placeId
+      };
     }
 
-    if (data.sourceLocation?.coordinates) {
-      const { lat, lng } = data.sourceLocation.coordinates;
-      if (!mapService.validateCoordinates(lat, lng)) {
-        throw new Error('Invalid source coordinates');
+    // Validate source coordinates if provided
+    let sourceLocation: any = undefined;
+    if (data.sourceLocation) {
+      if (data.sourceLocation.coordinates) {
+        const { lat, lng } = data.sourceLocation.coordinates;
+        if (!mapService.validateCoordinates(lat, lng)) {
+          throw new Error('Invalid source coordinates');
+        }
+        sourceLocation = {
+          ...data.sourceLocation,
+          point: mapService.buildGeoPoint(lat, lng)
+        };
+      } else {
+        // Manual entry without coordinates
+        sourceLocation = {
+          name: data.sourceLocation.name,
+          address: data.sourceLocation.address,
+          placeId: data.sourceLocation.placeId
+        };
       }
     }
 
@@ -32,19 +62,6 @@ class TripService {
     }
 
     const slug = await tripUtils.generateUniqueSlug(data.tripName);
-
-    const destinationLocation = {
-      ...data.destinationLocation,
-      point: mapService.buildGeoPoint(destLat, destLng)
-    };
-
-    const sourceLocation = data.sourceLocation ? {
-      ...data.sourceLocation,
-      point: mapService.buildGeoPoint(
-        data.sourceLocation.coordinates.lat,
-        data.sourceLocation.coordinates.lng
-      )
-    } : undefined;
     
     const tripData: any = {
       tripName: data.tripName,
@@ -222,25 +239,43 @@ class TripService {
     }
 
     if (updates.destinationLocation) {
-      const { lat, lng } = updates.destinationLocation.coordinates;
-      if (!mapService.validateCoordinates(lat, lng)) {
-        throw new Error('Invalid destination coordinates');
+      if (updates.destinationLocation.coordinates) {
+        const { lat, lng } = updates.destinationLocation.coordinates;
+        if (!mapService.validateCoordinates(lat, lng)) {
+          throw new Error('Invalid destination coordinates');
+        }
+        (updates as any).destinationLocation = {
+          ...updates.destinationLocation,
+          point: mapService.buildGeoPoint(lat, lng)
+        };
+      } else {
+        // Manual entry without coordinates
+        (updates as any).destinationLocation = {
+          name: updates.destinationLocation.name,
+          address: updates.destinationLocation.address,
+          placeId: updates.destinationLocation.placeId
+        };
       }
-      (updates as any).destinationLocation = {
-        ...updates.destinationLocation,
-        point: mapService.buildGeoPoint(lat, lng)
-      };
     }
 
     if (updates.sourceLocation) {
-      const { lat, lng } = updates.sourceLocation.coordinates;
-      if (!mapService.validateCoordinates(lat, lng)) {
-        throw new Error('Invalid source coordinates');
+      if (updates.sourceLocation.coordinates) {
+        const { lat, lng } = updates.sourceLocation.coordinates;
+        if (!mapService.validateCoordinates(lat, lng)) {
+          throw new Error('Invalid source coordinates');
+        }
+        (updates as any).sourceLocation = {
+          ...updates.sourceLocation,
+          point: mapService.buildGeoPoint(lat, lng)
+        };
+      } else {
+        // Manual entry without coordinates
+        (updates as any).sourceLocation = {
+          name: updates.sourceLocation.name,
+          address: updates.sourceLocation.address,
+          placeId: updates.sourceLocation.placeId
+        };
       }
-      (updates as any).sourceLocation = {
-        ...updates.sourceLocation,
-        point: mapService.buildGeoPoint(lat, lng)
-      };
     }
 
     if (updates.startDate && updates.endDate) {

@@ -17,7 +17,7 @@ const TripSidebar = () => {
   const items: TripSidebarItem[] = useMemo(
     () => [
       { id: 'overview', label: 'Overview', icon: 'layout', href: `/trips/${tripId}` },
-      { id: 'destinations', label: 'Route', icon: 'map', href: `/trips/${tripId}/destinations` },
+      { id: 'destinations', label: 'Itinerary', icon: 'map', href: `/trips/${tripId}/destinations` },
       { id: 'tasks', label: 'Tasks', icon: 'checkSquare', href: `/trips/${tripId}/tasks` },
       { id: 'budget', label: 'Budget', icon: 'dollarSign', href: `/trips/${tripId}/budget` },
       { id: 'accommodations', label: 'Stay', icon: 'home', href: `/trips/${tripId}/accommodations` },

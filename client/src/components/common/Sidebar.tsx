@@ -1,6 +1,5 @@
-import { useMemo, type ReactNode } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useNavigation, type NavItem } from '@/hooks/useNavigation';
 import Icon from '../icon/Icon';
 
 interface SidebarProps {
@@ -9,45 +8,14 @@ interface SidebarProps {
   className?: string;
 }
 
-type NavItem = {
-  label: string;
-  path?: string;
-  icon: ReactNode;
-  badge?: string;
-  disabled?: boolean;
-};
-
 const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useSelector((state: any) => state.auth);
-
-  const topNavItems: NavItem[] = useMemo(
-    () => [
-      { label: 'Dashboard', path: '/dashboard', icon: iconHome() },
-      { label: 'Trips', path: '/trips', icon: iconTrips() },
-      { label: 'Explore', path: '/explore', icon: iconCompass() },
-      { label: 'AI Planner', icon: iconSparkle(), badge: 'Coming soon', disabled: true },
-      { label: 'Saved Trips', icon: iconBookmark(), badge: 'Soon', disabled: true },
-      { label: 'Community', icon: iconCommunity(), badge: 'Soon', disabled: true },
-    ],
-    []
-  );
-
-  const bottomNavItems: NavItem[] = useMemo(
-    () => [
-      { label: 'Settings', icon: iconSettings(), disabled: true },
-    ],
-    []
-  );
+  const { topNavItems, bottomNavItems, isActive, displayName, user } = useNavigation();
 
   const handleNav = (item: NavItem) => {
     if (item.disabled || !item.path) return;
     navigate(item.path);
   };
-
-  const isActive = (path?: string) => path && location.pathname.startsWith(path);
-  const displayName = user?.firstName || user?.name || user?.email || 'Nomad';
 
   return (
     <aside
@@ -78,7 +46,7 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
                         title={collapsed ? item.label : undefined}
                       >
                         <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
-                          {item.icon}
+                          <Icon name={item.icon} size={20} />
                         </span>
                         {!collapsed && (
                           <span className="flex-1 text-left font-medium truncate">
@@ -128,7 +96,7 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
                   title={collapsed ? item.label : undefined}
                 >
                   <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
-                    {item.icon}
+                    <Icon name={item.icon} size={20} />
                   </span>
                   {!collapsed && (
                     <span className="flex-1 text-left font-medium truncate">
@@ -175,13 +143,5 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
       </aside>
   );
 };
-
-const iconHome = () => <Icon name="home" size={20} />;
-const iconTrips = () => <Icon name="plane" size={20} />;
-const iconCompass = () => <Icon name="compass" size={20} />;
-const iconSparkle = () => <Icon name="sparkles" size={20} />;
-const iconBookmark = () => <Icon name="bookmark" size={20} />;
-const iconCommunity = () => <Icon name="users" size={20} />;
-const iconSettings = () => <Icon name="settings" size={20} />;
 
 export default Sidebar;
