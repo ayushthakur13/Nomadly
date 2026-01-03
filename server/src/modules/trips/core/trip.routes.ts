@@ -1,8 +1,7 @@
 import express from 'express';
 import tripController from './trip.controller';
-import authMiddleware from '../../auth/auth.middleware';
-import { uploadTripCover } from '../../../shared/middlewares/multer';
-import asyncHandler from '../../../shared/utils/asyncHandler';
+import { uploadTripCover, authMiddleware } from '@shared/middlewares';
+import { asyncHandler } from '@shared/utils';
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import ctrl from './auth.controller';
-import { authMiddleware } from '../../shared/middlewares';
+import { authMiddleware } from '@shared/middlewares';
 
 const router = express.Router();
 

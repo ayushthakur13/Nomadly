@@ -116,7 +116,7 @@ const tripSchema = new Schema<ITrip>({
   tripName: { type: String, required: [true, 'Trip name is required'], trim: true, maxlength: [100, 'Trip name cannot exceed 100 characters'], index: true },
   slug: { type: String, unique: true, sparse: true, index: true },
   description: { type: String, trim: true, maxlength: [2000, 'Description cannot exceed 2000 characters'] },
-  startDate: { type: Date, required: [true, 'Start date is required'], index: true },
+  startDate: { type: Date, required: [true, 'Start date is required'] },
   endDate: {
     type: Date,
     required: [true, 'End date is required'],
@@ -130,7 +130,7 @@ const tripSchema = new Schema<ITrip>({
   tags: [{ type: String }],
   isPublic: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
-  lifecycleStatus: { type: String, enum: Object.values(TripLifecycleStatus), default: TripLifecycleStatus.DRAFT, index: true },
+  lifecycleStatus: { type: String, enum: Object.values(TripLifecycleStatus), default: TripLifecycleStatus.DRAFT },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   members: { type: [TripMemberSchema], default: [] },
   destinations: [{ type: Schema.Types.ObjectId, ref: 'Destination' }],

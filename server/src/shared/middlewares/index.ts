@@ -1,2 +1,2 @@
-export { default as authMiddleware } from '../../modules/auth/auth.middleware';
-export { uploadProfile, uploadTripCover, uploadDestination, uploadMemory } from './multer';
+export { default as authMiddleware } from './auth.middleware';
+export * from './multer';

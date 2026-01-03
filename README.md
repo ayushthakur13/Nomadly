@@ -59,9 +59,9 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 - ⏳ Download shared memories
 
 ### 👥 Members and Collaboration
-- 🚧 Invite members via email or username
-- ⏳ Accept or reject trip invitations
-- 🚧 Role based permissions such as creator, editor, and viewer
+- ✅ Invite members via email or username
+- ✅ Accept or reject trip invitations
+- ✅ Role based permissions such as creator and member
 - ⏳ Real time group chat using WebSockets
 
 ---

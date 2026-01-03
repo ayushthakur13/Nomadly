@@ -27,8 +27,8 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>(
   {
-    username: { type: String, required: true, unique: true },
-    email: { type: String, unique: true, sparse: true },
+    username: { type: String, required: true },
+    email: { type: String },
     passwordHash: { type: String, default: null },
     name: { type: String },
     bio: { type: String, maxlength: 300, default: "" },
@@ -48,8 +48,8 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
+userSchema.index({ username: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true, sparse: true });
 
 userSchema.virtual('_plainPassword').set(function(this: any, v: string) {
   this._tempPassword = v;

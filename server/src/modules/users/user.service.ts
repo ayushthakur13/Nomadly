@@ -1,5 +1,5 @@
 import User from './user.model';
-import { deleteFromCloudinary } from '../../shared/utils/cloudinary.utils';
+import { deleteFromCloudinary } from '@shared/utils';
 
 export const USER_ERRORS = {
   USER_NOT_FOUND: 'USER_NOT_FOUND',

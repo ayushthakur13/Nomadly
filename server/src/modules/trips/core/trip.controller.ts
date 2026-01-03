@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import tripService from './trip.service';
 import mapService from '../../maps/map.service';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters } from './trip.types';
-import { deleteFromCloudinary } from '../../../shared/utils/cloudinary.utils';
+import { deleteFromCloudinary } from '@shared/utils';
 import { TripLifecycleStatus } from './trip.model';
 
 interface AuthRequest extends Request {
@@ -544,11 +544,16 @@ class TripController {
         return;
       }
 
-      const results = await mapService.searchLocation(query, {
+      const searchOptions: any = {
         limit: limit ? parseInt(limit as string) : 5,
-        context: (context === 'destination' || context === 'trip') ? context : 'trip',
-        proximity
-      });
+        context: (context === 'destination' || context === 'trip') ? context : 'trip'
+      };
+      
+      if (proximity) {
+        searchOptions.proximity = proximity;
+      }
+
+      const results = await mapService.searchLocation(query, searchOptions);
 
       res.json({
         success: true,

@@ -1,8 +1,7 @@
 import express from 'express';
 import destinationController from './destination.controller';
-import authMiddleware from '../../auth/auth.middleware';
-import { uploadDestination } from '@shared/middlewares';
-import asyncHandler from '@shared/utils/asyncHandler';
+import { authMiddleware, uploadDestination } from '@shared/middlewares';
+import { asyncHandler } from '@shared/utils';
 
 const router = express.Router({ mergeParams: true });
 

@@ -2,7 +2,7 @@ import User from '../users/user.model';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from './utils/jwt';
 import { hashToken, compareToken } from './utils/hash';
 import { OAuth2Client } from 'google-auth-library';
-import { uploadFromUrl } from '../../shared/utils/cloudinary.utils';
+import { uploadFromUrl } from '@shared/utils';
 
 export const AUTH_ERRORS = {
   USERNAME_TAKEN: 'USERNAME_TAKEN',

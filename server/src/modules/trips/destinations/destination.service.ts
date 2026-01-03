@@ -1,8 +1,8 @@
 import { Types } from 'mongoose';
 import Destination, { IDestination } from './destination.model';
 import Trip from '../core/trip.model';
-import { deleteFromCloudinary } from '@shared/utils/cloudinary.utils';
-import { canEditTrip } from '../core/trip.utils';
+import { deleteFromCloudinary } from '@shared/utils';
+import { canModifyTripResources } from '../members/member.permissions';
 
 interface CreateDestinationDTO {
   name: string;
@@ -83,7 +83,7 @@ class DestinationService {
     }
 
     // Check if user can edit trip
-    if (!canEditTrip(trip, userId)) {
+    if (!canModifyTripResources(trip, userId)) {
       throw new Error('Unauthorized to add destinations to this trip');
     }
 
@@ -259,7 +259,7 @@ class DestinationService {
     }
 
     // Check if user can edit trip
-    if (!canEditTrip(trip, userId)) {
+    if (!canModifyTripResources(trip, userId)) {
       throw new Error('Unauthorized to reorder destinations');
     }
 
@@ -374,7 +374,7 @@ class DestinationService {
       throw new Error('Associated trip not found');
     }
 
-    if (!canEditTrip(trip, userId)) {
+    if (!canModifyTripResources(trip, userId)) {
       throw new Error('Unauthorized to modify this destination');
     }
   }

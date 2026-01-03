@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import destinationService from './destination.service';
-import { uploadFromUrl } from '@shared/utils/cloudinary.utils';
 
 interface AuthRequest extends Request {
   user?: {

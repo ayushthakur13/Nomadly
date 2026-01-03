@@ -5,6 +5,8 @@ import User from '../../users/user.model';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters, CloneTripOptions } from './trip.types';
 import mapService from '../../maps/map.service';
 import tripUtils from './trip.utils';
+import { canModifyTripResources } from '../members/member.permissions';
+import { isTripCreator, isTripMember } from '../members/member.utils';
 
 class TripService {
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
@@ -222,7 +224,7 @@ class TripService {
       throw new Error('TRIP_PRIVATE');
     }
 
-    const isMember = requestingUserId && tripUtils.isTripMember(trip as ITrip, requestingUserId);
+    const isMember = requestingUserId && isTripMember(trip as ITrip, requestingUserId);
     if (!isMember) {
       await Trip.findByIdAndUpdate(trip._id, { $inc: { 'engagement.views': 1 } });
     }
@@ -234,7 +236,7 @@ class TripService {
     const trip = await Trip.findById(tripId);
     if (!trip) return null;
 
-    if (!tripUtils.canEditTrip(trip, userId)) {
+    if (!canModifyTripResources(trip, userId)) {
       throw new Error('INSUFFICIENT_PERMISSIONS');
     }
 
@@ -309,7 +311,7 @@ class TripService {
     const trip = await Trip.findById(tripId);
     if (!trip) return false;
 
-    if (!tripUtils.isTripCreator(trip, userId)) {
+    if (!isTripCreator(trip, userId)) {
       throw new Error('ONLY_CREATOR_CAN_DELETE');
     }
 
@@ -323,7 +325,7 @@ class TripService {
     const trip = await Trip.findById(tripId);
     if (!trip) return null;
 
-    if (!tripUtils.isTripCreator(trip, userId)) {
+    if (!isTripCreator(trip, userId)) {
       throw new Error('ONLY_CREATOR_CAN_PUBLISH');
     }
 
@@ -338,7 +340,7 @@ class TripService {
     const trip = await Trip.findById(tripId);
     if (!trip) return null;
 
-    if (!tripUtils.isTripCreator(trip, userId)) {
+    if (!isTripCreator(trip, userId)) {
       throw new Error('ONLY_CREATOR_CAN_UNPUBLISH');
     }
 
@@ -358,7 +360,7 @@ class TripService {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error('TRIP_NOT_FOUND');
 
-    if (!tripUtils.canEditTrip(trip, userId)) {
+    if (!canModifyTripResources(trip, userId)) {
       throw new Error('INSUFFICIENT_PERMISSIONS');
     }
 
@@ -374,7 +376,7 @@ class TripService {
     const trip = await Trip.findById(tripId);
     if (!trip) return null;
 
-    if (!tripUtils.canEditTrip(trip, userId)) {
+    if (!canModifyTripResources(trip, userId)) {
       throw new Error('INSUFFICIENT_PERMISSIONS');
     }
 

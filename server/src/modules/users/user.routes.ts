@@ -1,7 +1,6 @@
 import express from 'express';
 import ctrl from './user.controller';
-import { authMiddleware } from '../../shared/middlewares';
-import { uploadProfile } from '../../shared/middlewares';
+import { authMiddleware, uploadProfile } from '@shared/middlewares';
 
 const router = express.Router();
 
