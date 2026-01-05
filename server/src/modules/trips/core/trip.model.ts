@@ -1,29 +1,17 @@
 import { Schema, model, Document, Types } from "mongoose";
 
+// Import shared enums from monorepo shared types
+import { TripLifecycleStatus, TripCategory } from '../../../../../shared/types';
+
+// Re-export for backward compatibility within server modules
+export { TripLifecycleStatus, TripCategory };
+
+// Backend-specific interfaces (Mongoose Document extensions)
 export interface ITripMember {
   userId: Types.ObjectId;
   role: "creator" | "member";
   joinedAt: Date;
   invitedBy?: Types.ObjectId;
-}
-
-export enum TripLifecycleStatus {
-  DRAFT = 'draft',
-  PUBLISHED = 'published',
-  ARCHIVED = 'archived',
-}
-
-export enum TripCategory {
-  ADVENTURE = 'adventure',
-  LEISURE = 'leisure',
-  BUSINESS = 'business',
-  FAMILY = 'family',
-  SOLO = 'solo',
-  COUPLE = 'couple',
-  FRIENDS = 'friends',
-  BACKPACKING = 'backpacking',
-  LUXURY = 'luxury',
-  BUDGET = 'budget'
 }
 
 export interface ILocation {

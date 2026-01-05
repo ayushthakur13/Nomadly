@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
+import { extractApiError } from '@/utils/errorHandling';
 import Icon from '../icon/Icon';
 import LocationSearchInput from '../trips/LocationSearchInput';
 
@@ -155,7 +156,8 @@ const EditTripModal = ({
       toast.success('Trip updated');
       onClose();
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to update trip');
+      const errorMsg = extractApiError(error, 'Failed to update trip');
+      toast.error(errorMsg);
     }
   };
 

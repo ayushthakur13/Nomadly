@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { deleteTrip } from '@/store/tripsSlice';
+import { deleteTrip } from '@/features/trips/store';
 import toast from 'react-hot-toast';
 import { useAsyncAction } from '@/hooks/useAsyncAction';
 import { TOAST_MESSAGES } from '@/constants/toastMessages';

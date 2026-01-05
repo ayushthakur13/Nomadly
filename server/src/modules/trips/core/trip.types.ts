@@ -1,36 +1,11 @@
-import { TripLifecycleStatus, TripCategory } from './trip.model';
+// Import shared domain types from monorepo
+import { TripLifecycleStatus, TripCategory } from '../../../../../shared/types';
 
-export interface LocationDTO {
-  name: string;
-  address?: string;
-  coordinates?: { lat: number; lng: number; };
-  placeId?: string;
-}
+// Re-export for backward compatibility
+export { TripLifecycleStatus, TripCategory };
 
-export interface CreateTripDTO {
-  tripName: string;
-  description?: string;
-  startDate: string | Date;
-  endDate: string | Date;
-  sourceLocation?: LocationDTO;
-  destinationLocation: LocationDTO;
-  category?: TripCategory | string;
-  tags?: string[];
-  isPublic?: boolean;
-}
-
-export interface UpdateTripDTO {
-  tripName?: string;
-  description?: string;
-  startDate?: string | Date;
-  endDate?: string | Date;
-  sourceLocation?: LocationDTO;
-  destinationLocation?: LocationDTO;
-  category?: TripCategory | string;
-  tags?: string[];
-  isPublic?: boolean;
-  lifecycleStatus?: TripLifecycleStatus;
-}
+// Import and re-export DTOs (these are API contracts, so they belong in shared)
+export type { CreateTripDTO, UpdateTripDTO, LocationDTO } from '../../../../../shared/types';
 
 export interface TripQueryFilters {
   userId?: string;

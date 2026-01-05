@@ -1,6 +1,6 @@
 import { QuickInfoStrip, TimelineSnapshot, LocationPreview, NeedsAttention, PlanningStatus, QuickAccessCards } from './components';
 import { useOverviewMetrics, useQuickInfo, useTimelineProgress, useNeedsAttention, usePlanningStatus, useQuickAccessCards } from './hooks';
-import { useTripStatus } from '@/features/trips/dashboard/domain/hooks/useTripStatus';
+import { useTripStatus } from '@/features/trips/dashboard/hooks/domain';
 import { useNavigate } from 'react-router-dom';
 
 interface OverviewPageProps {

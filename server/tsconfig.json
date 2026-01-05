@@ -2,7 +2,7 @@
   "extends": "./tsconfig.paths.json",
   "compilerOptions": {
     /* File structure */
-    "rootDir": "./src",
+    "rootDir": "..",
     "outDir": "./dist",
 
     /* Language and Environment */
@@ -42,7 +42,7 @@
     /* JSX (for potential frontend/shared use) */
     "jsx": "react-jsx"
   },
-  "include": ["src"],
+  "include": ["src", "../shared"],
   "exclude": ["node_modules", "dist"],
   "ts-node": {
     "esm": true,

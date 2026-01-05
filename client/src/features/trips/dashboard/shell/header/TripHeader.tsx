@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateTrip } from '@/store/tripsSlice';
+import { updateTrip } from '@/features/trips/store';
 import { useTripHeaderMenu, useTripCoverUpload, useTripShare, useTripDelete } from './hooks';
 import { CoverImage, HeaderActions, TripTitle } from './components';
 import ImageLightbox from '@/features/trips/dashboard/modules/destinations/components/ImageLightbox';
-import { useTripStatus } from '@/features/trips/dashboard/domain/hooks/useTripStatus';
-import { useTripDateRange } from '@/features/trips/dashboard/domain/hooks/useTripDateRange';
+import { useTripStatus, useTripDateRange } from '@/features/trips/dashboard/hooks/domain';
 
 interface TripHeaderProps {
   trip: {

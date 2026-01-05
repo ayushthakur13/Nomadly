@@ -1,11 +1,9 @@
 import nomadlyIcon from "../../assets/logos/w-icon-no-bg.svg"
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-// Removed modal usage
+import { useSelector } from "react-redux";
 
 const Footer = () => {
   const { isAuthenticated } = useSelector((s: any) => s.auth);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 

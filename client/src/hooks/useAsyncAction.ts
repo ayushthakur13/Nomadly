@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { showErrorToast } from '@/utils/errorHandling';
+import { showErrorToast, extractApiError } from '@/utils/errorHandling';
 
 interface UseAsyncActionOptions {
   onSuccess?: () => void;
@@ -45,7 +45,7 @@ export const useAsyncAction = <T = void>(
       onSuccess?.();
       return result;
     } catch (err) {
-      const errorMsg = (err as Error)?.message || errorMessage || 'An error occurred';
+      const errorMsg = extractApiError(err, errorMessage || 'An error occurred');
       setError(errorMsg);
       
       if (showToast) {

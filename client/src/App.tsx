@@ -1,23 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import store from './store';
-import AuthPage from './pages/auth/AuthPage';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import { loginSuccess, setInitialized } from './store/authSlice';
-import api, { setAccessToken } from './services/api';
-import PublicNavbar from './components/common/PublicNavbar';
-import AppLayout from './components/layout/AppLayout';
-import Landing from './pages/landing/Landing';
-import Dashboard from './pages/dashboard/Dashboard';
-import Explore from './pages/explore/Explore';
-import ExploreTrip from './pages/explore/ExploreTrip';
-import Profile from './pages/profile/Profile';
-import LandingRoute from './components/auth/LandingRoute';
-import PublicRoute from './components/auth/PublicRoute';
+import { AuthPage, ProtectedRoute, LandingRoute, PublicRoute } from './features/auth';
+import { loginSuccess, setInitialized } from './features/auth/store/authSlice';
+import api, { setAccessToken, initializeTokenSync } from './services/api';
+import { getCsrfToken } from './services/csrf';
+import { PublicNavbar, AppLayout } from './components';
+import { Landing, Dashboard, Explore, ExploreTrip, Profile } from './pages';
 import { MyTripsPage } from '@/features/trips/list';
 import { CreateTripPage } from '@/features/trips/create';
 import { TripDashboardPage } from '@/features/trips/dashboard';
@@ -45,7 +37,6 @@ function AppContent() {
   useEffect(() => {
     (async () => {
       try {
-        const { getCsrfToken } = await import('./utils/auth');
         const csrf = getCsrfToken();
         if (!csrf) {
           dispatch(setInitialized());
@@ -186,6 +177,10 @@ function AppContent() {
 }
 
 function App() {
+  // Initialize Redux store subscription for token sync (Problem 2 fix)
+  // Makes Redux the single source of truth for access tokens
+  initializeTokenSync(store);
+  
   return (
     <Provider store={store}>
       <Router>

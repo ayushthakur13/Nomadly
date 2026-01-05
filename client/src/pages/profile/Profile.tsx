@@ -3,19 +3,20 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { extractApiError } from "../../utils/errorHandling";
 import Icon from "../../components/icon/Icon";
 import {
   updateProfileStart,
   updateProfileSuccess,
   updateProfileFailure,
   logout,
-} from "../../store/authSlice";
+} from "../../features/auth/";
 import api from "../../services/api";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import { TOAST_MESSAGES } from "../../constants/toastMessages";
 import AvatarManager from "../../components/profile/AvatarManager";
 import SecuritySection from "../../components/profile/SecuritySection";
-import { secureLogout } from "../../utils/auth";
+import { secureLogout } from "../../features/auth/utils/auth";
 
 interface ProfileFormData {
   username: string;
@@ -97,8 +98,7 @@ export default function Profile() {
         anySuccess = true;
         toast.success(TOAST_MESSAGES.PROFILE.UPDATE_SUCCESS);
       } catch (error: any) {
-        const message =
-          error?.response?.data?.message || "Failed to update profile";
+        const message = extractApiError(error, "Failed to update profile");
         toast.error(message);
       }
     }
@@ -122,7 +122,7 @@ export default function Profile() {
           const msg =
             error?.response?.status === 409
               ? "Username already taken"
-              : error?.response?.data?.message || "Failed to update username";
+              : extractApiError(error, "Failed to update username");
           toast.error(msg);
         }
       }

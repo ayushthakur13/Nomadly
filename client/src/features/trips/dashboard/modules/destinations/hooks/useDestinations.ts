@@ -8,9 +8,10 @@ import {
   reorderDestinations as apiReorder,
   uploadDestinationImage,
   deleteDestinationImage,
-  Destination,
-  DestinationPayload,
-} from '@/services/destinations';
+  type Destination,
+  type DestinationPayload,
+} from '@/services/destinations.service';
+import { extractApiError, type ApiError } from '@/utils/errorHandling';
 
 const reorderArray = (list: Destination[], fromId: string, toId: string): Destination[] => {
   if (fromId === toId) return list;
@@ -38,8 +39,8 @@ export function useDestinations() {
     try {
       const data = await fetchDestinations(tripId);
       setDestinations((data || []).sort((a, b) => a.order - b.order));
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to load destinations');
+    } catch (err) {
+      setError(extractApiError(err as ApiError, 'Failed to load destinations'));
     } finally {
       setLoading(false);
     }
@@ -52,22 +53,40 @@ export function useDestinations() {
   const createDestination = async (payload: DestinationPayload) => {
     if (!tripId) return null;
     setError(null);
-    const created = await apiCreate(tripId, payload);
-    setDestinations((prev) => [...prev, created].sort((a, b) => a.order - b.order));
-    return created;
+    try {
+      const created = await apiCreate(tripId, payload);
+      setDestinations((prev) => [...prev, created].sort((a, b) => a.order - b.order));
+      return created;
+    } catch (err) {
+      const errorMsg = extractApiError(err as ApiError, 'Failed to create destination');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
   };
 
   const updateDestination = async (id: string, payload: Partial<DestinationPayload>) => {
     setError(null);
-    const updated = await apiUpdate(id, payload);
-    setDestinations((prev) => prev.map((d) => (d._id === id ? { ...d, ...updated } : d)));
-    return updated;
+    try {
+      const updated = await apiUpdate(id, payload);
+      setDestinations((prev) => prev.map((d) => (d._id === id ? { ...d, ...updated } : d)));
+      return updated;
+    } catch (err) {
+      const errorMsg = extractApiError(err as ApiError, 'Failed to update destination');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
   };
 
   const deleteDestination = async (id: string) => {
     setError(null);
-    await apiDelete(id);
-    setDestinations((prev) => prev.filter((d) => d._id !== id).map((d, idx) => ({ ...d, order: idx })));
+    try {
+      await apiDelete(id);
+      setDestinations((prev) => prev.filter((d) => d._id !== id).map((d, idx) => ({ ...d, order: idx })));
+    } catch (err) {
+      const errorMsg = extractApiError(err as ApiError, 'Failed to delete destination');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
   };
 
   const reorder = async (fromId: string, toId: string) => {
@@ -78,22 +97,36 @@ export function useDestinations() {
       const orderedIds = optimistic.map((d) => d._id);
       const server = await apiReorder(tripId, orderedIds);
       setDestinations(server.sort((a, b) => a.order - b.order));
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Reorder failed');
+    } catch (err) {
+      setError(extractApiError(err as ApiError, 'Failed to reorder destinations'));
       await load();
     }
   };
 
   const changeImage = async (id: string, formData: FormData) => {
-    const updated = await uploadDestinationImage(id, formData);
-    setDestinations((prev) => prev.map((d) => (d._id === id ? { ...d, ...updated } : d)));
-    return updated;
+    setError(null);
+    try {
+      const updated = await uploadDestinationImage(id, formData);
+      setDestinations((prev) => prev.map((d) => (d._id === id ? { ...d, ...updated } : d)));
+      return updated;
+    } catch (err) {
+      const errorMsg = extractApiError(err as ApiError, 'Failed to upload image');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
   };
 
   const removeImage = async (id: string) => {
-    const updated = await deleteDestinationImage(id);
-    setDestinations((prev) => prev.map((d) => (d._id === id ? { ...d, ...updated } : d)));
-    return updated;
+    setError(null);
+    try {
+      const updated = await deleteDestinationImage(id);
+      setDestinations((prev) => prev.map((d) => (d._id === id ? { ...d, ...updated } : d)));
+      return updated;
+    } catch (err) {
+      const errorMsg = extractApiError(err as ApiError, 'Failed to remove image');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
   };
 
   const stats = useMemo(() => {
@@ -126,5 +159,3 @@ export function useDestinations() {
     reload: load,
   };
 }
-
-export type { Destination, DestinationPayload } from '@/services/destinations';

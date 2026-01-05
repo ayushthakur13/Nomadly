@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import useTripsCache from '@/hooks/useTripsCache';
+import useTripsCache from '../../hooks';
 
 /**
  * Manages trips filter state (tabs, category, sort) and URL sync.

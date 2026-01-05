@@ -8,8 +8,9 @@ import ConfirmationModal from '@/components/common/ConfirmationModal';
 import ErrorAlert from '@/components/common/ErrorAlert';
 import PageHeader from '@/components/common/PageHeader';
 import Icon from '@/components/icon/Icon';
-import { useDynamicForm } from '../../hooks/useDynamicForm';
-import { useDestinations, Destination } from './hooks/useDestinations';
+import { useDynamicForm } from '../../hooks/forms/useDynamicForm';
+import { useDestinations } from './hooks/useDestinations';
+import type { Destination } from '@/services/destinations.service';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import toast from 'react-hot-toast';
 

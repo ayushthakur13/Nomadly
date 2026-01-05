@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import useTripsCache from '../../hooks/useTripsCache';
+import useTripsCache from '@/features/trips/hooks';
 import TripCard from '../../components/trips/TripCard';
 
 const Dashboard = () => {

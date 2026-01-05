@@ -1,9 +1,10 @@
 import axios from "axios";
+import { getCsrfToken, clearCsrfToken } from "./csrf";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:4444/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4444/api";
 
 let accessToken: string | null = null;
+
 export function setAccessToken(token?: string | null) {
   accessToken = token || null;
 }
@@ -12,6 +13,19 @@ export function clearAccessToken() {
 }
 export function getAccessToken() {
   return accessToken;
+}
+
+/**
+ * Initialize Redux store subscription for token sync
+ * This makes Redux the source of truth for the access token
+ * Call this once during app initialization (typically in App.tsx)
+ */
+export function initializeTokenSync(store: any) {
+  // Sync any future Redux auth state changes to the API client
+  store.subscribe(() => {
+    const state = store.getState();
+    setAccessToken(state.auth.token);
+  });
 }
 
 const api = axios.create({
@@ -73,7 +87,6 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { getCsrfToken } = await import("../utils/auth");
         const csrf = getCsrfToken();
         const res = await api.post(
           "/auth/refresh",
@@ -87,6 +100,7 @@ api.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null);
         clearAccessToken();
+        clearCsrfToken();
         const publicPaths = ['/', '/explore', '/aboutus', '/auth'];
         const currentPath = window.location.pathname;
         const isPublicPage = publicPaths.some(path => 

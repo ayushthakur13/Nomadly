@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { updateTripCover, deleteTripCover } from '@/store/tripsSlice';
+import { updateTripCover, deleteTripCover } from '@/features/trips/store';
 import toast from 'react-hot-toast';
 import { useAsyncAction } from '@/hooks/useAsyncAction';
 import { TOAST_MESSAGES } from '@/constants/toastMessages';
