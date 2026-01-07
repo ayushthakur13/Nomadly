@@ -40,7 +40,7 @@ class MemberController {
    */
   addMember = asyncHandler(async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     const { tripId } = req.params;
-    const { userId } = req.body;
+    const { userId, email, username } = req.body;
     const requesterId = req.user?.id;
 
     if (!requesterId) {
@@ -53,13 +53,8 @@ class MemberController {
       return;
     }
 
-    if (!userId) {
-      res.status(400).json({ success: false, message: 'User ID is required' });
-      return;
-    }
-
-    if (!Types.ObjectId.isValid(userId)) {
-      res.status(400).json({ success: false, message: 'Invalid user ID' });
+    if (!userId && !email && !username) {
+      res.status(400).json({ success: false, message: 'User ID, email, or username is required' });
       return;
     }
 
@@ -70,7 +65,27 @@ class MemberController {
       return;
     }
 
-    const trip = await memberService.addMemberToTrip(tripId, userId, requesterId);
+    // Find user by userId, email, or username
+    let targetUserId = userId;
+    if (!targetUserId) {
+      const User = (await import('../../users/user.model')).default;
+      const user = email 
+        ? await User.findOne({ email: email.toLowerCase() })
+        : await User.findOne({ username });
+      
+      if (!user) {
+        res.status(404).json({ success: false, message: 'User not found' });
+        return;
+      }
+      targetUserId = (user._id as Types.ObjectId).toString();
+    }
+
+    if (!Types.ObjectId.isValid(targetUserId)) {
+      res.status(400).json({ success: false, message: 'Invalid user ID' });
+      return;
+    }
+
+    const trip = await memberService.addMemberToTrip(tripId, targetUserId, requesterId);
 
     res.status(200).json({
       success: true,

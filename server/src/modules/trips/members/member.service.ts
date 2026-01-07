@@ -123,11 +123,11 @@ class MemberService {
 
     if (!includeUserDetails) {
       return trip.members.map(m => ({
-        userId: m.userId,
+        userId: m.userId.toString(),
         role: m.role,
-        joinedAt: m.joinedAt,
-        invitedBy: m.invitedBy
-      }));
+        joinedAt: (m.joinedAt as Date).toISOString(),
+        invitedBy: m.invitedBy?.toString()
+      })) as MemberDTO[];
     }
 
     // Populate user details
@@ -141,14 +141,14 @@ class MemberService {
     return populatedTrip.members.map(m => {
       const user = m.userId as any;
       return {
-        userId: user._id,
+        userId: user._id?.toString?.() ?? user._id,
         role: m.role,
-        joinedAt: m.joinedAt,
-        invitedBy: m.invitedBy,
+        joinedAt: (m.joinedAt as Date).toISOString(),
+        invitedBy: (m.invitedBy as any)?.toString?.() ?? m.invitedBy,
         username: user.username,
         name: user.name,
         profilePicUrl: user.profilePicUrl
-      };
+      } as MemberDTO;
     });
   }
 

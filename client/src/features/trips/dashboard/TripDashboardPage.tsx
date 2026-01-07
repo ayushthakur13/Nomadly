@@ -55,7 +55,9 @@ const TripDashboardPage = () => {
     );
   }
 
-  const isOwner = trip.createdBy._id === user?.id;
+  const tripOwnerId = (trip.createdBy as any)?._id ?? trip.createdBy;
+  const currentUserId = user?._id ?? user?.id;
+  const isOwner = Boolean(tripOwnerId && currentUserId && tripOwnerId === currentUserId);
 
   // Determine which content to show based on current route
   const renderContent = () => {
@@ -71,7 +73,7 @@ const TripDashboardPage = () => {
       case '/accommodations':
         return <AccommodationsPage />;
       case '/members':
-        return <MembersPage />;
+        return <MembersPage tripId={tripId!} trip={trip} isOwner={isOwner} />;
       case '/memories':
         return <MemoriesPage />;
       case '/chat':

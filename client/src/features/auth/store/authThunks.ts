@@ -60,7 +60,7 @@ export const signupAsync = createAsyncThunk<
   'auth/signup',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ data: AuthResponse }>(AUTH_ENDPOINTS.SIGNUP, {
+      const response = await api.post<{ data: AuthResponse }>(AUTH_ENDPOINTS.REGISTER, {
         username: credentials.username,
         email: credentials.email,
         password: credentials.password,

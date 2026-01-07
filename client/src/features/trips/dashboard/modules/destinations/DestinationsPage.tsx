@@ -151,7 +151,6 @@ const DestinationsPage = () => {
       {/* Left pane */}
       <div className="flex flex-col gap-4">
         <PageHeader
-          label="Stops"
           title="Itinerary"
           subtitle={subtext || 'Shape how this journey unfolds.'}
           action={{ label: 'Add stop', onClick: openCreate, icon: <Icon name="add" size={20} /> }}
@@ -202,9 +201,8 @@ const DestinationsPage = () => {
       {/* Right pane - Map preview with header */}
       <div className="flex flex-col gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Map</p>
-          <h2 className="text-2xl font-semibold text-gray-900">Location Preview</h2>
-          <p className="text-sm text-gray-500">Spatial context for your stops</p>
+          <h2 className="text-2xl font-semibold text-gray-900">Map</h2>
+          <p className="text-sm text-gray-500">Location Preview</p>
         </div>
 
         <LocationPreview

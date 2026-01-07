@@ -1,14 +1,15 @@
 import { Types } from 'mongoose';
 import { InvitationStatus } from './invitation.model';
+import type { CreateInvitationPayload, InvitationStatus as SharedInvitationStatus } from '../../../../shared/types';
 
-export interface CreateInvitationDTO {
+// CreateInvitationDTO extends payload with server-specific fields
+export type CreateInvitationDTO = CreateInvitationPayload & {
   tripId: string;
   invitedBy: string;
-  invitedUserId?: string; // For inviting by username/userId
-  invitedEmail?: string; // For inviting by email
-  message?: string;
-  expiresInDays?: number; // Default: 7 days
-}
+  invitedUserId?: string;
+  invitedEmail?: string;
+  expiresInDays?: number;
+};
 
 export interface UpdateInvitationStatusDTO {
   status: InvitationStatus.ACCEPTED | InvitationStatus.REJECTED | InvitationStatus.CANCELLED;

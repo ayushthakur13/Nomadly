@@ -1,21 +1,10 @@
-import { Types } from 'mongoose';
+import type { MemberRole, AddMemberPayload, TripMember } from '../../../../../shared';
 
-export type MemberRole = 'creator' | 'member';
+// Re-export AddMemberPayload as AddMemberDTO for consistency with server naming
+export type AddMemberDTO = AddMemberPayload;
 
-export interface MemberDTO {
-  userId: Types.ObjectId | string;
-  role: MemberRole;
-  joinedAt: Date;
-  invitedBy?: Types.ObjectId | string | undefined;
-  username?: string;
-  name?: string;
-  profilePicUrl?: string;
-}
-
-export interface AddMemberDTO {
-  userId: string;
-  invitedBy?: string;
-}
+// Re-export TripMember as MemberDTO for consistency with server naming
+export type MemberDTO = TripMember;
 
 export interface UpdateMemberRoleDTO {
   role: 'member';

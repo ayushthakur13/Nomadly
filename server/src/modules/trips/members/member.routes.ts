@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authMiddleware } from '@shared/middlewares';
 import memberController from './member.controller';
 
-const router = Router();
+const router = Router({ mergeParams: true }); // Enable access to parent route params
 
 // All routes require authentication
 router.use(authMiddleware);

@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 
 interface PageHeaderProps {
-  label: string;
   title: string;
   subtitle?: string;
   action?: {
@@ -11,11 +10,10 @@ interface PageHeaderProps {
   };
 }
 
-const PageHeader = ({ label, title, subtitle, action }: PageHeaderProps) => {
+const PageHeader = ({ title, subtitle, action }: PageHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-xs uppercase tracking-[0.12em] text-gray-500">{label}</p>
         <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
         {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
       </div>

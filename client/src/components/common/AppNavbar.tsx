@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Icon from '../icon/Icon';
+import { NotificationBell } from '@/features/invitations';
 
 interface AppNavbarProps {
   onToggleSidebar?: () => void;
@@ -112,12 +113,7 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
               <span className="font-semibold text-sm hidden lg:inline">Add Trip</span>
             </button>
           )}
-          <button
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-            aria-label="Notifications"
-          >
-            <Icon name="bell" size={20} />
-          </button>
+          <NotificationBell />
           <button
             onClick={handleToggleTheme}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"

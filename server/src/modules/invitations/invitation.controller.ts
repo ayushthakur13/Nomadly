@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
+import User from '../users/user.model';
 import invitationService from './invitation.service';
 import { asyncHandler } from '../../shared';
 import { InvitationStatus } from './invitation.model';
@@ -25,7 +26,7 @@ class InvitationController {
       return;
     }
 
-    const { tripId, invitedUserId, invitedEmail, message, expiresInDays } = req.body;
+    const { tripId, invitedUserId, invitedEmail, invitedUsername, message, expiresInDays } = req.body;
 
     if (!tripId) {
       res.status(400).json({ success: false, message: 'Trip ID is required' });
@@ -37,15 +38,27 @@ class InvitationController {
       return;
     }
 
-    if (!invitedUserId && !invitedEmail) {
+    if (!invitedUserId && !invitedEmail && !invitedUsername) {
       res.status(400).json({ 
         success: false, 
-        message: 'Either invitedUserId or invitedEmail must be provided' 
+        message: 'Provide invitedUserId, invitedEmail, or invitedUsername' 
       });
       return;
     }
 
-    if (invitedUserId && !Types.ObjectId.isValid(invitedUserId)) {
+    let resolvedUserId = invitedUserId;
+
+    // Resolve username to userId if provided
+    if (!resolvedUserId && invitedUsername) {
+      const targetUser = await User.findOne({ username: invitedUsername });
+      if (!targetUser) {
+        res.status(404).json({ success: false, message: 'User not found' });
+        return;
+      }
+      resolvedUserId = (targetUser._id as any).toString();
+    }
+
+    if (resolvedUserId && !Types.ObjectId.isValid(resolvedUserId)) {
       res.status(400).json({ success: false, message: 'Invalid user ID' });
       return;
     }
@@ -53,7 +66,7 @@ class InvitationController {
     const invitation = await invitationService.createInvitation({
       tripId,
       invitedBy: userId,
-      invitedUserId,
+      invitedUserId: resolvedUserId,
       invitedEmail,
       message,
       expiresInDays
