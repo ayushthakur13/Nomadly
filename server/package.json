@@ -4,8 +4,7 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon",
-    "dev:tsx": "tsx watch src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "format": "prettier --write ."
@@ -37,7 +36,7 @@
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
-    "@types/node": "^24.9.2",
+    "@types/node": "^24.10.9",
     "prettier": "^3.6.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

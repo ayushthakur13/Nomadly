@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Icon from '@/components/icon/Icon';
 import InvitationCard from './InvitationCard';
 import { useInvitations } from '../hooks';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 const NotificationBell = () => {
   const navigate = useNavigate();
@@ -12,21 +13,7 @@ const NotificationBell = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { invitations, count, loading, accept, reject, isAccepting, isRejecting } = useInvitations();
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [isOpen]);
+  useOnClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleAccept = async (id: string) => {
     try {

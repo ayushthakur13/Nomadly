@@ -33,11 +33,11 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 - ✅ Multi stop trips with detailed destinations
 - ✅ Location search with map integration
 - ⏳ Store coordinates for accurate mapping
-- ⏳ Visualize trips using routes and pins
+- ✅ Visualize trips using routes and pins
 
 ### ✅ Task Management
-- 🚧 Create and assign tasks to trip members
-- 🚧 Role based task completion
+- ✅ Create and assign tasks to trip members
+- ✅ Role based task completion
 - ⏳ Track deadlines and progress
 - ⏳ Filter tasks by status or member
 
@@ -278,7 +278,7 @@ The client expects `VITE_API_URL` to point to your server (default `http://local
 **Build optimization:** Uses Vite for fast development and optimized production builds with automatic code splitting.
 
 ### Two-terminal workflow
-- Terminal A (server): `cd server && npm run dev:tsx`
+- Terminal A (server): `cd server && npm run dev`
 - Terminal B (client): `cd client && npm run dev`
 
 Optionally, create a root-level script with `concurrently` to run both at once.
@@ -364,8 +364,7 @@ See [client/.env.example](client/.env.example):
 
 ### Server
 From [server/package.json](server/package.json):
-- `npm run dev` — Runs with nodemon (watches JS files)
-- `npm run dev:tsx` — Runs with tsx for TypeScript watch mode (recommended)
+- `npm run dev` — Runs with tsx for TypeScript watch mode
 - `npm run build` — Compiles TypeScript to JavaScript
 - `npm start` — Runs compiled server from `dist/server.js`
 

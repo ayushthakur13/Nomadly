@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import Icon from '../icon/Icon';
 import { debounce } from '../../utils/debounce';
 import api from '../../services/api';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 interface LocationResult {
   name: string;
@@ -92,16 +93,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
   }, [initialValue]);
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useOnClickOutside(containerRef, () => setShowResults(false), true);
 
   const handleSelect = (location: LocationResult) => {
     setSearchQuery(location.name);
