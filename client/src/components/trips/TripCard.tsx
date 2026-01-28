@@ -1,7 +1,6 @@
 import defaultTripCardCover from "../../assets/illustrations/default-trip-cover.webp";
 import Icon from "../icon/Icon";
-
-type Trip = any;
+import type { Trip } from "../../services/trips.service";
 
 const CATEGORY_EMOJI: Record<string, string> = {
   adventure: "🗻",
@@ -129,6 +128,24 @@ const TripCard = ({
     return Math.round((passed / total) * 100);
   };
 
+  const getLocationDisplay = () => {
+    const locationName = trip.destinationLocation?.name || '—';
+    const address = trip.destinationLocation?.address;
+    
+    if (!address) return locationName;
+    
+    // Extract country from address (last part after last comma)
+    const parts = address.split(',').map(p => p.trim());
+    const country = parts[parts.length - 1];
+    
+    // If country exists and is different from location name, append it
+    if (country && country !== locationName) {
+      return `${locationName} • ${country}`;
+    }
+    
+    return locationName;
+  };
+
   const daysInfo = getDaysInfo();
   const status = getTripStatus();
   const memberCount = getMemberInfo();
@@ -206,10 +223,19 @@ const TripCard = ({
 
       {/* Content with better information architecture */}
       <div className="p-5">
-        <div className="mb-3">
-          <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-200 mb-1.5 line-clamp-1">
+        {/* Trip name and category on same row */}
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-200 line-clamp-1 flex-1">
             {trip.tripName}
           </h3>
+          {trip.category && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full flex-shrink-0">
+              <span>{CATEGORY_EMOJI[String(trip.category).toLowerCase()] ?? ""}</span>
+              {String(trip.category).charAt(0).toUpperCase() + String(trip.category).slice(1)}
+            </span>
+          )}
+        </div>
+        <div className="mb-3">
           <div className="flex items-center gap-1.5 text-gray-600 mb-2">
             <Icon
               name="location"
@@ -217,7 +243,7 @@ const TripCard = ({
               className="text-emerald-500 flex-shrink-0"
             />
             <p className="text-sm font-medium truncate">
-              {trip.destinationLocation?.name || trip.mainDestination || '—'}
+              {getLocationDisplay()}
             </p>
           </div>
           <p className="text-xs text-gray-500">{formatDateRange()}</p>
@@ -258,23 +284,6 @@ const TripCard = ({
               )}
             </div>
             <div className="text-xs text-gray-500">visibility</div>
-          </div>
-        </div>
-
-        {/* Bottom row: Category + Arrow */}
-        <div className="mt-3 flex items-center justify-between">
-          {trip.category ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">
-              <span>{CATEGORY_EMOJI[String(trip.category).toLowerCase()] ?? ""}</span>
-              {String(trip.category).charAt(0).toUpperCase() + String(trip.category).slice(1)}
-            </span>
-          ) : (
-            <div></div>
-          )}
-
-          {/* View details arrow */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Icon name="arrowRight" size={20} className="text-emerald-600" />
           </div>
         </div>
       </div>

@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { fetchTasks } from '@/services/tasks.service';
+import type { Task } from '@shared/types';
 
 export interface AttentionItem {
   id: string;
@@ -11,6 +14,28 @@ export interface AttentionItem {
 }
 
 export const useNeedsAttention = (trip: any, stage: 'Upcoming' | 'Ongoing' | 'Past') => {
+  const { tripId } = useParams<{ tripId: string }>();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(true);
+
+  // Fetch tasks to check if any exist
+  useEffect(() => {
+    const loadTasks = async () => {
+      if (!tripId) return;
+      try {
+        setTasksLoading(true);
+        const fetchedTasks = await fetchTasks(tripId, false);
+        setTasks(fetchedTasks || []);
+      } catch (error) {
+        console.error('Failed to fetch tasks for needs attention check:', error);
+        setTasks([]);
+      } finally {
+        setTasksLoading(false);
+      }
+    };
+    loadTasks();
+  }, [tripId]);
+
   const items = useMemo<AttentionItem[]>(() => {
     if (stage === 'Past') return [];
 
@@ -29,7 +54,7 @@ export const useNeedsAttention = (trip: any, stage: 'Upcoming' | 'Ongoing' | 'Pa
       });
     }
 
-    const hasMultipleTravellers = (trip.participants?.length || 1) > 1;
+    const hasMultipleTravellers = (trip.membersCount || trip.members?.length || 1) > 1;
     if (!hasMultipleTravellers) {
       list.push({
         id: 'members',
@@ -53,19 +78,22 @@ export const useNeedsAttention = (trip: any, stage: 'Upcoming' | 'Ongoing' | 'Pa
       urgency: 2,
     });
 
-    // Tasks placeholder (higher when ongoing)
-    list.push({
-      id: 'tasks',
-      title: 'No tasks yet',
-      why: 'A simple list keeps everyone aligned.',
-      cta: 'Create tasks',
-      icon: 'check',
-      href: `/trips/${trip._id}/tasks`,
-      urgency: stage === 'Ongoing' ? 1 : 4,
-    });
+    // Tasks: only show if no tasks exist
+    const hasTasks = tasks && tasks.length > 0;
+    if (!hasTasks) {
+      list.push({
+        id: 'tasks',
+        title: 'No tasks yet',
+        why: 'A simple list keeps everyone aligned.',
+        cta: 'Create tasks',
+        icon: 'check',
+        href: `/trips/${trip._id}/tasks`,
+        urgency: stage === 'Ongoing' ? 1 : 4,
+      });
+    }
 
     return list.sort((a, b) => a.urgency - b.urgency).slice(0, 5);
-  }, [trip, stage]);
+  }, [trip._id, trip.destinationLocation, trip.mainDestination, trip.membersCount, trip.members, tasks.length, stage]);
 
   return { items };
 }

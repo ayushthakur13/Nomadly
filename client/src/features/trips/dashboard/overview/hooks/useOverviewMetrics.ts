@@ -9,13 +9,13 @@ export const useOverviewMetrics = (trip: any) => {
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
     const durationDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    const participantCount = trip.participants?.length || 1;
+    const participantCount = trip.membersCount || trip.members?.length || 1;
 
     return {
       duration: durationDays,
       participants: participantCount,
     };
-  }, [trip.startDate, trip.endDate, trip.participants]);
+  }, [trip.startDate, trip.endDate, trip.membersCount, trip.members]);
 
   return metrics;
 };

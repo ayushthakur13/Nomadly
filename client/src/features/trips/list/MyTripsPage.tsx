@@ -1,46 +1,44 @@
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import TripsFilters from './components/TripsFilters';
-import TripsGrid from './components/TripsGrid';
+import { TripsFilters, TripsGrid } from './components/';
 import { useTripsFilters } from './hooks';
+import { fetchTrips } from '../store/tripsThunks';
 
 const MyTripsPage = () => {
   const navigate = useNavigate();
-  const { trips, loading, error } = useSelector((state: any) => state.trips);
+  const dispatch = useDispatch();
+  const { error } = useSelector((state: any) => state.trips);
 
   const {
     activeTab,
     sortBy,
     selectedCategory,
+    filteredTrips,
+    loading,
     handleTabChange,
     handleCategoryChange,
     handleSortChange,
   } = useTripsFilters();
 
+  // Fetch all trips on mount (no filters - load everything)
+  useEffect(() => {
+    dispatch<any>(fetchTrips({ sort: 'createdAt', order: 'desc' }));
+  }, [dispatch]);
+
   useEffect(() => {
     if (error) toast.error(error);
   }, [error]);
 
-  const ongoingTrips = trips?.ongoing || [];
-  const upcomingTrips = trips?.upcoming || [];
-  const pastTrips = trips?.past || [];
-  const allTrips = trips?.all || [...ongoingTrips, ...upcomingTrips, ...pastTrips];
-
+  // Compute counts from Redux categorized trips
+  const { trips } = useSelector((state: any) => state.trips);
   const counts = {
-    all: allTrips.length,
-    ongoing: ongoingTrips.length,
-    upcoming: upcomingTrips.length,
-    past: pastTrips.length,
+    all: trips?.all?.length || 0,
+    ongoing: trips?.ongoing?.length || 0,
+    upcoming: trips?.upcoming?.length || 0,
+    past: trips?.past?.length || 0,
   };
-
-  const displayTrips = (() => {
-    if (activeTab === 'ongoing') return ongoingTrips;
-    if (activeTab === 'upcoming') return upcomingTrips;
-    if (activeTab === 'past') return pastTrips;
-    return allTrips;
-  })();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,7 +66,7 @@ const MyTripsPage = () => {
         />
 
         <TripsGrid
-          trips={displayTrips}
+          trips={filteredTrips}
           loading={loading}
           activeTab={activeTab}
           onCreateClick={() => navigate('/trips/new')}
