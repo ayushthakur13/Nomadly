@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAsyncAction } from '../../hooks/useAsyncAction';
-import Navbar from '../../components/common/PublicNavbar';
-import Footer from '../../components/common/Footer';
+import Navbar from '../../ui/common/PublicNavbar';
+import Footer from '../../ui/common/Footer';
 
 const ExploreTrip = () => {
   const { tripId } = useParams();

@@ -155,7 +155,7 @@ src/
 ```bash
 src/
 ├── assets/               # Static assets (icons, images, logos, illustrations)
-├── components/           # Reusable UI components by domain
+├── ui/                   # Reusable UI components organized by domain
 │   ├── auth/             # Google login, protected routes
 │   ├── common/           # Shared components (navbar, sidebar, modals, footer)
 │   ├── icon/             # Icon registry and component
@@ -165,11 +165,23 @@ src/
 │   └── trips/            # Trip-related UI components
 ├── constants/            # Centralized constants (toastMessages, etc.)
 ├── features/             # Feature-specific modules with domain logic
-│   └── trips/            # Trip features (create, list, dashboard)
-├── hooks/                # Custom React hooks
+│   ├── auth/             # Authentication flows, routes, and state
+│   ├── dashboard/        # Main dashboard page
+│   ├── invitations/      # Trip invitation handling
+│   ├── landing/          # Landing page feature
+│   ├── profile/          # User profile management
+│   └── trips/            # Trip features (organized by subdomain)
+│       ├── _shared/      # Shared hooks and utilities (workspace data, permissions, cache)
+│       ├── browse/       # Trip browsing and filtering (MyTripsPage)
+│       ├── create/       # Trip creation wizard (multi-step form)
+│       ├── store/        # Redux state management (tripsSlice, tripsThunks)
+│       └── workspace/    # Trip workspace (detail view with feature modules)
+│           ├── modules/  # Feature modules (overview, tasks, budget, accommodations, members, memories, chat, destinations)
+│           └── shell/    # Layout shell (header, sidebar, navigation)
+├── hooks/                # Custom React hooks (global utilities)
 ├── pages/                # Page-level components (routing destinations)
-├── services/             # API and external integrations
-├── store/                # Redux Toolkit slices (auth, trips, ui)
+├── services/             # API clients and external integrations
+├── store/                # Redux Toolkit root store configuration
 ├── styles/               # Global styles and animations
 ├── utils/                # Utility functions (errorHandling, auth, debounce)
 └── main.tsx              # React app entry point

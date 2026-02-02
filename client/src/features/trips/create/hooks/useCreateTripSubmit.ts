@@ -67,7 +67,7 @@ export const useCreateTripSubmit = (onUpdateLoadingStates: (state: any) => void)
             toast.success(TOAST_MESSAGES.TRIP.CREATE_SUCCESS);
           } catch (e: any) {
             console.warn('Cover upload failed after creation:', e);
-            const errorMsg = extractApiError(e, 'Cover upload failed. You can set it from the trip dashboard.');
+            const errorMsg = extractApiError(e, 'Cover upload failed. You can set it from the trip workspace.');
             toast.error(errorMsg);
           } finally {
             onUpdateLoadingStates({ coverUploadLoading: false });

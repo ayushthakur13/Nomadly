@@ -1,5 +1,5 @@
-import Icon from '@/components/icon/Icon';
-import LocationSearchInput from '@/components/trips/LocationSearchInput';
+import { Icon } from '@/ui/icon/';
+import { LocationSearchInput } from '@/ui/common/';
 
 interface StepLocationsDatesProps {
   startDate: string;

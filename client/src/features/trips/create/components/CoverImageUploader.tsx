@@ -1,4 +1,4 @@
-import Icon from '@/components/icon/Icon';
+import { Icon } from '@/ui/icon/';
 import { useImageUpload } from '@/hooks/useImageUpload';
 
 interface CoverImageUploaderProps {

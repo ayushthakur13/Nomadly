@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import Icon from '@/components/icon/Icon';
+import Icon from '@/ui/icon/Icon';
 import type { Invitation } from '@/services/invitations.service';
 
 interface InvitationCardProps {

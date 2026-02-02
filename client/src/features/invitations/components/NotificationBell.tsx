@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import Icon from '@/components/icon/Icon';
+import { Icon } from '@/ui/icon/';
 import InvitationCard from './InvitationCard';
 import { useInvitations } from '../hooks';
 import { useOnClickOutside } from '@/hooks/useOnClickOutside';

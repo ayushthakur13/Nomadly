@@ -1,5 +1,5 @@
 import { useState, forwardRef } from "react";
-import Icon from "../../../components/icon/Icon";
+import { Icon } from "@/ui/icon/";
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;

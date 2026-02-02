@@ -1,5 +1,3 @@
-import Icon from '@/components/icon/Icon';
-
 interface CreateTripHeaderProps {
   currentStep: number;
 }

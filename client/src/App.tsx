@@ -8,11 +8,12 @@ import { AuthPage, ProtectedRoute, LandingRoute, PublicRoute } from './features/
 import { loginSuccess, setInitialized } from './features/auth/store/authSlice';
 import api, { setAccessToken, initializeTokenSync } from './services/api';
 import { getCsrfToken } from './services/csrf';
-import { PublicNavbar, AppLayout } from './components';
-import { Landing, Dashboard, Explore, ExploreTrip, Profile } from './pages';
-import { MyTripsPage } from '@/features/trips/list';
-import { CreateTripPage } from '@/features/trips/create';
-import { TripDashboardPage } from '@/features/trips/dashboard';
+import { PublicNavbar, AppLayout } from '@/ui/';
+import { Explore, ExploreTrip } from './pages';
+import { LandingPage } from './features/landing'
+import { DashboardPage } from './features/dashboard';
+import { ProfilePage } from './features/profile'
+import { MyTripsPage, CreateTripPage, TripWorkspacePage } from './features/trips/';
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
   <>
@@ -73,7 +74,7 @@ function AppContent() {
           element={
             <LandingRoute>
               <PublicLayout>
-                <Landing />
+                <LandingPage />
               </PublicLayout>
             </LandingRoute>
           }
@@ -115,7 +116,7 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <Dashboard />
+                <DashboardPage />
               </AppLayout>
             </ProtectedRoute>
           }
@@ -143,12 +144,12 @@ function AppContent() {
           }
         />
 
-        {/* Trip nested routes with feature-first dashboard */}
+        {/* Trip nested routes with feature-first workspace */}
         <Route
           path="/trips/:tripId/*"
           element={
             <ProtectedRoute>
-              <TripDashboardPage />
+              <TripWorkspacePage />
             </ProtectedRoute>
           }
         />
@@ -158,7 +159,7 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <AppLayout>
-                <Profile />
+                <ProfilePage />
               </AppLayout>
             </ProtectedRoute>
           }

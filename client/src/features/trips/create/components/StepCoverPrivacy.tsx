@@ -1,4 +1,4 @@
-import Icon from '@/components/icon/Icon';
+import { Icon } from '@/ui/icon/';
 import CoverImageUploader from './CoverImageUploader';
 
 interface StepCoverPrivacyProps {

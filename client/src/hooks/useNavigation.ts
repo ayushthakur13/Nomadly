@@ -35,7 +35,7 @@ export const useNavigation = () => {
 
   const isActive = (path?: string) => path && location.pathname.startsWith(path);
 
-  const displayName = user?.firstName || user?.name || user?.email || 'Nomad';
+  const displayName = user?.name || user?.email || 'Nomad';
 
   return {
     topNavItems,

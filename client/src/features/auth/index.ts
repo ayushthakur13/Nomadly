@@ -1,7 +1,7 @@
 // Auth components
-export { default as Login } from './components/Login';
-export { default as Signup } from './components/Signup';
-export { default as AuthPage } from './components/AuthPage';
+export { default as Login } from './pages/Login';
+export { default as Signup } from './pages/Signup';
+export { default as AuthPage } from './pages/AuthPage';
 export { default as GoogleLoginButton } from './components/GoogleLoginButton';
 
 // Auth UI components

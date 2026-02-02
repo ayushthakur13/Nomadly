@@ -10,7 +10,7 @@ import {
   publishTrip,
   unpublishTrip,
 } from './tripsThunks';
-import { processFetchedTrips } from '../utils/tripCategorization';
+import { processFetchedTrips } from '../_shared/utils';
 import type { Trip } from '../../../services/trips.service';
 
 interface TripsState {

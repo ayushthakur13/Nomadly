@@ -31,20 +31,35 @@ npm run lint     # Run ESLint
 ```
 src/
 ├── assets/          # Static assets (icons, images, logos, illustrations)
-├── components/      # Reusable UI components organized by domain
+├── ui/              # Reusable UI components organized by domain
 │   ├── auth/        # Authentication (GoogleLoginButton, ProtectedRoute)
 │   ├── common/      # Shared components (Navbar, Sidebar, Modals, Footer)
 │   ├── icon/        # Icon registry and component
 │   ├── landing/     # Landing page sections
-│   └── trips/       # Trip-related components
+│   ├── layout/      # Main layout wrapper
+│   ├── profile/     # User profile components
+│   └── trips/       # Trip-related UI components
 ├── constants/       # Centralized constants (toastMessages, etc.)
-├── features/        # Feature modules (trips/create, trips/dashboard)
-├── hooks/           # Custom React hooks
-├── pages/           # Page components (auth, dashboard, explore, profile)
-├── services/        # API services (axios interceptors)
-├── store/           # Redux Toolkit (auth, trips, ui slices)
+├── features/        # Feature-specific modules with domain logic
+│   ├── auth/        # Auth flows, routes, and state
+│   ├── dashboard/   # Main dashboard page
+│   ├── invitations/ # Trip invitation handling
+│   ├── landing/     # Landing page feature
+│   ├── profile/     # User profile management
+│   └── trips/       # Trip features (organized below)
+│       ├── _shared/ # Shared hooks and utilities (workspace, cache, permissions)
+│       ├── browse/  # Trip browsing/filtering (MyTripsPage)
+│       ├── create/  # Trip creation wizard (multi-step form)
+│       ├── store/   # Redux state (tripsSlice, tripsThunks)
+│       └── workspace/ # Trip workspace (detail view with modules)
+│           ├── modules/ # Feature modules (overview, tasks, budget, members, etc.)
+│           └── shell/   # Layout shell (header, sidebar)
+├── hooks/           # Custom React hooks (global utilities)
+├── pages/           # Page-level components (routing destinations)
+├── services/        # API services (axios interceptors, API clients)
+├── store/           # Redux Toolkit root store configuration
 ├── styles/          # Global styles (animations, base CSS)
-├── utils/           # Utilities (errorHandling, auth, debounce)
+├── utils/           # Utility functions (errorHandling, auth, debounce)
 └── main.tsx         # App entry point
 ```
 

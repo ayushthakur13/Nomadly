@@ -1,14 +1,7 @@
-/**
- * User information returned from the API
- */
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  avatar?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// User type is imported from shared types - single source of truth
+import type { User } from '@shared/types';
+
+export type { User } from '@shared/types';
 
 /**
  * Login credentials

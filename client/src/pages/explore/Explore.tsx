@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../../services/api';
 import { useAsyncAction } from '../../hooks/useAsyncAction';
-import Footer from '../../components/common/Footer';
+import Footer from '../../ui/common/Footer';
 
 const Explore = () => {
   const [trips, setTrips] = useState<any[]>([]);

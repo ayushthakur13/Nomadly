@@ -1,4 +1,4 @@
-import Icon from '@/components/icon/Icon';
+import { Icon } from '@/ui/icon/';
 
 interface FormNavigationProps {
   currentStep: number;

@@ -3,8 +3,8 @@ import { loginAsync, signupAsync, googleLoginAsync } from './authThunks';
 import type {
   AuthState,
   AuthSuccessPayload,
-  User,
 } from '../types/auth.types';
+import type { User } from '@shared/types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
