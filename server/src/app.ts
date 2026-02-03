@@ -17,6 +17,7 @@ import { destinationRouter, destinationItemRouter } from './modules/trips/destin
 import { memberRoutes } from './modules/trips/members';
 import { invitationRoutes } from './modules/invitations';
 import { taskRouter, taskItemRouter } from "./modules/trips/tasks"
+import { budgetRouter, tripExpenseRouter, expenseItemRouter } from './modules/trips/budget';
 
 dotenv.config();
 
@@ -54,6 +55,9 @@ app.use('/api/trips/:tripId/members', memberRoutes);
 app.use('/api/invitations', invitationRoutes);
 app.use('/api/trips/:tripId/tasks', taskRouter);
 app.use('/api/tasks', taskItemRouter);
+app.use('/api/trips/:tripId/budget', budgetRouter);
+app.use('/api/trips/:tripId/expenses', tripExpenseRouter);
+app.use('/api/expenses', expenseItemRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

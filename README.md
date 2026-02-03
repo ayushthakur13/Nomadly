@@ -38,15 +38,17 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 ### ✅ Task Management
 - ✅ Create and assign tasks to trip members
 - ✅ Role based task completion
-- ⏳ Track deadlines and progress
-- ⏳ Filter tasks by status or member
+- ✅ Track deadlines and progress
+- ✅ Filter tasks by status or member
 
 ### 💸 Budget and Expenses
-- 🚧 Set total trip budget
-- 🚧 Add shared and individual expenses
-- ⏳ Automatic calculation of spent and remaining budget
-- ⏳ Individual member expense tracking
-- ⏳ Category based spending summary
+- ✅ Create budget with trip members and planned contributions
+- ✅ Add shared expenses with flexible split methods (equal, custom, percentage)
+- ✅ Automatic calculation of spent and remaining budget
+- ✅ Individual member expense tracking with per-member summaries
+- ✅ Category-based expense organization
+- ✅ Clone trip with budget (three modes: TEMPLATE, PLANNING, FULL_HISTORY)
+- ✅ Trip cache synchronization for budget consistency
 
 ### 🏨 Accommodations
 - 🚧 Add lodging details with check in and check out dates
