@@ -8,6 +8,7 @@ router.use(authMiddleware);
 
 router.post('/', budgetController.createBudget);
 router.get('/', budgetController.getBudgetSnapshot);
+router.patch('/', budgetController.updateBudgetBase);
 router.patch('/members/:userId', budgetController.updateBudgetMember);
 
 export default router;

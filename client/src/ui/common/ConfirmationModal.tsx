@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from '../icon/Icon';
 
 interface ConfirmationModalProps {
@@ -8,6 +9,7 @@ interface ConfirmationModalProps {
   confirmText?: string;
   cancelText?: string;
   isDangerous?: boolean;
+  isWarning?: boolean;
   isLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -21,6 +23,7 @@ const ConfirmationModal = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   isDangerous = false,
+  isWarning = false,
   isLoading = false,
   onConfirm,
   onCancel,
@@ -28,29 +31,29 @@ const ConfirmationModal = ({
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop with blur */}
       <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-modal-fade-in" 
         onClick={onCancel}
-        style={{ animation: 'fadeIn 0.2s ease-out' }}
       />
 
       {/* Modal content */}
       <div 
-        className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full"
-        style={{ animation: 'slideUp 0.3s ease-out' }}
+        className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full animate-modal-slide-up"
       >
         {/* Content with padding */}
-        <div className="px-8 py-8">
+        <div className="px-8 py-6">
           {/* Icon and Title */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className={`flex-shrink-0 p-3 rounded-xl ${isDangerous ? 'bg-red-50' : 'bg-emerald-50'}`}>
+          <div className="flex items-start gap-4 mb-6">
+            <div className={`flex-shrink-0 p-3 rounded-xl ${
+              isDangerous ? 'bg-red-50' : isWarning ? 'bg-amber-50' : 'bg-emerald-50'
+            }`}>
               <Icon 
-                name={isDangerous ? 'alertCircle' : 'checkCircle'} 
+                name={isDangerous ? 'alertCircle' : isWarning ? 'alertTriangle' : 'checkCircle'} 
                 size={24} 
-                className={isDangerous ? 'text-red-600' : 'text-emerald-600'}
+                className={isDangerous ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-emerald-600'}
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -82,6 +85,8 @@ const ConfirmationModal = ({
             className={`px-5 py-2.5 text-sm font-medium text-white rounded-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 ${
               isDangerous
                 ? 'bg-red-600 hover:bg-red-700 hover:shadow-lg hover:shadow-red-600/20'
+                : isWarning
+                ? 'bg-amber-600 hover:bg-amber-700 hover:shadow-lg hover:shadow-amber-600/20'
                 : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-600/20'
             }`}
           >
@@ -92,30 +97,10 @@ const ConfirmationModal = ({
           </button>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default ConfirmationModal;

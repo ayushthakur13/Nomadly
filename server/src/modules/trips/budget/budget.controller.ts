@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '@shared/utils';
 import budgetService from './budget.service';
-import type { CreateBudgetDTO, UpdateBudgetMemberDTO } from '../../../../../shared/types/budget';
+import type { CreateBudgetDTO, UpdateBudgetDTO, UpdateBudgetMemberDTO } from '../../../../../shared/types/budget';
 
 interface AuthRequest extends Request {
   user?: {
@@ -36,12 +36,49 @@ class BudgetController {
       res.status(400).json({ success: false, message: 'Base currency is required' });
       return;
     }
+    if (dto.totalBudgetAmount !== undefined && typeof dto.totalBudgetAmount !== 'number') {
+      res.status(400).json({ success: false, message: 'totalBudgetAmount must be a number' });
+      return;
+    }
 
     const snapshot = await budgetService.createBudget(tripId, userId, dto);
 
     res.status(201).json({
       success: true,
       message: 'Budget created successfully',
+      data: { snapshot },
+    });
+  });
+
+  /**
+   * PATCH /api/trips/:tripId/budget
+   * Update base budget amount (creator only)
+   */
+  updateBudgetBase = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    const { tripId } = req.params;
+
+    if (!userId) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    if (!tripId) {
+      res.status(400).json({ success: false, message: 'Trip ID is required' });
+      return;
+    }
+
+    const dto: UpdateBudgetDTO = req.body;
+    if (dto.baseBudgetAmount !== undefined && dto.baseBudgetAmount !== null && typeof dto.baseBudgetAmount !== 'number') {
+      res.status(400).json({ success: false, message: 'baseBudgetAmount must be a number or null' });
+      return;
+    }
+
+    const snapshot = await budgetService.updateBaseBudget(tripId, userId, dto);
+
+    res.status(200).json({
+      success: true,
+      message: 'Budget updated successfully',
       data: { snapshot },
     });
   });

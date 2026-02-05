@@ -48,6 +48,7 @@ export interface TripBudget {
   _id: string;
   tripId: string;
   baseCurrency: CurrencyCode;
+  baseBudgetAmount?: number | null;
   createdBy: string;
   members: BudgetMember[];
   rules: BudgetRules;
@@ -77,10 +78,15 @@ export interface BudgetSnapshot {
 
 export interface CreateBudgetDTO {
   baseCurrency: CurrencyCode;
+  totalBudgetAmount?: number;
   members?: {
     userId: string;
     plannedContribution: number;
   }[];
+}
+
+export interface UpdateBudgetDTO {
+  baseBudgetAmount?: number | null;
 }
 
 export interface UpdateBudgetMemberDTO {

@@ -91,6 +91,7 @@ export const MappingUtils = {
       _id: budget._id.toString(),
       tripId: budget.tripId.toString(),
       baseCurrency: budget.baseCurrency,
+      baseBudgetAmount: budget.baseBudgetAmount ?? null,
       createdBy: budget.createdBy.toString(),
       members,
       rules: {

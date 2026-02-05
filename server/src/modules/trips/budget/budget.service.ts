@@ -14,6 +14,7 @@ import type {
   BudgetSnapshot,
   CreateBudgetDTO,
   CreateExpenseDTO,
+  UpdateBudgetDTO,
   UpdateBudgetMemberDTO,
   UpdateExpenseDTO
 } from '../../../../../shared/types/budget';
@@ -37,21 +38,45 @@ class BudgetService {
     const baseCurrency = dto.baseCurrency?.trim().toUpperCase();
     ValidationUtils.validateCurrency(baseCurrency);
 
-    const contributionMap = new Map<string, number>();
-    if (Array.isArray(dto.members)) {
-      for (const member of dto.members) {
-        if (!member?.userId || !ValidationUtils.isValidObjectId(member.userId)) {
-          throw new Error('Invalid member user ID in budget members');
-        }
-        ValidationUtils.validateContribution(member.plannedContribution);
-        contributionMap.set(member.userId, FinancialUtils.normalizeMoney(member.plannedContribution));
+      const contributionMap = new Map<string, number>();
+      const tripMemberIds = new Set<string>(trip.members.map(m => m.userId.toString()));
+      if (!tripMemberIds.has(trip.createdBy.toString())) {
+        tripMemberIds.add(trip.createdBy.toString());
       }
-    }
 
-    const tripMemberIds = new Set<string>(trip.members.map(m => m.userId.toString()));
-    if (!tripMemberIds.has(trip.createdBy.toString())) {
-      tripMemberIds.add(trip.createdBy.toString());
-    }
+      const tripMemberList = Array.from(tripMemberIds);
+
+      if (dto.totalBudgetAmount !== undefined) {
+        ValidationUtils.validateAmount(dto.totalBudgetAmount);
+        if (tripMemberList.length === 0) {
+          throw new Error('Trip must have at least one member to initialize budget');
+        }
+        const total = FinancialUtils.normalizeMoney(dto.totalBudgetAmount);
+        const perMember = FinancialUtils.normalizeMoney(total / tripMemberList.length);
+        const computed = tripMemberList.map((memberId) => ({
+          userId: memberId,
+          amount: perMember,
+        }));
+        const computedTotal = computed.reduce((sum, m) => sum + m.amount, 0);
+        const diff = FinancialUtils.normalizeMoney(total - computedTotal);
+        if (diff !== 0 && computed.length > 0) {
+          const last = computed[computed.length - 1];
+          if (last) {
+            last.amount = FinancialUtils.normalizeMoney(last.amount + diff);
+          }
+        }
+        for (const entry of computed) {
+          contributionMap.set(entry.userId, entry.amount);
+        }
+      } else if (Array.isArray(dto.members)) {
+        for (const member of dto.members) {
+          if (!member?.userId || !ValidationUtils.isValidObjectId(member.userId)) {
+            throw new Error('Invalid member user ID in budget members');
+          }
+          ValidationUtils.validateContribution(member.plannedContribution);
+          contributionMap.set(member.userId, FinancialUtils.normalizeMoney(member.plannedContribution));
+        }
+      }
 
     for (const memberId of contributionMap.keys()) {
       if (!tripMemberIds.has(memberId)) {
@@ -83,11 +108,43 @@ class BudgetService {
     const budget = await TripBudget.create({
       tripId: new Types.ObjectId(tripId),
       baseCurrency,
+      baseBudgetAmount: dto.totalBudgetAmount !== undefined
+        ? FinancialUtils.normalizeMoney(dto.totalBudgetAmount)
+        : null,
       createdBy: new Types.ObjectId(userId),
       members: budgetMembers,
     });
 
     return this.buildSnapshot(budget, []);
+  }
+
+  async updateBaseBudget(
+    tripId: string,
+    userId: string,
+    dto: UpdateBudgetDTO
+  ): Promise<BudgetSnapshot> {
+    ValidationUtils.validateObjectId(tripId, 'trip ID');
+
+    const trip = await Trip.findById(tripId);
+    if (!trip) throw new Error('Trip not found');
+
+    if (!isTripCreator(trip, userId)) {
+      throw new Error('Only trip creator can update base budget');
+    }
+
+    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    if (!budget) throw new Error('Budget not found');
+
+    if (dto.baseBudgetAmount === null) {
+      budget.baseBudgetAmount = null;
+    } else if (dto.baseBudgetAmount !== undefined) {
+      ValidationUtils.validateAmount(dto.baseBudgetAmount);
+      budget.baseBudgetAmount = FinancialUtils.normalizeMoney(dto.baseBudgetAmount);
+    }
+
+    await budget.save();
+
+    return this.buildSnapshotWithExpenses(budget, tripId);
   }
 
   async getBudgetSnapshot(tripId: string, userId: string): Promise<BudgetSnapshot> {

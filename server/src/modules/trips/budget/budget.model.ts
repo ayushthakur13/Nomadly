@@ -18,6 +18,7 @@ export interface ITripBudget extends Document {
   _id: Types.ObjectId;
   tripId: Types.ObjectId;
   baseCurrency: string;
+  baseBudgetAmount?: number | null;
   createdBy: Types.ObjectId;
   members: IBudgetMember[];
   rules: IBudgetRules;
@@ -76,6 +77,12 @@ const TripBudgetSchema = new Schema<ITripBudget>(
       minlength: 3,
       maxlength: 3,
       default: 'INR',
+    },
+
+    baseBudgetAmount: {
+      type: Number,
+      min: [0, 'Base budget cannot be negative'],
+      default: null,
     },
 
     createdBy: {
