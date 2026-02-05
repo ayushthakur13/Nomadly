@@ -191,6 +191,15 @@ src/
 
 ---
 
+## 📚 Documentation
+
+For detailed documentation on architecture, features, and implementation details:
+
+- **[Backend Documentation](docs/BACKEND_DOCUMENTATION.md)** — Comprehensive backend guide covering modules, API design, security, database, and deployment
+- **[Frontend Documentation](docs/FRONTEND_DOCUMENTATION.md)** — Complete frontend guide covering React architecture, state management, services, hooks, and styling
+
+---
+
 ## 🏛️ Architecture & Patterns
 
 ### Backend: Domain-Driven Modular Design
