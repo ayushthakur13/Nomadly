@@ -72,7 +72,42 @@ class ExpenseController {
       return;
     }
 
-    const dto: UpdateExpenseDTO = req.body;
+    const body = req.body as Record<string, unknown>;
+
+    // Reject attempted mutations of immutable fields at the HTTP layer
+    const immutableFields = ['splitMethod', 'createdBy', 'paidBy', 'tripId'] as const;
+    for (const field of immutableFields) {
+      if (field in body) {
+        res.status(400).json({ success: false, message: `'${field}' cannot be updated` });
+        return;
+      }
+    }
+
+    // Field-level type validation for mutable fields
+    if ('amount' in body) {
+      if (typeof body.amount !== 'number' || body.amount <= 0) {
+        res.status(400).json({ success: false, message: 'amount must be a positive number' });
+        return;
+      }
+    }
+    if ('title' in body && typeof body.title !== 'string') {
+      res.status(400).json({ success: false, message: 'title must be a string' });
+      return;
+    }
+    if ('category' in body && typeof body.category !== 'string') {
+      res.status(400).json({ success: false, message: 'category must be a string' });
+      return;
+    }
+    if ('date' in body && typeof body.date !== 'string') {
+      res.status(400).json({ success: false, message: 'date must be an ISO date string' });
+      return;
+    }
+    if ('notes' in body && typeof body.notes !== 'string') {
+      res.status(400).json({ success: false, message: 'notes must be a string' });
+      return;
+    }
+
+    const dto: UpdateExpenseDTO = body as UpdateExpenseDTO;
     const snapshot = await budgetService.updateExpense(expenseId, userId, dto);
 
     res.status(200).json({

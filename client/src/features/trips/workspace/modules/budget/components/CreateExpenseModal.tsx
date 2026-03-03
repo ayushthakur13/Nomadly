@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import toast from 'react-hot-toast';
 import { useBudget, useMemberDetails } from '../hooks';
 import { Icon } from '@/ui/icon';
 import type { BudgetMember, CreateExpenseDTO, ExpenseSplit } from '@shared/types';
@@ -40,9 +41,35 @@ const CreateExpenseModal = ({ members, onClose }: CreateExpenseModalProps) => {
 
   const handleSubmit = async () => {
     const amount = parseFloat(formData.amount);
-    if (!formData.title.trim() || isNaN(amount) || amount <= 0) {
-      alert('Please fill in all required fields');
+    if (!formData.title.trim()) {
+      toast.error('Please enter an expense title');
       return;
+    }
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid amount greater than 0');
+      return;
+    }
+
+    // Validate split totals before sending to server
+    if (formData.splitMethod === 'custom') {
+      const splitTotal = activeSplitMembers.reduce(
+        (sum, m) => sum + (parseFloat(splitInputs[m.userId] || '0') || 0),
+        0
+      );
+      if (Math.abs(splitTotal - amount) > 0.01) {
+        toast.error(`Custom split amounts must sum to ${amount.toFixed(2)}. Current total: ${splitTotal.toFixed(2)}`);
+        return;
+      }
+    }
+    if (formData.splitMethod === 'percentage') {
+      const percentTotal = activeSplitMembers.reduce(
+        (sum, m) => sum + (parseFloat(splitInputs[m.userId] || '0') || 0),
+        0
+      );
+      if (Math.abs(percentTotal - 100) > 0.01) {
+        toast.error(`Percentages must sum to 100%. Current total: ${percentTotal.toFixed(2)}%`);
+        return;
+      }
     }
 
     // Build splits array based on split method
@@ -240,6 +267,17 @@ const CreateExpenseModal = ({ members, onClose }: CreateExpenseModalProps) => {
               </div>
             </div>
 
+            {/* Rounding note for equal split */}
+            {formData.splitMethod === 'equal' && formData.amount && activeSplitMembers.length > 0 && (() => {
+              const perPerson = parseFloat(formData.amount) / activeSplitMembers.length;
+              const isUneven = !Number.isInteger(perPerson * 100);
+              return isUneven ? (
+                <p className="text-xs text-gray-400">
+                  Amounts will be split as evenly as possible. The last member may receive a sub-cent rounding adjustment.
+                </p>
+              ) : null;
+            })()}
+
             {/* Split Details (Custom/Percentage) */}
             {formData.splitMethod !== 'equal' && formData.amount && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
@@ -271,6 +309,11 @@ const CreateExpenseModal = ({ members, onClose }: CreateExpenseModalProps) => {
                     </div>
                   ))}
                 </div>
+                {formData.splitMethod === 'percentage' && (
+                  <p className="text-xs text-blue-600">
+                    Percentages are converted to currency amounts. Sub-cent differences due to rounding are automatically adjusted on the last member.
+                  </p>
+                )}
               </div>
             )}
           </div>

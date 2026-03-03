@@ -29,12 +29,18 @@ export function useBudgetPermissions(snapshot: BudgetSnapshot | null): BudgetPer
     const budget = snapshot.budget;
     const currentMember = budget.members.find((m) => m.userId === currentUserId);
 
-    // Creator check: compare as strings to handle ObjectId vs string
+    /**
+     * Normalize IDs to plain trimmed strings before comparison.
+     * Both createdBy and currentUserId arrive as strings from the API,
+     * but this guard prevents silent mismatches from extra whitespace or
+     * ObjectId objects leaking through in tests/stubs.
+     */
+    const toId = (v: unknown): string => String(v ?? '').trim();
     const isCreator = Boolean(
-      budget.createdBy && String(budget.createdBy) === String(currentUserId)
+      currentUserId && toId(budget.createdBy) === toId(currentUserId)
     );
 
-    // Can add expense if creator OR member with permission
+    // Can add expense if creator OR active member with permission
     const canAddExpense = Boolean(
       isCreator ||
         (currentMember &&
@@ -48,7 +54,7 @@ export function useBudgetPermissions(snapshot: BudgetSnapshot | null): BudgetPer
     // Can edit contribution if creator, or self with permission
     const canEditContribution = (userId: string): boolean => {
       if (isCreator) return true;
-      if (userId !== currentUserId) return false;
+      if (toId(userId) !== toId(currentUserId)) return false;
 
       const memberMeta = budget.members.find((m) => m.userId === userId);
       if (!memberMeta || memberMeta.isPastMember) return false;

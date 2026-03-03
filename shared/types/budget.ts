@@ -2,15 +2,18 @@
  * Budget domain types - API contract between client and server
  */
 
+/** ISO 4217 currency code, e.g. 'INR', 'USD', 'EUR' */
 export type CurrencyCode = string;
 
 export type BudgetMemberRole = 'creator' | 'member';
 
 export interface BudgetMember {
   userId: string;
+  /** How much this member plans to contribute, >= their actual spent amount */
   plannedContribution: number;
   role: BudgetMemberRole;
   joinedAt: string;
+  /** Past members remain for audit history but cannot create/edit expenses */
   isPastMember: boolean;
 }
 
@@ -24,13 +27,20 @@ export interface ExpenseSplit {
 export interface Expense {
   _id: string;
   tripId: string;
+  /** Short human-readable description, e.g. 'Hotel Taj' */
   title?: string;
+  /** Total expense amount in baseCurrency, normalised to 2 decimal places */
   amount: number;
+  /** ISO 4217 code — must match the parent TripBudget.baseCurrency */
   currency: CurrencyCode;
+  /** Free-form category tag, e.g. 'accommodation', 'food' */
   category?: string;
+  /** User who physically paid – must be an active budget member */
   paidBy: string;
+  /** User who recorded the expense */
   createdBy: string;
   splitMethod: ExpenseSplitMethod;
+  /** Per-member breakdown; sum of split amounts must equal `amount` (±0.01) */
   splits: ExpenseSplit[];
   date: string;
   notes?: string;
@@ -47,9 +57,12 @@ export interface BudgetRules {
 export interface TripBudget {
   _id: string;
   tripId: string;
+  /** ISO 4217 code for all monetary values in this budget */
   baseCurrency: CurrencyCode;
+  /** Optional overall budget ceiling set by the creator; null means no cap */
   baseBudgetAmount?: number | null;
   createdBy: string;
+  /** All trip members who are tracked in this budget, including past members */
   members: BudgetMember[];
   rules: BudgetRules;
   createdAt: string;
@@ -57,8 +70,11 @@ export interface TripBudget {
 }
 
 export interface BudgetSummary {
+  /** Sum of all active members' plannedContribution */
   totalPlanned: number;
+  /** Sum of all expense amounts */
   totalSpent: number;
+  /** totalPlanned - totalSpent; negative means over-budget */
   remaining: number;
 }
 

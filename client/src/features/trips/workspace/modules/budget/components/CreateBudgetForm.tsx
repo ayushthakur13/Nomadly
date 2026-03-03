@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Icon } from '@/ui/icon';
 import type { CreateBudgetDTO, BudgetSnapshot } from '@shared/types';
 import toast from 'react-hot-toast';
+
+const COMMON_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AUD', 'CAD', 'SGD', 'AED', 'JPY', 'THB'];
 
 interface CreateBudgetFormProps {
   onClose: () => void;
@@ -11,6 +12,7 @@ interface CreateBudgetFormProps {
 
 export function CreateBudgetForm({ onClose, onSubmit, isLoading }: CreateBudgetFormProps) {
   const [totalBudgetAmount, setTotalBudgetAmount] = useState('');
+  const [currency, setCurrency] = useState('INR');
 
   const handleSubmit = async () => {
     const amount = parseFloat(totalBudgetAmount);
@@ -21,7 +23,7 @@ export function CreateBudgetForm({ onClose, onSubmit, isLoading }: CreateBudgetF
 
     try {
       await onSubmit({
-        baseCurrency: 'INR',
+        baseCurrency: currency,
         totalBudgetAmount: amount,
       });
       onClose();
@@ -33,24 +35,46 @@ export function CreateBudgetForm({ onClose, onSubmit, isLoading }: CreateBudgetF
   };
 
   return (
-    <div className="mt-4 bg-gray-50 rounded-lg p-4">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Total planned budget (₹)
-      </label>
-      <p className="text-xs text-gray-500 mb-3">
-        This amount will be shared equally among trip members
-      </p>
+    <div className="mt-4 bg-gray-50 rounded-lg p-4 space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Total planned budget
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            Shared equally among trip members
+          </p>
+          <input
+            type="number"
+            value={totalBudgetAmount}
+            onChange={(e) => setTotalBudgetAmount(e.target.value)}
+            placeholder="e.g., 20000"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+            disabled={isLoading}
+            step="500"
+            min="0"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Currency
+          </label>
+          <p className="text-xs text-gray-500 mb-2">
+            All expenses will use this currency
+          </p>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-white"
+            disabled={isLoading}
+          >
+            {COMMON_CURRENCIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+      </div>
       <div className="flex flex-wrap gap-2">
-        <input
-          type="number"
-          value={totalBudgetAmount}
-          onChange={(e) => setTotalBudgetAmount(e.target.value)}
-          placeholder="e.g., 20000"
-          className="flex-1 min-w-[180px] px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
-          disabled={isLoading}
-          step="500"
-          min="0"
-        />
         <button
           onClick={handleSubmit}
           disabled={isLoading}

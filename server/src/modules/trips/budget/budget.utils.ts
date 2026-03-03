@@ -64,13 +64,17 @@ export const ValidationUtils = {
       throw new Error('Base currency is required and must be 3 letters');
     }
   },
-
-  validateSplitMethod(method: unknown): asserts method is 'equal' | 'custom' | 'percentage' {
-    if (!method || !['equal', 'custom', 'percentage'].includes(method as string)) {
-      throw new Error('Invalid splitMethod');
-    }
-  },
 };
+
+/**
+ * Assertion guard for split method — must be a standalone function because
+ * TypeScript requires direct function references for `asserts` signatures.
+ */
+export function validateSplitMethod(method: unknown): asserts method is 'equal' | 'custom' | 'percentage' {
+  if (!method || !['equal', 'custom', 'percentage'].includes(method as string)) {
+    throw new Error('Invalid split method. Must be one of: equal, custom, percentage');
+  }
+}
 
 /**
  * Mapping/transformation utilities
@@ -166,6 +170,13 @@ export const MappingUtils = {
 export const BudgetAccessUtils = {
   getBudgetMemberIds(budget: ITripBudget): Set<string> {
     return new Set(budget.members.map(m => m.userId.toString()));
+  },
+
+  /** Returns only non-past member IDs — use this when validating expense splits */
+  getActiveBudgetMemberIds(budget: ITripBudget): Set<string> {
+    return new Set(
+      budget.members.filter(m => !m.isPastMember).map(m => m.userId.toString())
+    );
   },
 
   ensureMemberAccess(budget: ITripBudget, userId: string): void {
@@ -290,7 +301,7 @@ function computeEqualSplit(amount: number, budgetMembers: { userId: string; isPa
 function computePercentageSplit(amount: number, splits: { userId: string; amount: number }[]): { userId: string; amount: number }[] {
   const totalPercent = splits.reduce((sum, s) => sum + s.amount, 0);
   if (Math.abs(totalPercent - 100) > 0.01) {
-    throw new Error('Split percentages must sum to 100');
+    throw new Error('Split percentages must sum to 100%');
   }
 
   const computed = splits.map(s => ({

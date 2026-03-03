@@ -9,6 +9,7 @@ import {
   MappingUtils,
   BudgetAccessUtils,
   SplitUtils,
+  validateSplitMethod,
 } from './budget.utils';
 import type {
   BudgetSnapshot,
@@ -144,6 +145,11 @@ class BudgetService {
 
     await budget.save();
 
+    // Sync Trip-level budget summary cache
+    await this.syncTripBudgetSummary(tripId).catch((err) => {
+      console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
+    });
+
     return this.buildSnapshotWithExpenses(budget, tripId);
   }
 
@@ -215,7 +221,9 @@ class BudgetService {
     await budget.save();
 
     // Sync Trip cache since totalPlanned changed
-    await this.syncTripBudgetSummary(tripId, budget);
+    await this.syncTripBudgetSummary(tripId).catch((err) => {
+      console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
+    });
 
     return this.buildSnapshotWithExpenses(budget, tripId);
   }
@@ -234,6 +242,7 @@ class BudgetService {
     }
 
     const budgetMemberIds = BudgetAccessUtils.getBudgetMemberIds(budget);
+    const activeBudgetMemberIds = BudgetAccessUtils.getActiveBudgetMemberIds(budget);
     if (!budgetMemberIds.has(dto.paidBy)) {
       throw new Error('PaidBy must be a budget member');
     }
@@ -241,11 +250,9 @@ class BudgetService {
     ValidationUtils.validateAmount(dto.amount);
     const amount = FinancialUtils.normalizeMoney(dto.amount);
 
-    // Validate split method (equal, custom, or percentage)
-    if (!dto.splitMethod || !['equal', 'custom', 'percentage'].includes(dto.splitMethod)) {
-      throw new Error('Invalid splitMethod');
-    }
-    const splitMethod = dto.splitMethod as 'equal' | 'custom' | 'percentage';
+    // Validate split method (standalone assertion function — required by TypeScript for asserts signatures)
+    validateSplitMethod(dto.splitMethod);
+    const splitMethod = dto.splitMethod;
 
     const splitsInput = dto.splits ? dto.splits.map(s => ({ userId: s.userId, amount: FinancialUtils.normalizeMoney(s.amount) })) : undefined;
     const splits = SplitUtils.computeSplits({
@@ -255,7 +262,8 @@ class BudgetService {
       budgetMembers: budget.members.map(m => ({ userId: m.userId.toString(), isPastMember: m.isPastMember }))
     });
 
-    SplitUtils.validateSplits(splits, amount, budgetMemberIds);
+    // Use active member IDs so past members cannot appear in new splits
+    SplitUtils.validateSplits(splits, amount, activeBudgetMemberIds);
 
     const expenseDate = dto.date !== undefined ? ValidationUtils.validateDateString(dto.date) : new Date();
 
@@ -273,7 +281,9 @@ class BudgetService {
       notes: dto.notes,
     });
 
-    await this.syncTripBudgetSummary(tripId, budget);
+    await this.syncTripBudgetSummary(tripId).catch((err) => {
+      console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
+    });
 
     return this.buildSnapshotWithExpenses(budget, tripId);
   }
@@ -292,6 +302,7 @@ class BudgetService {
     BudgetAccessUtils.enforceExpensePermission('edit', isCreator, userId, expense.createdBy?.toString(), budget);
 
     const budgetMemberIds = BudgetAccessUtils.getBudgetMemberIds(budget);
+    const activeBudgetMemberIds = BudgetAccessUtils.getActiveBudgetMemberIds(budget);
 
     if (dto.amount !== undefined) {
       ValidationUtils.validateAmount(dto.amount);
@@ -331,13 +342,16 @@ class BudgetService {
         budgetMembers: budget.members.map(m => ({ userId: m.userId.toString(), isPastMember: m.isPastMember }))
       });
 
-      SplitUtils.validateSplits(splits, expense.amount, budgetMemberIds);
+      // Use active member IDs so past members cannot appear in updated splits
+      SplitUtils.validateSplits(splits, expense.amount, activeBudgetMemberIds);
       expense.splits = splits.map(s => ({ userId: new Types.ObjectId(s.userId), amount: FinancialUtils.normalizeMoney(s.amount) }));
     }
 
     await expense.save();
 
-    await this.syncTripBudgetSummary(expense.tripId.toString(), budget);
+    await this.syncTripBudgetSummary(expense.tripId.toString()).catch((err) => {
+      console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
+    });
 
     return this.buildSnapshotWithExpenses(budget, expense.tripId.toString());
   }
@@ -357,7 +371,9 @@ class BudgetService {
 
     await expense.deleteOne();
 
-    await this.syncTripBudgetSummary(expense.tripId.toString(), budget);
+    await this.syncTripBudgetSummary(expense.tripId.toString()).catch((err) => {
+      console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
+    });
 
     return this.buildSnapshotWithExpenses(budget, expense.tripId.toString());
   }
@@ -390,25 +406,34 @@ class BudgetService {
     return budget;
   }
 
-  private normalizeMoney(value: number): number {
-    return FinancialUtils.normalizeMoney(value);
-  }
-
-  private async syncTripBudgetSummary(tripId: string, budget: ITripBudget): Promise<void> {
-    const totalPlanned = this.normalizeMoney(
-      budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0)
+  /**
+   * Re-computes and persists Trip.budgetSummary from the live DB state.
+   *
+   * Budget and expenses are both queried fresh from the DB at call time to
+   * avoid using stale in-memory values from the caller (which was the root
+   * cause of the previous staleness bug on totalPlanned).
+   *
+   * Residual race: two *concurrent* expense writes may aggregate totalSpent
+   * before the other's document is visible. This is accepted at current scale.
+   * TODO: wrap in a MongoDB session (requires replica set / Atlas) when moving
+   * to production to guarantee full consistency.
+   */
+  private async syncTripBudgetSummary(tripId: string): Promise<void> {
+    // Re-query budget fresh so totalPlanned always reflects committed DB state.
+    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    const totalPlanned = FinancialUtils.normalizeMoney(
+      budget ? budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0) : 0
     );
+
     const totalSpentAgg = await Expense.aggregate([
       { $match: { tripId: new Types.ObjectId(tripId) } },
       { $group: { _id: '$tripId', total: { $sum: '$amount' } } }
     ]);
-    const totalSpent = this.normalizeMoney(totalSpentAgg[0]?.total || 0);
+    const totalSpent = FinancialUtils.normalizeMoney(totalSpentAgg[0]?.total || 0);
 
     const trip = await Trip.findById(tripId);
     if (!trip) return;
 
-    // NOTE: This is a read-recompute-write cache update and can race under concurrent expense writes.
-    // Accepted for current scale. Consider transactions/optimistic locking or async recompute in future.
     trip.budgetSummary = { total: totalPlanned, spent: totalSpent };
     await trip.save();
   }
@@ -519,7 +544,7 @@ class BudgetService {
     }
 
     // Sync Trip budget summary cache
-    await this.syncTripBudgetSummary(newTripId, clonedBudget);
+    await this.syncTripBudgetSummary(newTripId);
   }
 }
 
