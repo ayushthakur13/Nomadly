@@ -11,6 +11,7 @@ import type {
   CreateBudgetDTO,
   UpdateBudgetDTO,
   UpdateBudgetMemberDTO,
+  BulkUpdateBudgetMembersDTO,
   CreateExpenseDTO,
   UpdateExpenseDTO,
 } from '../../../shared/types';
@@ -106,6 +107,22 @@ export async function updateMemberContribution(
     return normalizeBudgetSnapshot(res.data);
   } catch (error) {
     throw new Error(extractApiError(error as ApiError, 'Failed to update contribution'));
+  }
+}
+
+/**
+ * Bulk update planned contributions for multiple members (creator only).
+ * Validates all entries server-side before applying any — atomic fail-fast.
+ */
+export async function bulkUpdateMemberContributions(
+  tripId: string,
+  payload: BulkUpdateBudgetMembersDTO
+): Promise<BudgetSnapshot> {
+  try {
+    const res = await api.patch(`/trips/${tripId}/budget/members`, payload);
+    return normalizeBudgetSnapshot(res.data);
+  } catch (error) {
+    throw new Error(extractApiError(error as ApiError, 'Failed to update contributions'));
   }
 }
 

@@ -5,9 +5,10 @@ import { useBudgetFilters } from '../hooks';
 
 interface ExpensesListProps {
   snapshot: BudgetSnapshot;
+  getMemberName: (userId: string) => string;
 }
 
-const ExpensesList = ({ snapshot }: ExpensesListProps) => {
+const ExpensesList = ({ snapshot, getMemberName }: ExpensesListProps) => {
   const expenses = snapshot?.expenses ?? [];
   const budget = snapshot?.budget;
   const { user } = useAuth();
@@ -29,7 +30,6 @@ const ExpensesList = ({ snapshot }: ExpensesListProps) => {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">Expense Ledger</h2>
-          <p className="text-sm text-gray-500">Recent spend, kept simple</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {availableCategories.length > 1 && (
@@ -57,9 +57,9 @@ const ExpensesList = ({ snapshot }: ExpensesListProps) => {
         </div>
       </div>
 
-      <div className="divide-y divide-gray-200">
+      <div className="space-y-0.5">
         {filteredExpenses.length === 0 ? (
-          <div className="py-10 text-center text-gray-500">
+          <div className="py-10 text-center text-gray-500 text-sm">
             {expenses.length === 0
               ? 'No expenses yet. Start with your first shared spend.'
               : 'No expenses match the current filter.'}
@@ -83,6 +83,7 @@ const ExpensesList = ({ snapshot }: ExpensesListProps) => {
                 baseCurrency={budget?.baseCurrency || 'INR'}
                 canEdit={canEditOrDelete}
                 canDelete={canEditOrDelete}
+                getMemberName={getMemberName}
               />
             );
           })

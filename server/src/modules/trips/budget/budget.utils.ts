@@ -70,9 +70,9 @@ export const ValidationUtils = {
  * Assertion guard for split method — must be a standalone function because
  * TypeScript requires direct function references for `asserts` signatures.
  */
-export function validateSplitMethod(method: unknown): asserts method is 'equal' | 'custom' | 'percentage' {
-  if (!method || !['equal', 'custom', 'percentage'].includes(method as string)) {
-    throw new Error('Invalid split method. Must be one of: equal, custom, percentage');
+export function validateSplitMethod(method: unknown): asserts method is 'equal' | 'custom' {
+  if (!method || !['equal', 'custom'].includes(method as string)) {
+    throw new Error('Invalid split method. Must be one of: equal, custom');
   }
 }
 
@@ -234,7 +234,7 @@ export const SplitUtils = {
     budgetMembers
   }: {
     amount: number;
-    splitMethod: 'equal' | 'custom' | 'percentage';
+    splitMethod: 'equal' | 'custom';
     splits?: { userId: string; amount: number }[] | undefined;
     budgetMembers: { userId: string; isPastMember: boolean }[];
   }): { userId: string; amount: number }[] {
@@ -247,14 +247,11 @@ export const SplitUtils = {
     }
 
     if (!Array.isArray(splits) || splits.length === 0) {
-      throw new Error('Splits are required for this split method');
+      throw new Error('Splits are required for custom split method');
     }
 
-    if (splitMethod === 'custom') {
-      return splits.map(s => ({ userId: s.userId, amount: FinancialUtils.normalizeMoney(s.amount) }));
-    }
-
-    return computePercentageSplit(amount, splits);
+    // custom: use provided amounts directly
+    return splits.map(s => ({ userId: s.userId, amount: FinancialUtils.normalizeMoney(s.amount) }));
   },
 
   validateSplits(splits: { userId: string; amount: number }[], amount: number, memberIds: Set<string>): void {
@@ -298,25 +295,3 @@ function computeEqualSplit(amount: number, budgetMembers: { userId: string; isPa
   return result;
 }
 
-function computePercentageSplit(amount: number, splits: { userId: string; amount: number }[]): { userId: string; amount: number }[] {
-  const totalPercent = splits.reduce((sum, s) => sum + s.amount, 0);
-  if (Math.abs(totalPercent - 100) > 0.01) {
-    throw new Error('Split percentages must sum to 100%');
-  }
-
-  const computed = splits.map(s => ({
-    userId: s.userId,
-    amount: FinancialUtils.normalizeMoney((amount * s.amount) / 100),
-  }));
-
-  const computedTotal = computed.reduce((sum, s) => sum + s.amount, 0);
-  const diff = FinancialUtils.normalizeMoney(amount - computedTotal);
-  if (diff !== 0 && computed.length > 0) {
-    const last = computed[computed.length - 1];
-    if (last) {
-      last.amount = FinancialUtils.normalizeMoney(last.amount + diff);
-    }
-  }
-
-  return computed;
-}

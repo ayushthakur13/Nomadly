@@ -1,24 +1,62 @@
 import { useState } from 'react';
-import { useBudget, useBudgetPermissions } from './hooks';
+import { useBudget, useBudgetPermissions, useMemberDetails } from './hooks';
 import { BudgetHeader, BudgetMembers, ExpensesList, CreateExpenseModal, CreateBudgetForm } from './components/';
-import { ErrorAlert, PageHeader } from '@/ui/common';
+import { ErrorAlert, InfoModal, PageHeader } from '@/ui/common';
 import { Icon } from '@/ui/icon';
+import { useAuth } from '@/features/auth/hooks/';
+import { formatCurrency } from './utils/formatting';
 
 const BudgetPage = () => {
   const { snapshot, loading, error, budgetNotFound, createBudget, updateBaseBudget, actionLoading } = useBudget();
   const permissions = useBudgetPermissions(snapshot);
   const { canAddExpense, isCreator } = permissions;
+  const { user } = useAuth();
+  const { getMemberName, membersWithDetails } = useMemberDetails();
+  const currentUserId = (user as any)?.id || (user as any)?._id || null;
+  const myStats = snapshot?.memberSummaries?.find((m) => m.userId === currentUserId) ?? null;
+  const currency = snapshot?.budget?.baseCurrency || 'INR';
   
   const showEmptyState = budgetNotFound || !snapshot;
   
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBudgetForm, setShowBudgetForm] = useState(false);
+  const [showContributionsModal, setShowContributionsModal] = useState(false);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Budget"
-        subtitle="Budget awareness first, ledger second"
+        subtitle={
+          myStats ? (
+            <div className="flex items-center gap-3 mt-0.5">
+              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                <Icon name="wallet" size={12} className="text-gray-400" />
+                <span className="font-medium text-gray-600">{formatCurrency(myStats.planned, currency)}</span>
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="inline-flex items-center gap-1 text-xs text-gray-400">
+                <Icon name="receipt" size={12} className="text-gray-400" />
+                <span className="font-medium text-gray-600">{formatCurrency(myStats.spent, currency)}</span>
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="inline-flex items-center gap-1 text-xs">
+                <Icon name="piggyBank" size={12} className="text-gray-400" />
+                <span className={`font-medium ${myStats.remaining < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                  {myStats.remaining < 0 ? '-' : ''}{formatCurrency(Math.abs(myStats.remaining), currency)}
+                </span>
+              </span>
+            </div>
+          ) : undefined
+        }
+        secondaryAction={
+          snapshot
+            ? {
+                label: 'Contributions',
+                onClick: () => setShowContributionsModal(true),
+                icon: <Icon name="users" size={16} />,
+              }
+            : undefined
+        }
         action={
           canAddExpense
             ? {
@@ -74,6 +112,9 @@ const BudgetPage = () => {
             snapshot={snapshot}
             canEditBaseBudget={Boolean(isCreator)}
             actionLoading={actionLoading}
+            getMemberName={getMemberName}
+            membersWithDetails={membersWithDetails}
+            onOpenContributions={() => setShowContributionsModal(true)}
             onUpdateBaseBudget={async (amount) => {
               await updateBaseBudget({ baseBudgetAmount: amount });
             }}
@@ -82,20 +123,24 @@ const BudgetPage = () => {
             }}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <BudgetMembers snapshot={snapshot} />
-            </div>
-            <div className="lg:col-span-2">
-              <ExpensesList snapshot={snapshot} />
-            </div>
-          </div>
+          <ExpensesList snapshot={snapshot} getMemberName={getMemberName} />
+
+          <InfoModal
+            isOpen={showContributionsModal}
+            title="Contributions"
+            subtitle="Planned vs spent per traveler"
+            size="md"
+            onClose={() => setShowContributionsModal(false)}
+          >
+            <BudgetMembers snapshot={snapshot} getMemberName={getMemberName} membersWithDetails={membersWithDetails} />
+          </InfoModal>
         </>
       )}
 
       {showCreateModal && snapshot && (
         <CreateExpenseModal
           members={snapshot.budget.members}
+          getMemberName={getMemberName}
           onClose={() => setShowCreateModal(false)}
         />
       )}

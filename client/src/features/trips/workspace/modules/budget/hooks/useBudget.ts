@@ -8,6 +8,7 @@ import {
   updateExpense as apiUpdateExpense,
   deleteExpense as apiDeleteExpense,
   updateMemberContribution as apiUpdateMemberContribution,
+  bulkUpdateMemberContributions as apiBulkUpdateMemberContributions,
 } from '@/services/budget.service';
 import type {
   BudgetSnapshot,
@@ -16,6 +17,7 @@ import type {
   CreateExpenseDTO,
   UpdateExpenseDTO,
   UpdateBudgetMemberDTO,
+  BulkUpdateBudgetMembersDTO,
 } from '@shared/types';
 import { extractApiError, type ApiError } from '@/utils/errorHandling';
 
@@ -168,6 +170,20 @@ export function useBudget() {
     [tripId]
   );
 
+  const bulkUpdateMemberContributions = useCallback(
+    async (payload: BulkUpdateBudgetMembersDTO): Promise<BudgetSnapshot> => {
+      if (!tripId) throw new Error('Trip ID is required');
+      return createBudgetAction(
+        () => apiBulkUpdateMemberContributions(tripId, payload),
+        'Failed to update contributions',
+        setActionLoading,
+        setError,
+        setSnapshot
+      )();
+    },
+    [tripId]
+  );
+
   const clearError = () => setError(null);
 
   return {
@@ -182,6 +198,7 @@ export function useBudget() {
     updateExpense,
     deleteExpense,
     updateMemberContribution,
+    bulkUpdateMemberContributions,
     clearError,
     reload: load,
   };

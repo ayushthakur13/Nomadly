@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '@shared/utils';
 import budgetService from './budget.service';
-import type { CreateBudgetDTO, UpdateBudgetDTO, UpdateBudgetMemberDTO } from '../../../../../shared/types/budget';
+import type { CreateBudgetDTO, UpdateBudgetDTO, UpdateBudgetMemberDTO, BulkUpdateBudgetMembersDTO } from '../../../../../shared/types/budget';
 
 interface AuthRequest extends Request {
   user?: {
@@ -147,6 +147,39 @@ class BudgetController {
     res.status(200).json({
       success: true,
       message: 'Budget member updated successfully',
+      data: { snapshot },
+    });
+  });
+
+  /**
+   * PATCH /api/trips/:tripId/budget/members
+   * Bulk update planned contributions for multiple members (creator only)
+   */
+  updateBudgetMembersBulk = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const requesterId = req.user?.id;
+    const { tripId } = req.params;
+
+    if (!requesterId) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    if (!tripId) {
+      res.status(400).json({ success: false, message: 'Trip ID is required' });
+      return;
+    }
+
+    const dto: BulkUpdateBudgetMembersDTO = req.body;
+    if (!Array.isArray(dto?.updates) || dto.updates.length === 0) {
+      res.status(400).json({ success: false, message: 'updates must be a non-empty array' });
+      return;
+    }
+
+    const snapshot = await budgetService.bulkUpdateMemberContributions(tripId, requesterId, dto);
+
+    res.status(200).json({
+      success: true,
+      message: 'Contributions updated successfully',
       data: { snapshot },
     });
   });

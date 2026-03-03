@@ -17,6 +17,7 @@ import type {
   CreateExpenseDTO,
   UpdateBudgetDTO,
   UpdateBudgetMemberDTO,
+  BulkUpdateBudgetMembersDTO,
   UpdateExpenseDTO
 } from '../../../../../shared/types/budget';
 
@@ -213,14 +214,95 @@ class BudgetService {
 
     const plannedContribution = FinancialUtils.normalizeMoney(dto.plannedContribution);
     const spentByMember = await this.getMemberSpent(tripId, targetUserId);
-    if (plannedContribution < spentByMember) {
-      throw new Error('Planned contribution cannot be less than amount already spent');
+    const currentPlanned = FinancialUtils.normalizeMoney(member.plannedContribution ?? 0);
+
+    // Block only if the new value is *lower* than what's already been spent
+    // AND lower than the current planned (i.e. a downward move that digs deeper into deficit).
+    // Upward edits — even ones that don't fully cover spent — are always allowed because
+    // the member is moving in the right direction.
+    if (plannedContribution < spentByMember && plannedContribution < currentPlanned) {
+      throw new Error('Planned contribution cannot be reduced below amount already spent');
     }
 
     member.plannedContribution = plannedContribution;
     await budget.save();
 
     // Sync Trip cache since totalPlanned changed
+    await this.syncTripBudgetSummary(tripId).catch((err) => {
+      console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
+    });
+
+    return this.buildSnapshotWithExpenses(budget, tripId);
+  }
+
+  /**
+   * Bulk update planned contributions for multiple members in a single operation.
+   * Creator only. Validates all entries before applying any — fail-fast to keep
+   * state consistent. Past members are explicitly blocked.
+   */
+  async bulkUpdateMemberContributions(
+    tripId: string,
+    requesterId: string,
+    dto: BulkUpdateBudgetMembersDTO
+  ): Promise<BudgetSnapshot> {
+    ValidationUtils.validateObjectId(tripId, 'trip ID');
+
+    const trip = await Trip.findById(tripId);
+    if (!trip) throw new Error('Trip not found');
+
+    if (!isTripCreator(trip, requesterId)) {
+      throw new Error('Only trip creator can bulk update contributions');
+    }
+
+    if (!Array.isArray(dto.updates) || dto.updates.length === 0) {
+      throw new Error('updates must be a non-empty array');
+    }
+
+    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    if (!budget) throw new Error('Budget not found');
+
+    // Collect spent amounts for all target members in parallel before validation
+    const spentMap = new Map<string, number>();
+    await Promise.all(
+      dto.updates.map(async (update) => {
+        const spent = await this.getMemberSpent(tripId, update.userId);
+        spentMap.set(update.userId, spent);
+      })
+    );
+
+    // ── Validate ALL entries before touching any ───────────────────────────
+    for (const update of dto.updates) {
+      ValidationUtils.validateObjectId(update.userId, 'user ID');
+      ValidationUtils.validateContribution(update.plannedContribution);
+
+      const member = budget.members.find((m) => m.userId.toString() === update.userId);
+      if (!member) throw new Error(`Budget member ${update.userId} not found`);
+      if (member.isPastMember) {
+        throw new Error(`Cannot update contribution for a past member (${update.userId})`);
+      }
+
+      const newPlanned = FinancialUtils.normalizeMoney(update.plannedContribution);
+      const spent = spentMap.get(update.userId) ?? 0;
+      const currentPlanned = FinancialUtils.normalizeMoney(member.plannedContribution ?? 0);
+
+      // Same rule as individual update: block only if downward AND below spent
+      if (newPlanned < spent && newPlanned < currentPlanned) {
+        throw new Error(
+          `Contribution for member ${update.userId} cannot be reduced below their already-spent amount`
+        );
+      }
+    }
+
+    // ── Apply all updates ──────────────────────────────────────────────────
+    for (const update of dto.updates) {
+      const member = budget.members.find((m) => m.userId.toString() === update.userId);
+      if (member) {
+        member.plannedContribution = FinancialUtils.normalizeMoney(update.plannedContribution);
+      }
+    }
+
+    await budget.save();
+
     await this.syncTripBudgetSummary(tripId).catch((err) => {
       console.error('[BudgetService] syncTripBudgetSummary failed silently:', err);
     });
@@ -333,12 +415,18 @@ class BudgetService {
     const splitMethod = expense.splitMethod;
 
     if (dto.splits || dto.amount !== undefined) {
+      let splitsInput: { userId: string; amount: number }[];
+
+      if (dto.splits) {
+        splitsInput = dto.splits.map(s => ({ userId: s.userId, amount: FinancialUtils.normalizeMoney(s.amount) }));
+      } else {
+        splitsInput = expense.splits.map(s => ({ userId: s.userId.toString(), amount: FinancialUtils.normalizeMoney(s.amount) }));
+      }
+
       const splits = SplitUtils.computeSplits({
         amount: expense.amount,
         splitMethod,
-        splits: dto.splits
-          ? dto.splits.map(s => ({ userId: s.userId, amount: FinancialUtils.normalizeMoney(s.amount) }))
-          : expense.splits.map(s => ({ userId: s.userId.toString(), amount: FinancialUtils.normalizeMoney(s.amount) })),
+        splits: splitsInput,
         budgetMembers: budget.members.map(m => ({ userId: m.userId.toString(), isPastMember: m.isPastMember }))
       });
 

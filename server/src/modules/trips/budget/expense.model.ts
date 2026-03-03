@@ -17,7 +17,7 @@ export interface IExpense extends Document {
   category?: string;
   paidBy: Types.ObjectId;
   createdBy: Types.ObjectId;
-  splitMethod: 'equal' | 'custom' | 'percentage';
+  splitMethod: 'equal' | 'custom';
   splits: IExpenseSplit[];
   date?: Date;
   notes?: string;
@@ -94,7 +94,7 @@ const ExpenseSchema = new Schema<IExpense>(
     splitMethod: {
       type: String,
       required: true,
-      enum: ['equal', 'custom', 'percentage'],
+      enum: ['equal', 'custom'],
     },
 
     splits: {

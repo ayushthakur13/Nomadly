@@ -1,4 +1,5 @@
 export { default as BudgetHeader } from './BudgetHeader';
+export { default as BudgetInsights } from './BudgetInsights';
 export { default as BudgetMembers } from './BudgetMembers';
 export { default as ExpensesList } from './ExpensesList';
 export { default as ExpenseRow } from './ExpenseRow';

@@ -20,9 +20,10 @@ export function useBudgetFilters(expenses: Expense[]) {
     let filtered = [...expenses];
 
     // Filter by category
+    // Normalize: no category and 'Other' both map to 'Other'
     if (categoryFilter) {
       filtered = filtered.filter(
-        (e) => (e.category || 'Uncategorized') === categoryFilter
+        (e) => (e.category && e.category !== 'Other' ? e.category : 'Other') === categoryFilter
       );
     }
 
@@ -72,7 +73,9 @@ export function useBudgetFilters(expenses: Expense[]) {
 
   const availableCategories = useMemo(() => {
     const categories = new Set<string>();
-    expenses.forEach((e) => categories.add(e.category || 'Uncategorized'));
+    expenses.forEach((e) => categories.add(
+      e.category && e.category !== 'Other' ? e.category : 'Other'
+    ));
     return Array.from(categories).sort();
   }, [expenses]);
 

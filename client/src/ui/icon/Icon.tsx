@@ -51,6 +51,9 @@ import {
   NotebookPen,
   Pencil,
   GripVertical,
+  Wallet,
+  Receipt,
+  PiggyBank,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
@@ -107,6 +110,9 @@ const ICONS: Record<string, LucideIcon> = {
   notes: NotebookPen,
   pencil: Pencil,
   grip: GripVertical,
+  wallet: Wallet,
+  receipt: Receipt,
+  piggyBank: PiggyBank,
 };
 
 type IconName = keyof typeof ICONS;

@@ -17,7 +17,7 @@ export interface BudgetMember {
   isPastMember: boolean;
 }
 
-export type ExpenseSplitMethod = 'equal' | 'custom' | 'percentage';
+export type ExpenseSplitMethod = 'equal' | 'custom';
 
 export interface ExpenseSplit {
   userId: string;
@@ -107,6 +107,13 @@ export interface UpdateBudgetDTO {
 
 export interface UpdateBudgetMemberDTO {
   plannedContribution: number;
+}
+
+export interface BulkUpdateBudgetMembersDTO {
+  updates: {
+    userId: string;
+    plannedContribution: number;
+  }[];
 }
 
 export interface CreateExpenseDTO {
