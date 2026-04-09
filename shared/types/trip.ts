@@ -35,6 +35,10 @@ export interface TripBudgetSummary {
   spent: number;
 }
 
+export interface TripStayPermissions {
+  allowMemberStayEdits: boolean;
+}
+
 /**
  * Core Trip domain model
  * Represents the API contract for a trip resource
@@ -62,6 +66,7 @@ export interface Trip {
   membersCount: number;
   engagement: TripEngagement;
   budgetSummary?: TripBudgetSummary;
+  stayPermissions?: TripStayPermissions;
   createdAt: string;
   updatedAt: string;
   // Virtual fields computed by backend
@@ -83,6 +88,7 @@ export interface CreateTripDTO {
   category?: TripCategory | string;
   tags?: string[];
   isPublic?: boolean;
+  stayPermissions?: Partial<TripStayPermissions>;
 }
 
 /**
@@ -99,4 +105,5 @@ export interface UpdateTripDTO {
   tags?: string[];
   isPublic?: boolean;
   lifecycleStatus?: TripLifecycleStatus;
+  stayPermissions?: Partial<TripStayPermissions>;
 }

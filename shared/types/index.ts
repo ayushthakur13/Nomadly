@@ -4,6 +4,7 @@ export * from './trip';
 export * from './user';
 export * from './destination';
 export * from './invitation';
+export * from './accommodation';
 
 // Avoid name conflicts: explicitly re-export member types with aliases
 export type {

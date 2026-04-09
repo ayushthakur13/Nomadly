@@ -335,6 +335,7 @@ For detailed budget documentation, see [budget/README.md](budget/README.md)
 ```typescript
 {
   tripId: ObjectId          // Reference to parent trip
+  createdBy: ObjectId       // User who added this stay
   name: string             // Hotel/accommodation name
   address: string          // Physical address
   bookingUrl: string       // Booking link
@@ -359,6 +360,24 @@ For detailed budget documentation, see [budget/README.md](budget/README.md)
 - Store booking references
 - Calculate total accommodation costs
 - Share booking details with trip members
+
+### Access Rules (RBAC)
+
+- Trip members can create stays.
+- Edit/delete is allowed for:
+  - trip creator, or
+  - stay creator (`createdBy`), or
+  - any trip member when `trip.stayPermissions.allowMemberStayEdits = true`.
+
+### Key Endpoints
+
+**Trip-Scoped** (at `/api/trips/:tripId/accommodations`):
+- `GET /` - Get all accommodations for the trip
+- `POST /` - Create accommodation
+
+**Item Routes** (at `/api/accommodations`):
+- `PATCH /:accommodationId` - Update accommodation
+- `DELETE /:accommodationId` - Delete accommodation
 
 ---
 

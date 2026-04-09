@@ -88,6 +88,8 @@ server/src/
 /api/trips/:tripId/tasks         - Trip tasks
 /api/trips/:tripId/budget        - Trip budget
 /api/trips/:tripId/expenses      - Expenses
+/api/trips/:tripId/accommodations - Trip accommodations
+/api/accommodations              - Accommodation items
 /api/invitations                 - Invitations
 ```
 
@@ -301,5 +303,17 @@ Nomadly's backend is a modular Node.js/Express/MongoDB application designed for 
 - ✅ Location services via Mapbox + OpenStreetMap
 - ✅ Production-ready error handling and validation
 - ✅ Indexed MongoDB for performance
+
+---
+
+## Accommodations RBAC Notes
+
+- Accommodation records include `createdBy` for ownership/audit visibility.
+- Trip-level setting `stayPermissions.allowMemberStayEdits` controls collaborative editing.
+- Effective write policy:
+  - members can create,
+  - trip creator can edit/delete any,
+  - member can edit/delete their own,
+  - other-member edits require `allowMemberStayEdits = true`.
 
 For detailed information, see module-specific documentation linked above.

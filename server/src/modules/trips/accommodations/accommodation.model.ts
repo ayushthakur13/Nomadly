@@ -2,6 +2,7 @@ import { Schema, model, Document, Types } from "mongoose";
 
 export interface IAccommodation extends Document {
   tripId: Types.ObjectId;
+  createdBy: Types.ObjectId;
   name?: string;
   address?: string;
   bookingUrl?: string;
@@ -16,6 +17,7 @@ export interface IAccommodation extends Document {
 const accommodationSchema = new Schema<IAccommodation>(
   {
     tripId: { type: Schema.Types.ObjectId, ref: "Trip", required: true, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: String,
     address: String,
     bookingUrl: String,

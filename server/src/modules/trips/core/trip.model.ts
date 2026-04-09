@@ -55,6 +55,7 @@ export interface ITrip extends Document {
   membersCount: number;
   engagement: IEngagement;
   budgetSummary?: { total: number; spent: number; };
+  stayPermissions?: { allowMemberStayEdits: boolean };
   createdAt: Date;
   updatedAt: Date;
   timeStatus?: 'upcoming' | 'ongoing' | 'completed';
@@ -100,6 +101,13 @@ const EngagementSchema = new Schema<IEngagement>({
   clones: { type: Number, default: 0, min: 0 }
 }, { _id: false });
 
+const StayPermissionsSchema = new Schema(
+  {
+    allowMemberStayEdits: { type: Boolean, default: false }
+  },
+  { _id: false }
+);
+
 const tripSchema = new Schema<ITrip>({
   tripName: { type: String, required: [true, 'Trip name is required'], trim: true, maxlength: [100, 'Trip name cannot exceed 100 characters'], index: true },
   slug: { type: String, unique: true, sparse: true, index: true },
@@ -125,7 +133,8 @@ const tripSchema = new Schema<ITrip>({
   tasksCount: { type: Number, default: 0 },
   membersCount: { type: Number, default: 0 },
   engagement: { type: EngagementSchema, default: () => ({}) },
-  budgetSummary: { total: { type: Number, default: 0 }, spent: { type: Number, default: 0 } }
+  budgetSummary: { total: { type: Number, default: 0 }, spent: { type: Number, default: 0 } },
+  stayPermissions: { type: StayPermissionsSchema, default: () => ({ allowMemberStayEdits: false }) }
 }, { timestamps: true });
 
 tripSchema.index({ createdAt: -1 });

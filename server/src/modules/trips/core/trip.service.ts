@@ -86,6 +86,11 @@ class TripService {
         }
       ]
     };
+    if (data.stayPermissions?.allowMemberStayEdits !== undefined) {
+      tripData.stayPermissions = {
+        allowMemberStayEdits: Boolean(data.stayPermissions.allowMemberStayEdits)
+      };
+    }
 
     const trip = new Trip(tripData);
     await trip.save();
@@ -434,6 +439,9 @@ class TripService {
         views: 0,
         clones: 0
       }
+    };
+    clonedData.stayPermissions = {
+      allowMemberStayEdits: Boolean((originalTrip as any).stayPermissions?.allowMemberStayEdits)
     };
 
     if (includeBudget && originalTrip.budgetSummary) {
