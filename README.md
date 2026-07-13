@@ -32,7 +32,7 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 ### 📍 Destinations and Itineraries
 - ✅ Multi stop trips with detailed destinations
 - ✅ Location search with map integration
-- ⏳ Store coordinates for accurate mapping
+- ✅ Store coordinates for accurate mapping
 - ✅ Visualize trips using routes and pins
 
 ### ✅ Task Management
@@ -51,14 +51,14 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 - ✅ Trip cache synchronization for budget consistency
 
 ### 🏨 Accommodations
-- 🚧 Add lodging details with check in and check out dates
-- ⏳ Store booking links, costs, and notes
-- ⏳ Centralized accommodation reference for the trip
+- ✅ Add lodging details with check in and check out dates
+- ✅ Store booking links, costs, and notes
+- ✅ Centralized accommodation reference for the trip
 
 ### 🖼️ Memories and Media
-- 🚧 Upload trip photos securely
-- ⏳ Access control for uploading and deleting media
-- ⏳ Download shared memories
+- ✅ Upload trip photos securely
+- ✅ Access control for uploading and deleting media
+- ✅ Download shared memories
 
 ### 👥 Members and Collaboration
 - ✅ Invite members via email or username
@@ -127,7 +127,7 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 
 ## 📂 Project Structure
 
-### Backend
+### Server
 ```bash
 src/
 ├── config/               # Configuration files (database, external services)
@@ -254,12 +254,6 @@ await execute(async () => {
 
 ---
 
-## 🔧 Code Architecture & Patterns
-
-### Frontend Patterns Detail
-
----
-
 ## 🧪 Running Locally
 
 ### Backend Setup
@@ -274,8 +268,8 @@ cp .env.example .env
 ```
 
 Start the server (TypeScript):
-```
-npx ts-node-dev --respawn src/server.ts
+```bash
+npm run dev
 ```
 
 ### Client Setup
@@ -308,78 +302,12 @@ Optionally, create a root-level script with `concurrently` to run both at once.
 
 ---
 
-## ⚙️ Environment Variables
-
-### Server (.env)
-See [server/.env.example](server/.env.example) for a complete list, including:
-- `PORT`, `MONGO_URI`
-- `JWT_SECRET`, `JWT_REFRESH_SECRET`, optional expiries
-- `CLIENT_URL`, `CORS_ORIGIN`
-- `CLOUDINARY_*`
-- `GOOGLE_CLIENT_ID`
-
-### Client (.env)
-See [client/.env.example](client/.env.example):
-- `VITE_API_URL` — Backend API base URL (default: `http://localhost:4444/api`)
-- `VITE_GOOGLE_CLIENT_ID` — Google OAuth client ID for authentication
-- `VITE_MAPBOX_TOKEN` — Mapbox access token for map features
-
----
-
 ## 🔐 Auth & Security (Overview)
 - Access token: stored in memory on the client
 - Refresh token: httpOnly cookie set by the server
 - CSRF: token persisted in localStorage and sent as `x-csrf-token` for refresh/logout
 - 401 handling: client automatically attempts refresh; on failure, user is redirected to login
 - Google Identity Services: One Tap and button supported; configure Authorized Origin for `http://localhost:5173`
-
----
-
-## 🔌 Core API Endpoints
-
-### Authentication
-- `POST /api/auth/register` — Create account with email/password
-- `POST /api/auth/login` — Login with email/username + password
-- `POST /api/auth/google` — Google OAuth sign-in
-- `POST /api/auth/refresh` — Refresh access token (requires CSRF header)
-- `POST /api/auth/logout` — Logout and revoke refresh token
-
-### Users
-- `GET /api/users/me` — Get current user profile
-- `PATCH /api/users/me` — Update profile (name, bio, visibility)
-- `PATCH /api/users/me/username` — Update username
-- `PATCH /api/users/me/password` — Change password
-- `POST /api/users/me/avatar` — Upload avatar
-- `DELETE /api/users/me/avatar` — Remove avatar
-
-### Trips
-- `GET /api/trips` — List user's trips with filters
-- `POST /api/trips` — Create new trip
-- `GET /api/trips/:tripId` — Get trip details
-- `PATCH /api/trips/:tripId` — Update trip info
-- `DELETE /api/trips/:tripId` — Delete trip
-- `POST /api/trips/:tripId/cover` — Upload trip cover
-- `DELETE /api/trips/:tripId/cover` — Remove trip cover
-- `PATCH /api/trips/:tripId/publish` — Publish/unpublish trip
-
-### Trip Destinations
-- `GET /api/trips/:tripId/destinations` — List trip stops
-- `POST /api/trips/:tripId/destinations` — Add destination
-- `PATCH /api/destinations/:destId` — Update destination
-- `DELETE /api/destinations/:destId` — Delete destination
-- `POST /api/destinations/:destId/image` — Upload destination image
-- `DELETE /api/destinations/:destId/image` — Remove destination image
-- `PATCH /api/destinations/:destId/order` — Reorder stops
-
-### Trip Members
-- `GET /api/trips/:tripId/members` — List trip members
-- `POST /api/trips/:tripId/members` — Invite member
-- `PATCH /api/trips/:tripId/members/:memberId` — Update member role
-- `DELETE /api/trips/:tripId/members/:memberId` — Remove member
-
-### Social & Discovery
-- `GET /api/trips?public=true` — Explore public trips
-- `GET /api/users/:userId` — View public profile
 
 ---
 
@@ -399,4 +327,3 @@ From [client/package.json](client/package.json):
 - `npm run lint` — ESLint with TypeScript support
 
 ---
-

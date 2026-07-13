@@ -19,8 +19,8 @@ class MemoryService {
     }
 
     // Check permissions: if trip is private, user must be owner or member
-    const isOwner = trip.createdBy.toString() === userId;
-    const isMember = trip.members.some((m: any) => m.userId.toString() === userId);
+    const isOwner = isTripCreator(trip, userId);
+    const isMember = isTripMember(trip, userId);
 
     if (!trip.isPublic && !isOwner && !isMember) {
       throw new Error('Unauthorized to view memories');
@@ -54,8 +54,8 @@ class MemoryService {
     }
 
     // Must be owner or member to upload
-    const isOwner = trip.createdBy.toString() === userId;
-    const isMember = trip.members.some((m: any) => m.userId.toString() === userId);
+    const isOwner = isTripCreator(trip, userId);
+    const isMember = isTripMember(trip, userId);
 
     if (!isOwner && !isMember) {
       throw new Error('Unauthorized to upload memories');
@@ -100,7 +100,7 @@ class MemoryService {
     }
 
     const isUploader = memory.uploadedBy.toString() === userId;
-    const isTripOwner = trip.createdBy.toString() === userId;
+    const isTripOwner = isTripCreator(trip, userId);
 
     if (!isUploader && !isTripOwner) {
       throw new Error('Unauthorized to update memory caption');
@@ -133,7 +133,7 @@ class MemoryService {
     }
 
     const isUploader = memory.uploadedBy.toString() === userId;
-    const isTripOwner = trip.createdBy.toString() === userId;
+    const isTripOwner = isTripCreator(trip, userId);
 
     if (!isUploader && !isTripOwner) {
       throw new Error('Unauthorized to delete memory');
