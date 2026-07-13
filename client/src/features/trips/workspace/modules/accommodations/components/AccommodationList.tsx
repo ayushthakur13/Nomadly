@@ -6,6 +6,7 @@ interface AccommodationListProps {
   canManageAccommodation: (accommodation: Accommodation) => boolean;
   onEdit: (accommodation: Accommodation) => void;
   onDelete: (accommodation: Accommodation) => void;
+  onCreateExpenseDraft: (accommodation: Accommodation) => void;
 }
 
 const AccommodationList = ({
@@ -13,6 +14,7 @@ const AccommodationList = ({
   canManageAccommodation,
   onEdit,
   onDelete,
+  onCreateExpenseDraft,
 }: AccommodationListProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -23,6 +25,7 @@ const AccommodationList = ({
           canManage={canManageAccommodation(accommodation)}
           onEdit={onEdit}
           onDelete={onDelete}
+          onCreateExpenseDraft={onCreateExpenseDraft}
         />
       ))}
     </div>

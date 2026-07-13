@@ -1,17 +1,21 @@
 import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import { ConfirmationModal, ErrorAlert, PageHeader } from "@/ui/common";
 import { Icon } from "@/ui/icon";
-import type { Accommodation, CreateAccommodationDTO, UpdateAccommodationDTO } from "@shared/types";
+import type { Accommodation, CreateAccommodationDTO, UpdateAccommodationDTO, Destination } from "@shared/types";
 import { useAuth } from "@/features/auth/hooks";
 import { updateTrip } from "@/features/trips/store";
 import { useAccommodations } from "./hooks/useAccommodations";
 import AccommodationList from "./components/AccommodationList";
 import AccommodationFormModal from "./components/AccommodationFormModal";
+import { getStayTimelineInsights } from "./utils/formatting";
 
 const AccommodationsPage = () => {
   const dispatch = useDispatch<any>();
+  const navigate = useNavigate();
+  const { tripId } = useParams<{ tripId: string }>();
   const { user } = useAuth();
   const { selectedTrip } = useSelector((state: any) => state.trips || {});
 
@@ -60,6 +64,29 @@ const AccommodationsPage = () => {
     const nights = `${totalNights} ${totalNights === 1 ? "night" : "nights"}`;
     return `${stays} · ${nights}`;
   }, [accommodations.length, totalNights]);
+
+  const stayInsights = useMemo(() => {
+    return getStayTimelineInsights(
+      accommodations.map((item) => ({
+        name: item.name,
+        checkIn: item.checkIn,
+        checkOut: item.checkOut,
+      }))
+    );
+  }, [accommodations]);
+
+  const destinationSuggestions = useMemo(() => {
+    const raw = (selectedTrip?.destinations || []) as Array<Destination | string>;
+    return raw
+      .filter((item): item is Destination => typeof item === "object" && item !== null)
+      .map((item) => ({
+        id: item._id,
+        name: item.name,
+        address: item.location?.address || item.location?.name,
+        arrivalDate: item.arrivalDate,
+        departureDate: item.departureDate,
+      }));
+  }, [selectedTrip?.destinations]);
 
   const openCreate = () => {
     setEditing(null);
@@ -125,6 +152,33 @@ const AccommodationsPage = () => {
     }
   };
 
+  const handleCreateExpenseDraft = (accommodation: Accommodation) => {
+    if (!tripId) return;
+    const nights =
+      accommodation.checkIn && accommodation.checkOut
+        ? Math.max(
+            1,
+            Math.ceil(
+              (new Date(accommodation.checkOut).getTime() - new Date(accommodation.checkIn).getTime()) /
+                (1000 * 60 * 60 * 24)
+            )
+          )
+        : 1;
+    const amount =
+      accommodation.pricePerNight !== undefined ? Number((accommodation.pricePerNight * nights).toFixed(2)) : 0;
+
+    const draft = {
+      title: accommodation.name || "Stay expense",
+      amount,
+      category: "Accommodation",
+      notes: accommodation.notes || undefined,
+      date: accommodation.checkIn || new Date().toISOString().split("T")[0],
+    };
+
+    window.sessionStorage.setItem(`nomadly:budgetExpenseDraft:${tripId}`, JSON.stringify(draft));
+    navigate(`/trips/${tripId}/budget`);
+  };
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -152,6 +206,23 @@ const AccommodationsPage = () => {
 
       <ErrorAlert error={error || actionError} />
 
+      {stayInsights.length > 0 && (
+        <div className="space-y-2">
+          {stayInsights.map((insight, index) => (
+            <div
+              key={`${insight.message}-${index}`}
+              className={`rounded-lg border px-3 py-2 text-sm ${
+                insight.level === "warning"
+                  ? "bg-red-50 border-red-200 text-red-700"
+                  : "bg-amber-50 border-amber-200 text-amber-700"
+              }`}
+            >
+              {insight.message}
+            </div>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600 flex items-center gap-3">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600" />
@@ -178,6 +249,7 @@ const AccommodationsPage = () => {
           accommodations={accommodations}
           canManageAccommodation={canManageAccommodation}
           onEdit={openEdit}
+          onCreateExpenseDraft={handleCreateExpenseDraft}
           onDelete={(item) => {
             if (!canManageAccommodation(item)) {
               setActionError("You do not have permission to delete this stay");
@@ -192,6 +264,7 @@ const AccommodationsPage = () => {
         open={modalOpen}
         initial={editing}
         submitting={actionLoading}
+        destinationSuggestions={destinationSuggestions}
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
       />

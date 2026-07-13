@@ -8,4 +8,10 @@ export const DEFAULT_ACCOMMODATION_FORM_VALUES: CreateAccommodationDTO = {
   checkOut: "",
   pricePerNight: undefined,
   notes: "",
+  destinationId: "",
+  checkInInstructions: "",
+  hostContactName: "",
+  hostContactPhone: "",
+  hostContactWhatsApp: "",
+  handoffNotes: "",
 };

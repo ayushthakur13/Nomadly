@@ -65,7 +65,21 @@ class AccommodationController {
         return;
       }
 
-      const { name, address, bookingUrl, checkIn, checkOut, pricePerNight, notes } =
+      const {
+        name,
+        address,
+        bookingUrl,
+        checkIn,
+        checkOut,
+        pricePerNight,
+        notes,
+        destinationId,
+        checkInInstructions,
+        hostContactName,
+        hostContactPhone,
+        hostContactWhatsApp,
+        handoffNotes,
+      } =
         req.body as Partial<CreateAccommodationDTO>;
 
       if (!name || !name.trim()) {
@@ -80,6 +94,12 @@ class AccommodationController {
       if (checkOut !== undefined) payload.checkOut = checkOut;
       if (pricePerNight !== undefined) payload.pricePerNight = pricePerNight;
       if (notes !== undefined) payload.notes = notes;
+      if (destinationId !== undefined) payload.destinationId = destinationId;
+      if (checkInInstructions !== undefined) payload.checkInInstructions = checkInInstructions;
+      if (hostContactName !== undefined) payload.hostContactName = hostContactName;
+      if (hostContactPhone !== undefined) payload.hostContactPhone = hostContactPhone;
+      if (hostContactWhatsApp !== undefined) payload.hostContactWhatsApp = hostContactWhatsApp;
+      if (handoffNotes !== undefined) payload.handoffNotes = handoffNotes;
 
       const accommodation = await accommodationService.createAccommodation(tripId, userId, payload);
 
@@ -102,6 +122,7 @@ class AccommodationController {
         error.message === "Check-out date must be after check-in date" ||
         error.message === "Price per night cannot be negative" ||
         error.message === "Invalid booking URL" ||
+        error.message === "Invalid destination ID" ||
         error.message === "Accommodation name is required"
       ) {
         res.status(400).json({ success: false, message: error.message });
@@ -126,7 +147,21 @@ class AccommodationController {
         return;
       }
 
-      const { name, address, bookingUrl, checkIn, checkOut, pricePerNight, notes } =
+      const {
+        name,
+        address,
+        bookingUrl,
+        checkIn,
+        checkOut,
+        pricePerNight,
+        notes,
+        destinationId,
+        checkInInstructions,
+        hostContactName,
+        hostContactPhone,
+        hostContactWhatsApp,
+        handoffNotes,
+      } =
         req.body as Partial<UpdateAccommodationDTO>;
 
       const payload: UpdateAccommodationDTO = {};
@@ -137,6 +172,12 @@ class AccommodationController {
       if (checkOut !== undefined) payload.checkOut = checkOut;
       if (pricePerNight !== undefined) payload.pricePerNight = pricePerNight;
       if (notes !== undefined) payload.notes = notes;
+      if (destinationId !== undefined) payload.destinationId = destinationId;
+      if (checkInInstructions !== undefined) payload.checkInInstructions = checkInInstructions;
+      if (hostContactName !== undefined) payload.hostContactName = hostContactName;
+      if (hostContactPhone !== undefined) payload.hostContactPhone = hostContactPhone;
+      if (hostContactWhatsApp !== undefined) payload.hostContactWhatsApp = hostContactWhatsApp;
+      if (handoffNotes !== undefined) payload.handoffNotes = handoffNotes;
 
       const accommodation = await accommodationService.updateAccommodation(accommodationId, userId, payload);
 
@@ -159,6 +200,7 @@ class AccommodationController {
         error.message === "Check-out date must be after check-in date" ||
         error.message === "Price per night cannot be negative" ||
         error.message === "Invalid booking URL" ||
+        error.message === "Invalid destination ID" ||
         error.message === "Accommodation name is required"
       ) {
         res.status(400).json({ success: false, message: error.message });

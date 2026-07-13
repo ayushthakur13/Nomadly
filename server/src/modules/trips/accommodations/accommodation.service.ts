@@ -49,6 +49,9 @@ class AccommodationService {
     const accommodation = new Accommodation({
       tripId: new Types.ObjectId(tripId),
       createdBy: new Types.ObjectId(userId),
+      destinationId: data.destinationId && Types.ObjectId.isValid(data.destinationId)
+        ? new Types.ObjectId(data.destinationId)
+        : undefined,
       name: data.name.trim(),
       address: data.address?.trim(),
       bookingUrl: this.normalizeBookingUrl(data.bookingUrl),
@@ -56,6 +59,11 @@ class AccommodationService {
       checkOut: data.checkOut ? new Date(data.checkOut) : undefined,
       pricePerNight: data.pricePerNight,
       notes: data.notes?.trim(),
+      checkInInstructions: data.checkInInstructions?.trim(),
+      hostContactName: data.hostContactName?.trim(),
+      hostContactPhone: data.hostContactPhone?.trim(),
+      hostContactWhatsApp: data.hostContactWhatsApp?.trim(),
+      handoffNotes: data.handoffNotes?.trim(),
     });
 
     await accommodation.save();
@@ -90,6 +98,12 @@ class AccommodationService {
 
     if (data.name !== undefined) accommodation.name = data.name.trim();
     if (data.address !== undefined) accommodation.address = data.address.trim();
+    if (data.destinationId !== undefined) {
+      (accommodation as any).destinationId =
+        data.destinationId && Types.ObjectId.isValid(data.destinationId)
+          ? new Types.ObjectId(data.destinationId)
+          : undefined;
+    }
     if (data.bookingUrl !== undefined) {
       (accommodation as any).bookingUrl = this.normalizeBookingUrl(data.bookingUrl);
     }
@@ -101,6 +115,11 @@ class AccommodationService {
     }
     if (data.pricePerNight !== undefined) accommodation.pricePerNight = data.pricePerNight;
     if (data.notes !== undefined) accommodation.notes = data.notes.trim();
+    if (data.checkInInstructions !== undefined) accommodation.checkInInstructions = data.checkInInstructions.trim();
+    if (data.hostContactName !== undefined) accommodation.hostContactName = data.hostContactName.trim();
+    if (data.hostContactPhone !== undefined) accommodation.hostContactPhone = data.hostContactPhone.trim();
+    if (data.hostContactWhatsApp !== undefined) accommodation.hostContactWhatsApp = data.hostContactWhatsApp.trim();
+    if (data.handoffNotes !== undefined) accommodation.handoffNotes = data.handoffNotes.trim();
 
     await accommodation.save();
     await accommodation.populate("createdBy", "username name profilePicUrl");
@@ -150,6 +169,10 @@ class AccommodationService {
     const nextBookingUrl = this.normalizeBookingUrl(nextBookingUrlRaw);
     if (nextBookingUrl && !this.isValidUrl(nextBookingUrl)) {
       throw new Error("Invalid booking URL");
+    }
+
+    if (payload.destinationId !== undefined && payload.destinationId && !Types.ObjectId.isValid(payload.destinationId)) {
+      throw new Error("Invalid destination ID");
     }
   }
 

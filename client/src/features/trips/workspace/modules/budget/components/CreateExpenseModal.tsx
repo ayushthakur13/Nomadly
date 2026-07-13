@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
@@ -11,25 +11,39 @@ import type { BudgetMember, CreateExpenseDTO, ExpenseSplit } from '@shared/types
 interface CreateExpenseModalProps {
   members: BudgetMember[];
   getMemberName: (userId: string) => string;
+  initialDraft?: CreateExpenseDTO;
   onClose: () => void;
 }
 
-const CreateExpenseModal = ({ members, getMemberName, onClose }: CreateExpenseModalProps) => {
+const CreateExpenseModal = ({ members, getMemberName, initialDraft, onClose }: CreateExpenseModalProps) => {
   const { tripId } = useParams<{ tripId: string }>();
   const { actionLoading, createExpense: performCreate, clearError } = useBudget();
 
   const [formData, setFormData] = useState({
-    title: '',
-    amount: '',
-    category: '',
+    title: initialDraft?.title || '',
+    amount: initialDraft?.amount !== undefined ? String(initialDraft.amount) : '',
+    category: initialDraft?.category || '',
     paidBy: members[0]?.userId || '',
-    splitMethod: 'equal' as 'equal' | 'custom',
-    notes: '',
-    date: new Date().toISOString().split('T')[0],
+    splitMethod: (initialDraft?.splitMethod || 'equal') as 'equal' | 'custom',
+    notes: initialDraft?.notes || '',
+    date: initialDraft?.date || new Date().toISOString().split('T')[0],
   });
 
   // Track split inputs as raw strings (convert to numbers on submit)
   const [splitInputs, setSplitInputs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!initialDraft) return;
+    setFormData((prev) => ({
+      ...prev,
+      title: initialDraft.title || '',
+      amount: initialDraft.amount !== undefined ? String(initialDraft.amount) : '',
+      category: initialDraft.category || '',
+      splitMethod: (initialDraft.splitMethod || 'equal') as 'equal' | 'custom',
+      notes: initialDraft.notes || '',
+      date: initialDraft.date || new Date().toISOString().split('T')[0],
+    }));
+  }, [initialDraft]);
 
   const activeSplitMembers = members.filter((m) => !m.isPastMember);
 

@@ -7,6 +7,7 @@ export interface Accommodation {
   tripId: string;
   createdBy: string;
   createdByName?: string;
+  destinationId?: string;
   name: string;
   address?: string;
   bookingUrl?: string;
@@ -14,6 +15,11 @@ export interface Accommodation {
   checkOut?: string;
   pricePerNight?: number;
   notes?: string;
+  checkInInstructions?: string;
+  hostContactName?: string;
+  hostContactPhone?: string;
+  hostContactWhatsApp?: string;
+  handoffNotes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -26,6 +32,12 @@ export interface CreateAccommodationDTO {
   checkOut?: string | Date;
   pricePerNight?: number;
   notes?: string;
+  destinationId?: string;
+  checkInInstructions?: string;
+  hostContactName?: string;
+  hostContactPhone?: string;
+  hostContactWhatsApp?: string;
+  handoffNotes?: string;
 }
 
 export interface UpdateAccommodationDTO {
@@ -36,4 +48,14 @@ export interface UpdateAccommodationDTO {
   checkOut?: string | Date;
   pricePerNight?: number;
   notes?: string;
+  destinationId?: string;
+  checkInInstructions?: string;
+  hostContactName?: string;
+  hostContactPhone?: string;
+  hostContactWhatsApp?: string;
+  handoffNotes?: string;
+}
+
+export interface AccommodationListResponse {
+  accommodations: Accommodation[];
 }

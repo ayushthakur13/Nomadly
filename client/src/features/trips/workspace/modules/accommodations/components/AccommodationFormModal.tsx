@@ -9,6 +9,13 @@ interface AccommodationFormModalProps {
   open: boolean;
   initial?: Accommodation | null;
   submitting?: boolean;
+  destinationSuggestions?: Array<{
+    id: string;
+    name: string;
+    address?: string;
+    arrivalDate?: string;
+    departureDate?: string;
+  }>;
   onClose: () => void;
   onSubmit: (payload: CreateAccommodationDTO) => Promise<void>;
 }
@@ -17,6 +24,7 @@ const AccommodationFormModal = ({
   open,
   initial,
   submitting = false,
+  destinationSuggestions = [],
   onClose,
   onSubmit,
 }: AccommodationFormModalProps) => {
@@ -34,6 +42,12 @@ const AccommodationFormModal = ({
         checkOut: toDateInputValue(initial.checkOut),
         pricePerNight: initial.pricePerNight,
         notes: initial.notes ?? "",
+        destinationId: initial.destinationId,
+        checkInInstructions: initial.checkInInstructions ?? "",
+        hostContactName: initial.hostContactName ?? "",
+        hostContactPhone: initial.hostContactPhone ?? "",
+        hostContactWhatsApp: initial.hostContactWhatsApp ?? "",
+        handoffNotes: initial.handoffNotes ?? "",
       });
     } else {
       setPayload(DEFAULT_ACCOMMODATION_FORM_VALUES);
@@ -76,10 +90,10 @@ const AccommodationFormModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+        className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <div>
             <p className="text-xs uppercase tracking-[0.12em] text-gray-500">{subtitle}</p>
             <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
@@ -89,7 +103,7 @@ const AccommodationFormModal = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Name</label>
@@ -112,6 +126,34 @@ const AccommodationFormModal = ({
                 placeholder="Street address or locality"
               />
             </div>
+
+            {destinationSuggestions.length > 0 && (
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Link destination (optional)</label>
+                <select
+                  value={(payload.destinationId as string) || ""}
+                  onChange={(e) => {
+                    const selectedId = e.target.value || undefined;
+                    const selected = destinationSuggestions.find((item) => item.id === selectedId);
+                    setPayload((prev) => ({
+                      ...prev,
+                      destinationId: selectedId,
+                      address: selected?.address || prev.address,
+                      checkIn: selected?.arrivalDate ? toDateInputValue(selected.arrivalDate) : prev.checkIn,
+                      checkOut: selected?.departureDate ? toDateInputValue(selected.departureDate) : prev.checkOut,
+                    }));
+                  }}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                >
+                  <option value="">No linked destination</option>
+                  {destinationSuggestions.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Check-in</label>
@@ -170,6 +212,61 @@ const AccommodationFormModal = ({
                 onChange={(e) => setPayload((prev) => ({ ...prev, notes: e.target.value }))}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Check-in instructions, host contact, reminders..."
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Check-in instructions</label>
+              <input
+                type="text"
+                value={(payload.checkInInstructions as string) || ""}
+                onChange={(e) => setPayload((prev) => ({ ...prev, checkInInstructions: e.target.value }))}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Door code, front desk note..."
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Host contact name</label>
+              <input
+                type="text"
+                value={(payload.hostContactName as string) || ""}
+                onChange={(e) => setPayload((prev) => ({ ...prev, hostContactName: e.target.value }))}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Host/manager name"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Host phone</label>
+              <input
+                type="text"
+                value={(payload.hostContactPhone as string) || ""}
+                onChange={(e) => setPayload((prev) => ({ ...prev, hostContactPhone: e.target.value }))}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="+91..."
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Host WhatsApp</label>
+              <input
+                type="text"
+                value={(payload.hostContactWhatsApp as string) || ""}
+                onChange={(e) => setPayload((prev) => ({ ...prev, hostContactWhatsApp: e.target.value }))}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="+91..."
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Handoff notes</label>
+              <textarea
+                rows={2}
+                value={(payload.handoffNotes as string) || ""}
+                onChange={(e) => setPayload((prev) => ({ ...prev, handoffNotes: e.target.value }))}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Who carries keys, late arrival plan, handover sequence..."
               />
             </div>
           </div>

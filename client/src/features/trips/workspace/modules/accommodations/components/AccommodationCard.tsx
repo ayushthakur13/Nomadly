@@ -7,9 +7,16 @@ interface AccommodationCardProps {
   canManage: boolean;
   onEdit: (accommodation: Accommodation) => void;
   onDelete: (accommodation: Accommodation) => void;
+  onCreateExpenseDraft: (accommodation: Accommodation) => void;
 }
 
-const AccommodationCard = ({ accommodation, canManage, onEdit, onDelete }: AccommodationCardProps) => {
+const AccommodationCard = ({
+  accommodation,
+  canManage,
+  onEdit,
+  onDelete,
+  onCreateExpenseDraft,
+}: AccommodationCardProps) => {
   const nights = getNightCount(accommodation.checkIn, accommodation.checkOut);
   const estimatedTotal =
     nights && accommodation.pricePerNight !== undefined ? nights * accommodation.pricePerNight : null;
@@ -83,11 +90,35 @@ const AccommodationCard = ({ accommodation, canManage, onEdit, onDelete }: Accom
             Booking link <Icon name="arrowRight" size={12} />
           </a>
         )}
+        <button
+          onClick={() => onCreateExpenseDraft(accommodation)}
+          className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 px-2.5 py-1 hover:bg-amber-100"
+        >
+          Expense draft <Icon name="receipt" size={12} />
+        </button>
       </div>
 
       <p className="mt-2 text-xs text-gray-500">
         Added by {accommodation.createdByName || "A trip member"}
       </p>
+
+      {(accommodation.checkInInstructions ||
+        accommodation.hostContactName ||
+        accommodation.hostContactPhone ||
+        accommodation.hostContactWhatsApp ||
+        accommodation.handoffNotes) && (
+        <div className="mt-2 text-xs text-gray-600 space-y-1">
+          {accommodation.checkInInstructions && <p>Check-in: {accommodation.checkInInstructions}</p>}
+          {accommodation.hostContactName && (
+            <p>
+              Host: {accommodation.hostContactName}
+              {accommodation.hostContactPhone ? ` (${accommodation.hostContactPhone})` : ""}
+            </p>
+          )}
+          {accommodation.hostContactWhatsApp && <p>WhatsApp: {accommodation.hostContactWhatsApp}</p>}
+          {accommodation.handoffNotes && <p>Handoff: {accommodation.handoffNotes}</p>}
+        </div>
+      )}
 
       {accommodation.notes && (
         <p className="mt-3 text-sm text-gray-700 border-t border-gray-100 pt-2">{accommodation.notes}</p>

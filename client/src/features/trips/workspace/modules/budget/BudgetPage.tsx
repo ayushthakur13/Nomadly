@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useBudget, useBudgetPermissions, useMemberDetails } from './hooks';
 import { BudgetHeader, BudgetMembers, ExpensesList, CreateExpenseModal, CreateBudgetForm } from './components/';
 import { ErrorAlert, InfoModal, PageHeader } from '@/ui/common';
 import { Icon } from '@/ui/icon';
 import { useAuth } from '@/features/auth/hooks/';
 import { formatCurrency } from './utils/formatting';
+import type { CreateExpenseDTO } from '@shared/types';
 
 const BudgetPage = () => {
+  const { tripId } = useParams<{ tripId: string }>();
   const { snapshot, loading, error, budgetNotFound, createBudget, updateBaseBudget, actionLoading } = useBudget();
   const permissions = useBudgetPermissions(snapshot);
   const { canAddExpense, isCreator } = permissions;
@@ -21,6 +24,23 @@ const BudgetPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBudgetForm, setShowBudgetForm] = useState(false);
   const [showContributionsModal, setShowContributionsModal] = useState(false);
+  const [expenseDraft, setExpenseDraft] = useState<CreateExpenseDTO | null>(null);
+
+  useEffect(() => {
+    if (!tripId || !snapshot || showCreateModal) return;
+    const key = `nomadly:budgetExpenseDraft:${tripId}`;
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as CreateExpenseDTO;
+      setExpenseDraft(parsed);
+      setShowCreateModal(true);
+    } catch {
+      // ignore malformed drafts
+    } finally {
+      window.sessionStorage.removeItem(key);
+    }
+  }, [tripId, snapshot, showCreateModal]);
 
   return (
     <div className="space-y-6">
@@ -141,7 +161,11 @@ const BudgetPage = () => {
         <CreateExpenseModal
           members={snapshot.budget.members}
           getMemberName={getMemberName}
-          onClose={() => setShowCreateModal(false)}
+          initialDraft={expenseDraft || undefined}
+          onClose={() => {
+            setShowCreateModal(false);
+            setExpenseDraft(null);
+          }}
         />
       )}
     </div>
