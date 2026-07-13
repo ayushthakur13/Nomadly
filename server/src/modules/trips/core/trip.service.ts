@@ -7,6 +7,8 @@ import mapService from '../../maps/map.service';
 import tripUtils from './trip.utils';
 import { canModifyTripResources } from '../members/member.permissions';
 import { isTripCreator, isTripMember } from '../members/member.utils';
+import memoryService from '../memories/memory.service';
+
 
 class TripService {
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
@@ -323,7 +325,13 @@ class TripService {
     await Trip.findByIdAndDelete(tripId);
     await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': -1 } });
 
+    // Cascade delete memories associated with the trip
+    await memoryService.deleteTripMemories(tripId).catch((err) => {
+      console.error(`Failed to cascade delete memories for trip ${tripId}:`, err);
+    });
+
     return true;
+
   }
 
   async publishTrip(tripId: string, userId: string): Promise<ITrip | null> {

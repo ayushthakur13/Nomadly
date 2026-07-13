@@ -54,12 +54,15 @@ import {
   Wallet,
   Receipt,
   PiggyBank,
+  Download,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
   add: Plus,
   delete: Trash2,
+  download: Download,
   edit: Edit,
+
   edit2: Edit2,
   search: Search,
   map: Map,

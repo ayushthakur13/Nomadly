@@ -10,6 +10,8 @@ import {
   updateMemberRole as updateMemberRoleUtil
 } from './member.utils';
 import { MemberDTO } from './member.types';
+import memoryService from '../memories/memory.service';
+
 
 class MemberService {
   /**
@@ -79,7 +81,14 @@ class MemberService {
     removeMemberUtil(trip, userObjectId);
     
     await trip.save();
+
+    // Cascade delete memories uploaded by the removed user
+    await memoryService.deleteUserMemoriesInTrip(tripId.toString(), userId.toString()).catch((err) => {
+      console.error(`Failed to cascade delete user ${userId} memories in trip ${tripId}:`, err);
+    });
+
     return trip;
+
   }
 
   /**
@@ -207,8 +216,14 @@ class MemberService {
 
     removeMemberUtil(trip, userObjectId);
     await trip.save();
+
+    // Cascade delete memories uploaded by the user who left
+    await memoryService.deleteUserMemoriesInTrip(tripId.toString(), userId.toString()).catch((err) => {
+      console.error(`Failed to cascade delete user ${userId} memories in trip ${tripId} upon leaving:`, err);
+    });
     
     return trip;
+
   }
 }
 

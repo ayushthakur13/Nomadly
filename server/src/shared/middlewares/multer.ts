@@ -39,6 +39,10 @@ export const uploadDestination = multer({
 export const uploadMemory = multer({
   storage: createStorage({
     folder: "nomadly/memories",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mov"],
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   }),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
 });
+
