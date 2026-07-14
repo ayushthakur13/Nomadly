@@ -193,6 +193,13 @@ class AccommodationService {
     return `https://${trimmed}`;
   }
 
+  async deleteTripAccommodations(tripId: string): Promise<void> {
+    if (!Types.ObjectId.isValid(tripId)) {
+      throw new Error("Invalid trip ID");
+    }
+    await Accommodation.deleteMany({ tripId: new Types.ObjectId(tripId) });
+  }
+
   private canEditAccommodation(trip: any, accommodation: IAccommodation, userId: string): boolean {
     if (isTripCreator(trip, userId)) {
       return true;

@@ -9,6 +9,8 @@ import { canModifyTripResources } from '../members/member.permissions';
 import { isTripCreator, isTripMember } from '../members/member.utils';
 import memoryService from '../memories/memory.service';
 import chatService from '../chat/chat.service';
+import accommodationService from '../accommodations/accommodation.service';
+
 
 
 
@@ -337,7 +339,13 @@ class TripService {
       console.error(`Failed to cascade delete chat messages for trip ${tripId}:`, err);
     });
 
+    // Cascade delete accommodations associated with the trip
+    await accommodationService.deleteTripAccommodations(tripId).catch((err) => {
+      console.error(`Failed to cascade delete accommodations for trip ${tripId}:`, err);
+    });
+
     return true;
+
 
 
   }

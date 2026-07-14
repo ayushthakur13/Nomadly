@@ -14,8 +14,10 @@ interface AuthRequest extends Request {
 
 function publicUser(u: any) {
   if (!u) return null;
+  const idStr = u._id?.toString() || u.id;
   return {
-    id: u._id?.toString() || u.id,
+    id: idStr,
+    _id: idStr,
     username: u.username,
     name: u.name,
     email: u.email,
