@@ -6,19 +6,21 @@ import { useImageUpload } from '@/hooks/useImageUpload';
 import { MemoryCard } from './components/MemoryCard';
 import { MemoryLightbox } from './components/MemoryLightbox';
 import { Icon } from '@/ui/icon';
-import { PageHeader, ConfirmationModal } from '@/ui/common';
+import { PageHeader, ConfirmationModal, ErrorAlert } from '@/ui/common';
 
 export const MemoriesPage = () => {
   const { user } = useSelector((state: any) => state.auth);
   const trip = useSelector((state: any) => state.trips.selectedTrip);
   
   const tripOwnerId = (trip?.createdBy as any)?._id ?? trip?.createdBy;
-  const currentUserId = user?._id ?? user?.id;
+  const currentUserId = user?._id;
+
   const isTripOwner = Boolean(tripOwnerId && currentUserId && tripOwnerId.toString() === currentUserId.toString());
 
   const {
     memories,
     loading,
+    error,
     actionLoading,
     uploadMemory,
     deleteMemory,
@@ -28,17 +30,20 @@ export const MemoriesPage = () => {
   const [activeLightboxIndex, setActiveLightboxIndex] = useState<number | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { fileInputRef, handleFileChange, openFilePicker, isUploading } = useImageUpload({
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxSize: 5 * 1024 * 1024, // 5MB limit
     onUploadSuccess: async (file) => {
+      setActionError(null);
       try {
         const formData = new FormData();
         formData.append('image', file);
         await uploadMemory(formData);
         toast.success('Photo uploaded successfully');
       } catch (err: any) {
+        setActionError(err.message || 'Failed to upload photo');
         toast.error(err.message || 'Failed to upload photo');
       }
     },
@@ -51,6 +56,7 @@ export const MemoriesPage = () => {
   const handleConfirmDelete = async () => {
     if (!deleteTargetId) return;
     setIsDeleting(true);
+    setActionError(null);
     try {
       await deleteMemory(deleteTargetId);
       toast.success('Photo deleted successfully');
@@ -59,6 +65,7 @@ export const MemoriesPage = () => {
         setActiveLightboxIndex(null);
       }
     } catch (err: any) {
+      setActionError(err.message || 'Failed to delete photo');
       toast.error(err.message || 'Failed to delete photo');
     } finally {
       setDeleteTargetId(null);
@@ -67,10 +74,12 @@ export const MemoriesPage = () => {
   };
 
   const handleEditCaption = async (id: string, caption: string) => {
+    setActionError(null);
     try {
       await updateMemoryCaption(id, caption);
       toast.success('Caption updated successfully');
     } catch (err: any) {
+      setActionError(err.message || 'Failed to update caption');
       toast.error(err.message || 'Failed to update caption');
     }
   };
@@ -85,54 +94,34 @@ export const MemoriesPage = () => {
       : 'Saving...';
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        onChange={handleFileChange}
-        className="hidden"
-        accept="image/jpeg,image/png,image/webp"
+    <div className="space-y-6">
+
+
+
+      <PageHeader
+        title="Photos & Memories"
+        subtitle={
+          memories.length === 1
+            ? '1 shared memory'
+            : `${memories.length} shared memories`
+        }
+        action={{
+          label: isBusy ? loaderText : 'Upload Photo',
+          onClick: openFilePicker,
+          icon: isBusy ? (
+            <Icon name="loader" size={16} className="animate-spin" />
+          ) : (
+            <Icon name="upload" size={16} />
+          ),
+        }}
       />
 
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 pb-5">
-        <PageHeader
-          title="Photos & Memories"
-          subtitle={
-            memories.length === 1
-              ? '1 shared memory'
-              : `${memories.length} shared memories`
-          }
-        />
-        
-        {/* Upload Button */}
-        <button
-          onClick={openFilePicker}
-          disabled={loading || isBusy}
-          className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow active:scale-95 disabled:opacity-50"
-        >
-          {isBusy ? (
-            <>
-              <Icon name="loader" size={16} className="animate-spin" />
-              <span>{loaderText}</span>
-            </>
-          ) : (
-            <>
-              <Icon name="upload" size={16} />
-              <span>Upload Photo</span>
-            </>
-          )}
-        </button>
-      </div>
+      <ErrorAlert error={error || actionError} />
 
-      {/* Grid gallery */}
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="flex flex-col items-center gap-3">
-            <Icon name="loader" className="animate-spin text-emerald-600" size={32} />
-            <p className="text-sm text-gray-500 font-medium">Loading memories...</p>
-          </div>
+      {loading && memories.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600 flex items-center gap-3">
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600" />
+          Loading memories...
         </div>
       ) : showEmpty ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm flex flex-col items-center max-w-lg mx-auto mt-6">
@@ -150,6 +139,7 @@ export const MemoriesPage = () => {
             Upload the first photo
           </button>
         </div>
+
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {/* Virtual Loader Card when uploading */}
@@ -196,9 +186,18 @@ export const MemoriesPage = () => {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTargetId(null)}
       />
+
+      {/* Hidden file input moved to bottom to prevent space-y child margin bugs */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileChange}
+        className="hidden"
+        accept="image/jpeg,image/png,image/webp"
+      />
+
     </div>
   );
 };
 
 export default MemoriesPage;
-

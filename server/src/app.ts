@@ -20,6 +20,8 @@ import { taskRouter, taskItemRouter } from "./modules/trips/tasks"
 import { budgetRouter, tripExpenseRouter, expenseItemRouter } from './modules/trips/budget';
 import { accommodationRouter, accommodationItemRouter } from "./modules/trips/accommodations";
 import { memoryRouter, memoryItemRouter } from './modules/trips/memories';
+import { chatRouter } from './modules/trips/chat';
+
 
 
 dotenv.config();
@@ -65,6 +67,8 @@ app.use('/api/trips/:tripId/accommodations', accommodationRouter);
 app.use('/api/accommodations', accommodationItemRouter);
 app.use('/api/trips/:tripId/memories', memoryRouter);
 app.use('/api/memories', memoryItemRouter);
+app.use('/api/trips/:tripId/chat', chatRouter);
+
 
 
 // 404 handler

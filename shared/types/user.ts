@@ -18,6 +18,7 @@ export interface UserStats {
 export interface User {
   _id: string;
   username: string;
+
   email?: string | null;
   name?: string;
   bio?: string;

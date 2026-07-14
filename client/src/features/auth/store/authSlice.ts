@@ -6,6 +6,14 @@ import type {
 } from '../types/auth.types';
 import type { User } from '@shared/types';
 
+const normalizeUser = (user: any): User | null => {
+  if (!user) return null;
+  return {
+    ...user,
+    _id: user._id || user.id || '',
+  };
+};
+
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
@@ -25,7 +33,7 @@ const authSlice = createSlice({
     },
     loginSuccess: (state, action: PayloadAction<AuthSuccessPayload>) => {
       state.isAuthenticated = true;
-      state.user = action.payload.user;
+      state.user = normalizeUser(action.payload.user);
       state.token = action.payload.token;
       state.initialized = true;
       state.loading = false;
@@ -51,7 +59,7 @@ const authSlice = createSlice({
     },
     updateProfileSuccess: (state, action: PayloadAction<{ user: Partial<User> }>) => {
       if (state.user) {
-        state.user = { ...state.user, ...action.payload.user };
+        state.user = normalizeUser({ ...state.user, ...action.payload.user }) as User;
       }
       state.loading = false;
       state.error = null;
@@ -70,7 +78,7 @@ const authSlice = createSlice({
       })
       .addCase(loginAsync.fulfilled, (state, action) => {
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = normalizeUser(action.payload.user);
         state.token = action.payload.token;
         state.initialized = true;
         state.loading = false;
@@ -90,7 +98,7 @@ const authSlice = createSlice({
       })
       .addCase(signupAsync.fulfilled, (state, action) => {
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = normalizeUser(action.payload.user);
         state.token = action.payload.token;
         state.initialized = true;
         state.loading = false;
@@ -110,7 +118,7 @@ const authSlice = createSlice({
       })
       .addCase(googleLoginAsync.fulfilled, (state, action) => {
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = normalizeUser(action.payload.user);
         state.token = action.payload.token;
         state.initialized = true;
         state.loading = false;

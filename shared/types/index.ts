@@ -17,3 +17,5 @@ export type {
 export * from './task';
 export * from './budget';
 export * from './memory';
+export * from './chat';
+

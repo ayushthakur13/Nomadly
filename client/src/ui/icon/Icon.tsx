@@ -55,7 +55,9 @@ import {
   Receipt,
   PiggyBank,
   Download,
+  Send,
 } from "lucide-react";
+
 
 const ICONS: Record<string, LucideIcon> = {
   add: Plus,
@@ -105,7 +107,10 @@ const ICONS: Record<string, LucideIcon> = {
   plane: Plane,
   dollarSign: DollarSign,
   messageCircle: MessageCircle,
+  messageSquare: MessageCircle,
+  send: Send,
   layout: Layout,
+
   check: Check,
   checkSquare: CheckCircle,
   moreVertical: MoreVertical,

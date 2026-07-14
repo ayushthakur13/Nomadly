@@ -56,7 +56,8 @@ const TripWorkspacePage = () => {
   }
 
   const tripOwnerId = (trip.createdBy as any)?._id ?? trip.createdBy;
-  const currentUserId = user?._id ?? user?.id;
+  const currentUserId = user?._id;
+
   const isOwner = Boolean(tripOwnerId && currentUserId && tripOwnerId === currentUserId);
 
   // Determine which content to show based on current route
