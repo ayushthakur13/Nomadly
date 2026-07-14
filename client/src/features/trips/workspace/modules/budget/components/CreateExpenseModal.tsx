@@ -12,10 +12,11 @@ interface CreateExpenseModalProps {
   members: BudgetMember[];
   getMemberName: (userId: string) => string;
   initialDraft?: CreateExpenseDTO;
+  isSoloTrip?: boolean;
   onClose: () => void;
 }
 
-const CreateExpenseModal = ({ members, getMemberName, initialDraft, onClose }: CreateExpenseModalProps) => {
+const CreateExpenseModal = ({ members, getMemberName, initialDraft, isSoloTrip, onClose }: CreateExpenseModalProps) => {
   const { tripId } = useParams<{ tripId: string }>();
   const { actionLoading, createExpense: performCreate, clearError } = useBudget();
 
@@ -168,24 +169,26 @@ const CreateExpenseModal = ({ members, getMemberName, initialDraft, onClose }: C
 
           {/* Paid By + Date */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1.5">
-                Paid by <span className="text-red-400">*</span>
-              </label>
-              <select
-                value={formData.paidBy}
-                onChange={(e) => setFormData({ ...formData, paidBy: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:border-transparent disabled:opacity-50 transition-all bg-white"
-                disabled={actionLoading}
-              >
-                {members.map((m) => (
-                  <option key={m.userId} value={m.userId}>
-                    {getMemberName(m.userId)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
+            {!isSoloTrip ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1.5">
+                  Paid by <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={formData.paidBy}
+                  onChange={(e) => setFormData({ ...formData, paidBy: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 focus:border-transparent disabled:opacity-50 transition-all bg-white"
+                  disabled={actionLoading}
+                >
+                  {members.map((m) => (
+                    <option key={m.userId} value={m.userId}>
+                      {getMemberName(m.userId)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+            <div className={isSoloTrip ? "col-span-2" : ""}>
               <label className="block text-sm font-medium text-gray-500 mb-1.5">Date</label>
               <input
                 type="date"
@@ -226,75 +229,77 @@ const CreateExpenseModal = ({ members, getMemberName, initialDraft, onClose }: C
           </div>
 
           {/* Split method toggle */}
-          <div>
-            <label className="block text-sm font-medium text-gray-500 mb-2">Split</label>
-            <div className="flex rounded-lg border border-gray-200 overflow-hidden w-fit text-sm font-medium">
-              {(['equal', 'custom'] as const).map((method) => (
-                <button
-                  key={method}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, splitMethod: method })}
-                  disabled={actionLoading}
-                  className={`px-4 py-2 transition-colors disabled:opacity-50 ${
-                    formData.splitMethod === method
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {method === 'equal' ? 'Fair split' : 'Custom amounts'}
-                </button>
-              ))}
-            </div>
+          {!isSoloTrip && (
+            <div>
+              <label className="block text-sm font-medium text-gray-500 mb-2">Split</label>
+              <div className="flex rounded-lg border border-gray-200 overflow-hidden w-fit text-sm font-medium">
+                {(['equal', 'custom'] as const).map((method) => (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, splitMethod: method })}
+                    disabled={actionLoading}
+                    className={`px-4 py-2 transition-colors disabled:opacity-50 ${
+                      formData.splitMethod === method
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {method === 'equal' ? 'Fair split' : 'Custom amounts'}
+                  </button>
+                ))}
+              </div>
 
-            {/* Equal split hint */}
-            {formData.splitMethod === 'equal' && formData.amount && activeSplitMembers.length > 0 && (() => {
-              const perPerson = parseFloat(formData.amount) / activeSplitMembers.length;
-              const isUneven = !Number.isInteger(perPerson * 100);
-              return isUneven ? (
-                <p className="text-sm text-gray-400 mt-2">
-                  Amounts will be split as evenly as possible with sub-cent rounding on the last member.
-                </p>
-              ) : null;
-            })()}
+              {/* Equal split hint */}
+              {formData.splitMethod === 'equal' && formData.amount && activeSplitMembers.length > 0 && (() => {
+                const perPerson = parseFloat(formData.amount) / activeSplitMembers.length;
+                const isUneven = !Number.isInteger(perPerson * 100);
+                return isUneven ? (
+                  <p className="text-sm text-gray-400 mt-2">
+                    Amounts will be split as evenly as possible with sub-cent rounding on the last member.
+                  </p>
+                ) : null;
+              })()}
 
-            {/* Custom split inputs */}
-            {formData.splitMethod === 'custom' && formData.amount && (() => {
-              const total = activeSplitMembers.reduce(
-                (sum, m) => sum + (parseFloat(splitInputs[m.userId] || '0') || 0),
-                0
-              );
-              const target = parseFloat(formData.amount) || 0;
-              const diff = total - target;
-              const isOver = diff > 0.01;
-              const isUnder = diff < -0.01;
-              return (
-                <div className="mt-3 bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-3">
-                  {activeSplitMembers.map((member) => (
-                    <div key={member.userId} className="flex items-center gap-3">
-                      <span className="flex-1 text-sm text-gray-700 truncate">{getMemberName(member.userId)}</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={splitInputs[member.userId] || ''}
-                        onChange={(e) => handleSplitInputChange(member.userId, e.target.value)}
-                        placeholder="0.00"
-                        className="w-24 px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-50"
-                        disabled={actionLoading}
-                      />
+              {/* Custom split inputs */}
+              {formData.splitMethod === 'custom' && formData.amount && (() => {
+                const total = activeSplitMembers.reduce(
+                  (sum, m) => sum + (parseFloat(splitInputs[m.userId] || '0') || 0),
+                  0
+                );
+                const target = parseFloat(formData.amount) || 0;
+                const diff = total - target;
+                const isOver = diff > 0.01;
+                const isUnder = diff < -0.01;
+                return (
+                  <div className="mt-3 bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-3">
+                    {activeSplitMembers.map((member) => (
+                      <div key={member.userId} className="flex items-center gap-3">
+                        <span className="flex-1 text-sm text-gray-700 truncate">{getMemberName(member.userId)}</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={splitInputs[member.userId] || ''}
+                          onChange={(e) => handleSplitInputChange(member.userId, e.target.value)}
+                          placeholder="0.00"
+                          className="w-24 px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-50"
+                          disabled={actionLoading}
+                        />
+                      </div>
+                    ))}
+                    <div className={`flex items-center justify-between pt-2 border-t text-sm font-medium ${
+                      isOver ? 'text-red-500 border-red-100' : isUnder ? 'text-amber-500 border-amber-100' : 'text-emerald-600 border-emerald-100'
+                    }`}>
+                      <span>{isOver ? 'Over by' : isUnder ? 'Remaining' : 'Balanced'}</span>
+                      {(isOver || isUnder) && <span>{Math.abs(diff).toFixed(2)}</span>}
+                      {!isOver && !isUnder && <Icon name="checkCircle" size={13} />}
                     </div>
-                  ))}
-                  <div className={`flex items-center justify-between pt-2 border-t text-sm font-medium ${
-                    isOver ? 'text-red-500 border-red-100' : isUnder ? 'text-amber-500 border-amber-100' : 'text-emerald-600 border-emerald-100'
-                  }`}>
-                    <span>{isOver ? 'Over by' : isUnder ? 'Remaining' : 'Balanced'}</span>
-                    {(isOver || isUnder) && <span>{Math.abs(diff).toFixed(2)}</span>}
-                    {!isOver && !isUnder && <Icon name="checkCircle" size={13} />}
                   </div>
-                </div>
-              );
-            })()}
-          </div>
+                );
+              })()}
+            </div>
+          )}
 
           {/* Notes */}
           <div>

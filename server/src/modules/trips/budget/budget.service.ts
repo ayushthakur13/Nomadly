@@ -634,6 +634,21 @@ class BudgetService {
     // Sync Trip budget summary cache
     await this.syncTripBudgetSummary(newTripId);
   }
+
+  async markMemberAsPast(
+    tripId: string | Types.ObjectId,
+    userId: string | Types.ObjectId
+  ): Promise<void> {
+    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    if (!budget) return;
+
+    const member = budget.members.find(m => m.userId.toString() === userId.toString());
+    if (member) {
+      member.isPastMember = true;
+      await budget.save();
+      await this.syncTripBudgetSummary(tripId.toString());
+    }
+  }
 }
 
 export default new BudgetService();

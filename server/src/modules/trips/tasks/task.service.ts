@@ -321,6 +321,16 @@ class TaskService {
     }
     return task;
   }
+
+  async unassignUserFromTasks(
+    tripId: string | Types.ObjectId,
+    userId: string | Types.ObjectId
+  ): Promise<void> {
+    await Task.updateMany(
+      { tripId: new Types.ObjectId(tripId) },
+      { $pull: { assignedTo: new Types.ObjectId(userId) } }
+    );
+  }
 }
 
 export default new TaskService();

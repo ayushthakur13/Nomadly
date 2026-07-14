@@ -1,5 +1,6 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { Icon } from '@/ui/icon/';
 
 interface TripSidebarItem {
@@ -13,9 +14,11 @@ const TripSidebar = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const trip = useSelector((state: any) => state.trips.selectedTrip);
+  const isSoloTrip = trip?.category === 'solo';
 
-  const items: TripSidebarItem[] = useMemo(
-    () => [
+  const items = useMemo<TripSidebarItem[]>(() => {
+    const list = [
       { id: 'overview', label: 'Overview', icon: 'layout', href: `/trips/${tripId}` },
       { id: 'destinations', label: 'Itinerary', icon: 'map', href: `/trips/${tripId}/destinations` },
       { id: 'tasks', label: 'Tasks', icon: 'checkSquare', href: `/trips/${tripId}/tasks` },
@@ -24,9 +27,12 @@ const TripSidebar = () => {
       { id: 'members', label: 'Members', icon: 'users', href: `/trips/${tripId}/members` },
       { id: 'memories', label: 'Memories', icon: 'image', href: `/trips/${tripId}/memories` },
       { id: 'chat', label: 'Chat', icon: 'messageCircle', href: `/trips/${tripId}/chat` },
-    ],
-    [tripId]
-  );
+    ];
+    if (isSoloTrip) {
+      return list.filter(item => item.id !== 'chat');
+    }
+    return list;
+  }, [tripId, isSoloTrip]);
 
   const isActive = (item: TripSidebarItem) => {
     if (item.id === 'overview') {

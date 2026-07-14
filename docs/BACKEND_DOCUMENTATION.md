@@ -207,8 +207,13 @@ CLOUDINARY_API_SECRET
 5. **Input Validation**: Email format, date validation, bounds checking
 6. **CORS**: Restricted to CLIENT_URL, credentials enabled
 7. **Rate Limiting**: Targeted `express-rate-limit` configuration:
-   - `/api/auth/register`, `/api/auth/login`, and `/api/auth/refresh` are limited to **15 requests per 15 minutes per IP** to prevent brute-force attacks (exempting `/me` and `/logout` to protect active session polling).
+   - `/api/auth/register`, `/api/auth/login`, `/api/auth/google`, and `/api/auth/refresh` are limited to **15 requests per 15 minutes per IP** to prevent brute-force and resource-exhaustion attacks (exempting `/me` and `/logout` to protect active session polling).
    - `/api/trips/search-location` is limited to **30 requests per 1 minute per IP** to protect Mapbox API billing from abuse.
+8. **Cascading Cleanup on Member Removal**: Triggers downstream cleanup actions to maintain consistency:
+   - **Memories**: Deletes all memory photos uploaded by the removed user.
+   - **Budget**: Marks the member as `isPastMember: true` inside the trip budget, preserving historical spending logs while disabling future contributions.
+   - **Tasks**: Automatically unassigns the user from `assignedTo` across all tasks in the trip.
+   - **Chat**: Untouched (preserves messages with "Former Member" fallback to maintain context).
 
 ---
 

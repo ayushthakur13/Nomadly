@@ -8,15 +8,18 @@ interface CreateBudgetFormProps {
   onClose: () => void;
   onSubmit: (payload: CreateBudgetDTO) => Promise<BudgetSnapshot | void>;
   isLoading: boolean;
+  isSoloTrip?: boolean;
 }
 
-export function CreateBudgetForm({ onClose, onSubmit, isLoading }: CreateBudgetFormProps) {
+export function CreateBudgetForm({ onClose, onSubmit, isLoading, isSoloTrip }: CreateBudgetFormProps) {
   const [totalBudgetAmount, setTotalBudgetAmount] = useState('');
   const [currency, setCurrency] = useState('INR');
 
   const handleSubmit = async () => {
-    const amount = parseFloat(totalBudgetAmount);
-    if (isNaN(amount) || amount <= 0) {
+    let amount = parseFloat(totalBudgetAmount);
+    if (isSoloTrip) {
+      amount = 0;
+    } else if (isNaN(amount) || amount <= 0) {
       toast.error('Please enter a valid budget amount');
       return;
     }
@@ -37,25 +40,27 @@ export function CreateBudgetForm({ onClose, onSubmit, isLoading }: CreateBudgetF
   return (
     <div className="mt-4 bg-gray-50 rounded-lg p-4 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Total planned budget
-          </label>
-          <p className="text-xs text-gray-500 mb-2">
-            Shared equally among trip members
-          </p>
-          <input
-            type="number"
-            value={totalBudgetAmount}
-            onChange={(e) => setTotalBudgetAmount(e.target.value)}
-            placeholder="e.g., 20000"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
-            disabled={isLoading}
-            step="500"
-            min="0"
-          />
-        </div>
-        <div>
+        {!isSoloTrip ? (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Total planned budget
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Shared equally among trip members
+            </p>
+            <input
+              type="number"
+              value={totalBudgetAmount}
+              onChange={(e) => setTotalBudgetAmount(e.target.value)}
+              placeholder="e.g., 20000"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+              disabled={isLoading}
+              step="500"
+              min="0"
+            />
+          </div>
+        ) : null}
+        <div className={isSoloTrip ? "col-span-2" : ""}>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Currency
           </label>
@@ -80,7 +85,7 @@ export function CreateBudgetForm({ onClose, onSubmit, isLoading }: CreateBudgetF
           disabled={isLoading}
           className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
         >
-          {isLoading ? 'Creating...' : 'Create budget'}
+          {isLoading ? 'Creating...' : isSoloTrip ? 'Start tracking' : 'Create budget'}
         </button>
         <button
           onClick={() => {

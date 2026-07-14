@@ -6,9 +6,10 @@ import { useBudgetFilters } from '../hooks';
 interface ExpensesListProps {
   snapshot: BudgetSnapshot;
   getMemberName: (userId: string) => string;
+  isSoloTrip?: boolean;
 }
 
-const ExpensesList = ({ snapshot, getMemberName }: ExpensesListProps) => {
+const ExpensesList = ({ snapshot, getMemberName, isSoloTrip }: ExpensesListProps) => {
   const expenses = snapshot?.expenses ?? [];
   const budget = snapshot?.budget;
   const { user } = useAuth();
@@ -83,6 +84,7 @@ const ExpensesList = ({ snapshot, getMemberName }: ExpensesListProps) => {
                 baseCurrency={budget?.baseCurrency || 'INR'}
                 canEdit={canEditOrDelete}
                 canDelete={canEditOrDelete}
+                isSoloTrip={isSoloTrip}
                 getMemberName={getMemberName}
               />
             );

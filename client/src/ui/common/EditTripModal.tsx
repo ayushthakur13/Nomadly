@@ -16,6 +16,8 @@ interface EditTripModalProps {
     destinationLocation?: any;
     startDate: string;
     endDate: string;
+    createdBy?: any;
+    members?: any[];
   };
   isLoading: boolean;
   onClose: () => void;
@@ -92,6 +94,20 @@ const EditTripModal = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+
+    if (name === 'category' && value === 'solo') {
+      const hasOtherMembers = trip?.members && trip.members.filter((m: any) => {
+        const mId = m.userId?._id || m.userId;
+        const cId = trip.createdBy?._id || trip.createdBy;
+        return mId && cId && mId.toString() !== cId.toString();
+      }).length > 0;
+
+      if (hasOtherMembers) {
+        toast.error('There are other members in this trip. Please remove them first before changing the category to Solo.');
+        return;
+      }
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 

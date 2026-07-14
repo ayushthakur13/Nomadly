@@ -11,6 +11,8 @@ import {
 } from './member.utils';
 import { MemberDTO } from './member.types';
 import memoryService from '../memories/memory.service';
+import budgetService from '../budget/budget.service';
+import taskService from '../tasks/task.service';
 
 
 class MemberService {
@@ -85,6 +87,16 @@ class MemberService {
     // Cascade delete memories uploaded by the removed user
     await memoryService.deleteUserMemoriesInTrip(tripId.toString(), userId.toString()).catch((err) => {
       console.error(`Failed to cascade delete user ${userId} memories in trip ${tripId}:`, err);
+    });
+
+    // Cascade: mark budget member as past
+    await budgetService.markMemberAsPast(tripId, userId).catch((err) => {
+      console.error(`Failed to mark budget member ${userId} as past in trip ${tripId}:`, err);
+    });
+
+    // Cascade: unassign user from all tasks in trip
+    await taskService.unassignUserFromTasks(tripId, userId).catch((err) => {
+      console.error(`Failed to unassign user ${userId} from tasks in trip ${tripId}:`, err);
     });
 
     return trip;

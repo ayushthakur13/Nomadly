@@ -9,6 +9,7 @@ import { formatCurrency, getCategoryDot } from '../utils/formatting';
 interface BudgetHeaderProps {
   snapshot: BudgetSnapshot | null;
   canEditBaseBudget: boolean;
+  isSoloTrip?: boolean;
   actionLoading: boolean;
   getMemberName: (userId: string) => string;
   membersWithDetails: Map<string, TripMember>;
@@ -20,6 +21,7 @@ interface BudgetHeaderProps {
 const BudgetHeader = ({
   snapshot,
   canEditBaseBudget,
+  isSoloTrip,
   actionLoading,
   getMemberName,
   membersWithDetails,
@@ -42,6 +44,11 @@ const BudgetHeader = ({
   const difference = hasBaseBudget ? baseBudgetAmount - summary.totalPlanned : 0;
   const isShort = hasBaseBudget && difference > 0.01;
   const hasBuffer = hasBaseBudget && difference < -0.01;
+
+  // For solo trip, remaining headroom is based on baseBudgetAmount
+  const remainingValue = isSoloTrip
+    ? (hasBaseBudget ? baseBudgetAmount - summary.totalSpent : 0)
+    : summary.remaining;
 
   // Category breakdown — all categories sorted by spend desc
   // Normalize: no category and 'Other' both group under 'Other'
@@ -86,19 +93,37 @@ const BudgetHeader = ({
       <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Trip base budget</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">
+              {isSoloTrip ? 'Trip budget limit' : 'Trip base budget'}
+            </p>
             <p className="text-lg font-semibold text-gray-900 mt-1">
               {hasBaseBudget ? formatCurrency(baseBudgetAmount, currency) : 'No budget target set'}
             </p>
-            {isShort && (
-              <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                You're {formatCurrency(Math.abs(difference), currency)} short of the trip budget target.
-              </p>
-            )}
-            {hasBuffer && (
-              <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-                You have a {formatCurrency(Math.abs(difference), currency)} buffer over the trip budget.
-              </p>
+            {isSoloTrip ? (
+              hasBaseBudget && (
+                baseBudgetAmount - summary.totalSpent < 0 ? (
+                  <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                    You are over your budget limit by {formatCurrency(Math.abs(baseBudgetAmount - summary.totalSpent), currency)}.
+                  </p>
+                ) : (
+                  <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+                    You have {formatCurrency(baseBudgetAmount - summary.totalSpent, currency)} headroom remaining.
+                  </p>
+                )
+              )
+            ) : (
+              <>
+                {isShort && (
+                  <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                    You're {formatCurrency(Math.abs(difference), currency)} short of the trip budget target.
+                  </p>
+                )}
+                {hasBuffer && (
+                  <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+                    You have a {formatCurrency(Math.abs(difference), currency)} buffer over the trip budget.
+                  </p>
+                )}
+              </>
             )}
           </div>
           {canEditBaseBudget && (
@@ -153,34 +178,39 @@ const BudgetHeader = ({
           )}
         </div>
       </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className={`grid gap-4 ${
+        isSoloTrip
+          ? (hasBaseBudget ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2')
+          : 'grid-cols-2 lg:grid-cols-4'
+      }`}>
         {/* Total Planned — clickable, opens contributions overlay */}
-        <button
-          type="button"
-          onClick={onOpenContributions}
-          className="block text-left bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:border-gray-300 transition-colors"
-        >
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-gray-500 text-xs uppercase tracking-wide">Committed</p>
-            <Icon name="chevronRight" size={13} className="text-gray-400" />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 mt-1">
-            {formatCurrency(summary.totalPlanned, currency)}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Amount Collected</p>
-        </button>
+        {!isSoloTrip && (
+          <button
+            type="button"
+            onClick={onOpenContributions}
+            className="block text-left bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:border-gray-300 transition-colors"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-gray-500 text-xs uppercase tracking-wide">Committed</p>
+              <Icon name="chevronRight" size={13} className="text-gray-400" />
+            </div>
+            <p className="text-2xl font-semibold text-gray-900 mt-1">
+              {formatCurrency(summary.totalPlanned, currency)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Amount Collected</p>
+          </button>
+        )}
 
         {/* Total Spent — clickable, opens spenders list */}
         <button
           type="button"
           onClick={() => snapshot.memberSummaries?.some((m) => m.spent > 0) && setShowSpendersModal(true)}
-          disabled={!snapshot.memberSummaries?.some((m) => m.spent > 0)}
-          className="block text-left bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:border-gray-300 transition-colors disabled:cursor-default"
+          disabled={!snapshot.memberSummaries?.some((m) => m.spent > 0) || isSoloTrip}
+          className={`block text-left bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:border-gray-300 transition-colors disabled:cursor-default ${isSoloTrip ? 'hover:border-gray-200' : ''}`}
         >
           <div className="flex items-center justify-between mb-1">
             <p className="text-gray-500 text-xs uppercase tracking-wide">Spent</p>
-            <Icon name="chevronRight" size={13} className={snapshot.memberSummaries?.some((m) => m.spent > 0) ? 'text-gray-400' : 'opacity-0'} />
+            <Icon name="chevronRight" size={13} className={(!isSoloTrip && snapshot.memberSummaries?.some((m) => m.spent > 0)) ? 'text-gray-400' : 'opacity-0'} />
           </div>
           <p className="text-2xl font-semibold text-red-600 mt-1">
             {formatCurrency(summary.totalSpent, currency)}
@@ -189,16 +219,20 @@ const BudgetHeader = ({
         </button>
 
         {/* Remaining */}
-        <div className="text-left bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-gray-500 text-xs uppercase tracking-wide">Remaining</p>
-            <Icon name="chevronRight" size={13} className="opacity-0" />
+        {(!isSoloTrip || hasBaseBudget) && (
+          <div className="text-left bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-gray-500 text-xs uppercase tracking-wide">Remaining</p>
+              <Icon name="chevronRight" size={13} className="opacity-0" />
+            </div>
+            <p className={`text-2xl font-semibold mt-1 ${remainingValue >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {formatCurrency(remainingValue, currency)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              {isSoloTrip ? 'Budget headroom' : 'Headroom left'}
+            </p>
           </div>
-          <p className={`text-2xl font-semibold mt-1 ${summary.remaining >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-            {formatCurrency(summary.remaining, currency)}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Headroom left</p>
-        </div>
+        )}
 
         {/* By Category — clickable, opens breakdown overlay */}
         <button

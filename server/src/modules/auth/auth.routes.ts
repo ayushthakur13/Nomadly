@@ -7,7 +7,7 @@ const router = express.Router();
 // Public
 router.post('/register', authRateLimiter, ctrl.register);
 router.post('/login', authRateLimiter, ctrl.login);
-router.post('/google', ctrl.google);
+router.post('/google', authRateLimiter, ctrl.google);
 router.post('/refresh', authRateLimiter, ctrl.refresh);
 
 // Protected

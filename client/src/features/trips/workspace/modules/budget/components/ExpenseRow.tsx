@@ -11,10 +11,11 @@ interface ExpenseRowProps {
   baseCurrency: string;
   canEdit: boolean;
   canDelete: boolean;
+  isSoloTrip?: boolean;
   getMemberName: (userId: string) => string;
 }
 
-const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, getMemberName }: ExpenseRowProps) => {
+const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, isSoloTrip, getMemberName }: ExpenseRowProps) => {
   const { actionLoading, deleteExpense: performDelete, updateExpense: performUpdate, clearError } = useBudget();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -117,7 +118,7 @@ const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, getMemberName }
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">{expense.title || 'Untitled'}</p>
             <p className="text-xs text-gray-400 mt-0.5">
-              Paid by {getMemberName(expense.paidBy)}&nbsp;&middot;&nbsp;{formatDate(expense.date)}
+              {!isSoloTrip ? `Paid by ${getMemberName(expense.paidBy)} · ` : ''}{formatDate(expense.date)}
               {expense.category ? <>&nbsp;&middot;&nbsp;{expense.category}</> : null}
             </p>
           </div>
@@ -287,7 +288,7 @@ const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, getMemberName }
         {isExpanded && !isEditing && (
           <div className="px-4 pb-4 space-y-3 border-t border-gray-200">
             {/* Splits breakdown */}
-            {expense.splits && expense.splits.length > 0 && (
+            {expense.splits && expense.splits.length > 0 && !isSoloTrip && (
               <div className="pt-3">
                 <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Split breakdown</p>
                 <div className="flex flex-col gap-1.5">
@@ -310,9 +311,11 @@ const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, getMemberName }
 
             {/* Footer: split method + actions */}
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs text-gray-400 bg-white border border-gray-200 px-2.5 py-1 rounded-full">
-                {SPLIT_METHOD_LABELS[expense.splitMethod] ?? expense.splitMethod}
-              </span>
+              {!isSoloTrip ? (
+                <span className="text-xs text-gray-400 bg-white border border-gray-200 px-2.5 py-1 rounded-full">
+                  {SPLIT_METHOD_LABELS[expense.splitMethod] ?? expense.splitMethod}
+                </span>
+              ) : <div />}
 
               <div className="flex items-center gap-1">
                 <button

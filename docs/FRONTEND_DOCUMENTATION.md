@@ -282,7 +282,7 @@ Each domain has a dedicated service file:
 - Trip task management
 
 **[members.service.ts](client/src/services/members.service.ts)**
-- Trip member management
+- Trip member management (with validation preventing changing trip category to Solo if other members are active on the trip)
 
 **[invitations.service.ts](client/src/services/invitations.service.ts)**
 - Invitation handling
@@ -291,7 +291,7 @@ Each domain has a dedicated service file:
 - Trip accommodation and booking management
 
 **[budget.service.ts](client/src/services/budget.service.ts)**
-- Budget details and expense tracking (splits)
+- Budget details and expense tracking (supports group splits/contributions, and solo target budget limits with remaining headroom calculation)
 
 **[chat.service.ts](client/src/services/chat.service.ts)**
 - Real-time chat message history loading

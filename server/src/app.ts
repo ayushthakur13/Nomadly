@@ -21,9 +21,6 @@ import { budgetRouter, tripExpenseRouter, expenseItemRouter } from './modules/tr
 import { accommodationRouter, accommodationItemRouter } from "./modules/trips/accommodations";
 import { memoryRouter, memoryItemRouter } from './modules/trips/memories';
 import { chatRouter } from './modules/trips/chat';
-import { authRateLimiter } from './shared/middlewares';
-
-
 
 dotenv.config();
 
