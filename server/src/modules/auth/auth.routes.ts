@@ -1,14 +1,14 @@
 import express from 'express';
 import ctrl from './auth.controller';
-import { authMiddleware } from '@shared/middlewares';
+import { authMiddleware, authRateLimiter } from '@shared/middlewares';
 
 const router = express.Router();
 
 // Public
-router.post('/register', ctrl.register);
-router.post('/login', ctrl.login);
+router.post('/register', authRateLimiter, ctrl.register);
+router.post('/login', authRateLimiter, ctrl.login);
 router.post('/google', ctrl.google);
-router.post('/refresh', ctrl.refresh);
+router.post('/refresh', authRateLimiter, ctrl.refresh);
 
 // Protected
 router.post('/logout', authMiddleware, ctrl.logout);

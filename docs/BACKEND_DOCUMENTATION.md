@@ -32,7 +32,31 @@ npm run dev      # Run development server with hot-reload
 npm run build    # Compile TypeScript to JavaScript
 npm start        # Run compiled JavaScript
 npm run format   # Format code with Prettier
+npm run test     # Run unit tests with Vitest
 ```
+
+---
+
+## Testing
+
+Unit testing is set up using **Vitest**. Test files are placed alongside the source files they test with the `.test.ts` suffix.
+
+To run the test suite once:
+```bash
+npm run test
+```
+
+To run the test suite in watch mode:
+```bash
+npx vitest
+```
+
+### Covered Areas
+- **Auth Module Utilities**:
+  - `jwt.ts`: Token signing, validation, expired token checks, and tampered token detection.
+  - `hash.ts`: Password and token hashing, validation of correct/incorrect plaintexts.
+- **Budget Module Utilities**:
+  - `budget.utils.ts`: Floating point rounding, split division (equal split logic, leftover remainder allocation, past member exclusion), split array validation, budget access control, and the complete expense permission matrix.
 
 ---
 
@@ -137,7 +161,7 @@ Cloudinary storage presets:
 - **uploadProfile** - User avatars (500x500, folder: `nomadly/profiles`)
 - **uploadTripCover** - Trip covers (1200x600, folder: `nomadly/trip_covers`)
 - **uploadDestination** - Destination images (folder: `nomadly/destinations`)
-- **uploadMemory** - Trip photos/videos (folder: `nomadly/memories`)
+- **uploadMemory** - Trip photos (images-only: jpg/jpeg/png/webp, 5MB max; folder: `nomadly/memories`)
 
 ### Async Error Handler
 
@@ -182,6 +206,9 @@ CLOUDINARY_API_SECRET
 4. **Data Privacy**: Private trips, permission checks, soft deletes
 5. **Input Validation**: Email format, date validation, bounds checking
 6. **CORS**: Restricted to CLIENT_URL, credentials enabled
+7. **Rate Limiting**: Targeted `express-rate-limit` configuration:
+   - `/api/auth/register`, `/api/auth/login`, and `/api/auth/refresh` are limited to **15 requests per 15 minutes per IP** to prevent brute-force attacks (exempting `/me` and `/logout` to protect active session polling).
+   - `/api/trips/search-location` is limited to **30 requests per 1 minute per IP** to protect Mapbox API billing from abuse.
 
 ---
 
@@ -287,7 +314,7 @@ Error middleware in `app.ts` handles:
 - **Features**: Notifications, advanced expense settlement, collaborative voting
 - **Security**: Rate limiting, 2FA, API keys for integrations
 - **Observability**: Structured logging, request tracing, performance monitoring
-- **Testing**: Unit tests (Jest), integration tests, E2E tests
+- **Testing**: Integration tests, E2E tests (Vitest unit tests already set up for core utilities)
 
 ---
 

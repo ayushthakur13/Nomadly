@@ -4,7 +4,7 @@ React + TypeScript SaaS application for travel planning and collaboration.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -26,7 +26,7 @@ npm run lint     # Run ESLint
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 src/
@@ -65,7 +65,7 @@ src/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **React 19** + **TypeScript** - UI framework with type safety
 - **Vite** - Build tool (fast HMR, optimized builds)
@@ -80,7 +80,7 @@ src/
 
 ---
 
-## 🎨 Design System
+## Design System
 
 ### Color Palette
 - **Primary**: `emerald-600` (#059669) - Actions, success states
@@ -99,7 +99,7 @@ src/
 
 ---
 
-## 🏗️ Architecture Patterns
+## Architecture Patterns
 
 ### Async Operations
 Use `useAsyncAction` hook for consistent async handling:
@@ -132,7 +132,7 @@ await execute(async () => {
 
 ---
 
-## 🔧 Environment Variables
+## Environment Variables
 
 Create `.env` file in `client/` directory:
 
@@ -144,7 +144,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 
 ---
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
 1. **Login/Signup**: Credentials → Backend → Access token (memory) + Refresh token (httpOnly cookie)
 2. **CSRF Protection**: Token stored in localStorage, sent as `x-csrf-token` header
@@ -154,7 +154,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 
 ---
 
-## 🧪 Development Guidelines
+## Development Guidelines
 
 ### Component Organization
 - **Pages**: Handle routing, fetch data, pass to features
@@ -176,7 +176,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 
 ---
 
-## 🚨 Common Issues
+## Common Issues
 
 - **Port already in use**: Change port in `vite.config.ts` or kill process on 5173
 - **API connection refused**: Ensure backend is running on correct port
@@ -185,7 +185,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 ### Core
 - `react` - UI framework
@@ -207,7 +207,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
 - Main project README: `../README.md`
 - Backend documentation: `../server/README.md`
@@ -215,7 +215,7 @@ VITE_MAPBOX_TOKEN=your_mapbox_token
 
 ---
 
-## 📝 Notes
+## Notes
 
 - Vite uses ES modules; ensure `"type": "module"` in `package.json`
 - Path aliases configured: `@/` → `src/`

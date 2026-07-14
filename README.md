@@ -1,47 +1,47 @@
-# 🌍 Nomadly
+# Nomadly
+
+<!-- Live demo link to be added post-deployment -->
 
 > Project status: In Progress (actively developed). Many features are implemented; others are planned or partially available. See checklists below.
 
-Nomadly is a modern full stack SaaS platform designed to simplify group travel planning. It brings trip organization, collaboration, budgeting, media sharing, and social discovery into a single unified experience. Built with scalability and real world use cases in mind, Nomadly evolves from a trip planner into a travel focused social network with AI powered planning capabilities.
+Nomadly is a modern full-stack travel planning platform designed to simplify group travel. It centralizes trip organization, itineraries, task assignments, budgeting, and real-time collaboration. Built with TypeScript, React, Express, and MongoDB, the project is designed for robust group travel management.
 
 ---
 
-## ✨ Why Nomadly
+## Why Nomadly
 
-Group travel planning is often chaotic. People rely on WhatsApp, spreadsheets, notes, and multiple booking apps, which leads to confusion, duplicated effort, and poor coordination.
+Group travel planning is often chaotic. People rely on WhatsApp, spreadsheets, notes, and multiple booking apps, which leads to confusion, duplicated effort, and coordination issues.
 
 Nomadly solves this by:
-- Centralizing all trip related information in one platform
-- Enabling real time collaboration for groups
+- Centralizing all trip-related information in one platform
+- Enabling real-time collaboration for groups
 - Making travel plans structured, visual, and reusable
-- Preparing the foundation for AI powered itinerary generation and social discovery
+- Preparing the foundation for travel-focused social discovery
 
 ---
 
-## 🧩 Core Features
+## Core Features
 
-Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
-
-### 🧳 Trip Management
+### Trip Management
 - ✅ Create, update, and delete trips
 - ✅ Add source and final destination
 - ✅ Track trip status as upcoming, ongoing, or completed
 - ✅ Upload and manage trip cover images
 - ✅ Toggle trip visibility between public and private
 
-### 📍 Destinations and Itineraries
-- ✅ Multi stop trips with detailed destinations
+### Destinations and Itineraries
+- ✅ Multi-stop trips with detailed destinations
 - ✅ Location search with map integration
 - ✅ Store coordinates for accurate mapping
-- ✅ Visualize trips using routes and pins
+- ✅ Visualize trips using map pins for destinations and stops
 
-### ✅ Task Management
+### Task Management
 - ✅ Create and assign tasks to trip members
-- ✅ Role based task completion
+- ✅ Role-based task completion
 - ✅ Track deadlines and progress
 - ✅ Filter tasks by status or member
 
-### 💸 Budget and Expenses
+### Budget and Expenses
 - ✅ Create budget with trip members and planned contributions
 - ✅ Add shared expenses with flexible split methods (equal, custom, percentage)
 - ✅ Automatic calculation of spent and remaining budget
@@ -50,55 +50,37 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 - ✅ Clone trip with budget (three modes: TEMPLATE, PLANNING, FULL_HISTORY)
 - ✅ Trip cache synchronization for budget consistency
 
-### 🏨 Accommodations
-- ✅ Add lodging details with check in and check out dates
+### Accommodations
+- ✅ Add lodging details with check-in and check-out dates
 - ✅ Store booking links, costs, and notes
 - ✅ Centralized accommodation reference for the trip
 
-### 🖼️ Memories and Media
-- ✅ Upload trip photos securely
-- ✅ Access control for uploading and deleting media
-- ✅ Download shared memories
+### Memories and Media
+- ✅ Upload trip photos securely (images-only: jpg/jpeg/png/webp, 5MB limit)
+- ✅ Access control for uploading and deleting images
+- ✅ Download shared image memories
 
-### 👥 Members and Collaboration
+### Members and Collaboration
 - ✅ Invite members via email or username
 - ✅ Accept or reject trip invitations
-- ✅ Role based permissions such as creator and member
-- ⏳ Real time group chat using WebSockets
+- ✅ Role-based permissions such as creator and member
+- ✅ Real-time group chat using WebSockets 
 
 ---
 
-## 🌐 Social Layer (In Progress)
+## Roadmap
 
-- 🚧 Explore public and featured trips
-- ⏳ Clone trips to reuse itineraries
-- ⏳ Like, save, and share trips
-- ⏳ Public user profiles with trip statistics
-- ⏳ Discovery focused feed inspired by social platforms
-
----
-
-## 🤖 AI Features (Planned)
-
-- ⏳ AI powered itinerary generation based on destination, budget, duration, and interests
-- ⏳ Smart day wise planning with hidden gems and local experiences
-- ⏳ AI generated budget breakdown
-- ⏳ Save AI generated trips as editable drafts
-- ⏳ Coming soon access for free users with premium upgrades
+Future enhancements and planned features:
+- **Itinerary Cloning**: Clone public trips to reuse itineraries for your own travels.
+- **Social Discovery**: Explore public trips, follow travelers, and like/save itineraries.
+- **AI-Powered Planning**: AI itinerary generation based on budget, duration, and interests.
+- **Smart Day-Wise Planning**: AI generated budget breakdowns and recommendations for local experiences.
+- **Shared Trips**: Open trips for shared joining with verified traveler profiles and SOS safety links.
+- **Admin Dashboard**: Coordination tools for large community/organization managed trips.
 
 ---
 
-## 👥 Shared and Community Trips (Planned)
-
-- ⏳ Open trips for shared joining
-- ⏳ Verified traveler profiles
-- ⏳ Safety features such as SOS links to local services
-- ⏳ Community and organization managed trips
-- ⏳ Admin dashboards for large group coordination
-
----
-
-## 🏗️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - React with TypeScript
@@ -111,21 +93,20 @@ Implemented vs Planned (✅ implemented · 🚧 in progress · ⏳ planned)
 ### Backend
 - Node.js with Express using TypeScript
 - MongoDB with Mongoose
-- JWT based authentication
+- JWT-based authentication
 - Google OAuth
-- Socket.io for real time features
+- Socket.io for real-time features
 - Multer and Cloudinary for media uploads
 
 ### Development and Infrastructure
 - Strict TypeScript configuration
 - RESTful API architecture
 - Modular and scalable project structure
-- Environment based configuration
-- Ready for CI CD and production deployment
+- Environment-based configuration
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ### Server
 ```bash
@@ -191,7 +172,7 @@ src/
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 For detailed documentation on architecture, features, and implementation details:
 
@@ -200,7 +181,7 @@ For detailed documentation on architecture, features, and implementation details
 
 ---
 
-## 🏛️ Architecture & Patterns
+## Architecture and Patterns
 
 ### Backend: Domain-Driven Modular Design
 Each module (auth, users, trips, etc.) follows a consistent pattern:
@@ -254,21 +235,14 @@ await execute(async () => {
 
 ---
 
-## 🧪 Running Locally
+## Running Locally
 
 ### Backend Setup
 ```bash
 git clone https://github.com/ayushthakur13/nomadly.git
 cd nomadly/server
 npm install
-```
-Create a `.env` file from the example:
-```bash
 cp .env.example .env
-```
-
-Start the server (TypeScript):
-```bash
 npm run dev
 ```
 
@@ -280,8 +254,15 @@ cp .env.example .env
 npm run dev
 ```
 
+### Running Tests
+To run backend unit tests:
+```bash
+cd ../server
+npm run test
+```
+
 **Dependencies installed:**
-- React 18 + TypeScript
+- React 19 + TypeScript
 - Tailwind CSS for styling
 - Redux Toolkit for state management
 - React Hook Form for form handling
@@ -302,7 +283,7 @@ Optionally, create a root-level script with `concurrently` to run both at once.
 
 ---
 
-## 🔐 Auth & Security (Overview)
+## Authentication and Security
 - Access token: stored in memory on the client
 - Refresh token: httpOnly cookie set by the server
 - CSRF: token persisted in localStorage and sent as `x-csrf-token` for refresh/logout
@@ -311,13 +292,14 @@ Optionally, create a root-level script with `concurrently` to run both at once.
 
 ---
 
-## 🧰 Scripts
+## Scripts
 
 ### Server
 From [server/package.json](server/package.json):
-- `npm run dev` — Runs with tsx for TypeScript watch mode
+- `npm run dev` — Runs dev server with tsx for TypeScript watch mode
 - `npm run build` — Compiles TypeScript to JavaScript
 - `npm start` — Runs compiled server from `dist/server.js`
+- `npm run test` — Runs the Vitest test suite
 
 ### Client
 From [client/package.json](client/package.json):

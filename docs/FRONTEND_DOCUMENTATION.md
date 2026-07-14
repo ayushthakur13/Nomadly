@@ -287,6 +287,18 @@ Each domain has a dedicated service file:
 **[invitations.service.ts](client/src/services/invitations.service.ts)**
 - Invitation handling
 
+**[accommodations.service.ts](client/src/services/accommodations.service.ts)**
+- Trip accommodation and booking management
+
+**[budget.service.ts](client/src/services/budget.service.ts)**
+- Budget details and expense tracking (splits)
+
+**[chat.service.ts](client/src/services/chat.service.ts)**
+- Real-time chat message history loading
+
+**[memories.service.ts](client/src/services/memories.service.ts)**
+- Photo memories uploading, downloading, and deletion (images-only)
+
 **Response Normalization**:
 
 Backend responses follow structure: `{ success: true, data: { entity: {...} } }`

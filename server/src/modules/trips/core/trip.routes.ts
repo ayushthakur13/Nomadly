@@ -1,11 +1,11 @@
 import express from 'express';
 import tripController from './trip.controller';
-import { uploadTripCover, authMiddleware } from '@shared/middlewares';
+import { uploadTripCover, authMiddleware, locationSearchRateLimiter } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
 
 const router = express.Router();
 
-router.get('/search-location', asyncHandler(tripController.searchLocation.bind(tripController)));
+router.get('/search-location', locationSearchRateLimiter, asyncHandler(tripController.searchLocation.bind(tripController)));
 router.get('/public', asyncHandler(tripController.getPublicTrips.bind(tripController)));
 
 router.use(authMiddleware);

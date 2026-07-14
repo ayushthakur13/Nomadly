@@ -4,7 +4,7 @@ Express + TypeScript REST API for travel planning platform with real-time WebSoc
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -16,19 +16,21 @@ Express + TypeScript REST API for travel planning platform with real-time WebSoc
 ```bash
 npm install
 cp .env.example .env  # Configure environment variables
-npm run dev:tsx       # Start dev server (port 4444)
+npm run dev           # Start dev server (port 4444)
 ```
 
-### Build & Production
+### Build, Production & Testing
 ```bash
+npm run dev      # Start development server with tsx watch
 npm run build    # Compile TypeScript to JavaScript
 npm start        # Run compiled server from dist/server.js
 npm run format   # Format code with Prettier
+npm run test     # Run Vitest unit tests (38 tests)
 ```
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 src/
@@ -58,7 +60,7 @@ src/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Node.js + Express 5** - Web framework
 - **TypeScript** - Type-safe JavaScript
@@ -73,7 +75,7 @@ src/
 
 ---
 
-## 🏗️ Architecture Patterns
+## Architecture Patterns
 
 ### Domain-Driven Modular Design
 Each module follows a consistent structure for **separation of concerns**:
@@ -117,7 +119,7 @@ WebSocket handlers for:
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 Create `.env` file in `server/` directory:
 
@@ -151,7 +153,7 @@ GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 
 ---
 
-## 🔐 Authentication Flow
+## Authentication Flow
 
 1. **Signup/Login**: Username + Email + Password → Bcrypt hash → MongoDB
 2. **Token Generation**: Access JWT (15m) + Refresh token (7d, httpOnly cookie)
@@ -162,7 +164,7 @@ GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 
 ---
 
-## 🧪 Development Guidelines
+## Development Guidelines
 
 ### Module Organization
 Each feature is self-contained:
@@ -189,7 +191,7 @@ Each feature is self-contained:
 
 ---
 
-## 🚨 Common Issues
+## Common Issues
 
 - **MongoDB Connection Failed**: Verify `MONGO_URI` is correct and MongoDB is running
 - **JWT Token Expired**: Frontend should handle 401 and refresh automatically
@@ -199,7 +201,7 @@ Each feature is self-contained:
 
 ---
 
-## 📦 Key Dependencies
+## Key Dependencies
 
 ### Core
 - `express` - Web framework
@@ -225,7 +227,7 @@ Each feature is self-contained:
 
 ---
 
-## 🔌 Core API Endpoints
+## Core API Endpoints
 
 ### Auth
 - `POST /api/auth/register`
@@ -253,19 +255,19 @@ For complete API list, see [main README](../README.md#-core-api-endpoints)
 
 ---
 
-## 🧰 Scripts
+## Scripts
 
 From `server/package.json`:
 
-- `npm run dev` — Runs with nodemon (watches JS files)
-- `npm run dev:tsx` — **Recommended** - Runs with tsx for TypeScript watch mode
+- `npm run dev` — Runs dev server using `tsx watch` for automatic hot-reload
 - `npm run build` — Compiles TypeScript to JavaScript (`dist/` folder)
 - `npm start` — Runs compiled server from `dist/server.js`
-- `npm run format` — Format code with Prettier
+- `npm run format` — Formats code with Prettier
+- `npm run test` — Runs the Vitest test suite (38 tests covering budget split logic and auth token utilities)
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
 - Main project README: `../README.md`
 - Frontend documentation: `../client/README.md`
@@ -273,7 +275,7 @@ From `server/package.json`:
 
 ---
 
-## 📝 Notes
+## Notes
 
 - Server uses ES modules (`"type": "module"` in package.json)
 - TypeScript strict mode enabled
