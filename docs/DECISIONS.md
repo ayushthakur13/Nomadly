@@ -145,3 +145,21 @@ String message checking. String matching is prone to typos and lacks compiler ch
 **Consequences:**
 * **Pros**: Increases type safety.
 * **Cons**: Requires coding custom classes for new domains.
+
+---
+
+## Known Deferred Refactoring: Missing Auth Client Service Wrapper
+**Status:** Accepted (Deferred)
+
+**Context:**
+Unlike all other client modules, the `auth` module does not have a separate API service class wrapper in the `services/` directory. Instead, the axios endpoint calls are inlined directly within `client/src/features/auth/store/authThunks.ts`.
+
+**Decision:**
+Accept the current inlined implementation as a known deferred technical debt. Standardize it into a dedicated `auth.service.ts` file in the services directory when convenient during future auth/profile updates.
+
+**Alternatives considered:**
+Refactoring immediately. While low risk, immediate refactoring was deferred to prioritize core feature cleaning and alignment.
+
+**Consequences:**
+* **Pros**: Prevents scope creep.
+* **Cons**: Keeps a small inconsistency in API request layering active in the frontend.
