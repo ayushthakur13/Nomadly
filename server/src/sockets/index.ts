@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
-import Message from "../modules/trips/chat/message.model";
-import User from "../modules/users/user.model";
-import Trip from "../modules/trips/core/trip.model";
+import chatService from "../modules/trips/chat/chat.service";
+import userService from "../modules/users/user.service";
+import tripService from "../modules/trips/core/trip.service";
 import { isTripCreator, isTripMember } from "../modules/trips/members/member.utils";
 import { verifyAccessToken } from "../modules/auth/utils/jwt";
 
@@ -49,7 +49,7 @@ export default function initSocket(io: Server): void {
       }
 
       try {
-        const trip = await Trip.findById(tripId).lean();
+        const trip = await tripService.findTripById(tripId);
         if (!trip) {
           socket.emit("error", { message: "Trip not found" });
           return;
@@ -89,7 +89,7 @@ export default function initSocket(io: Server): void {
       }
 
       try {
-        const trip = await Trip.findById(tripId).lean();
+        const trip = await tripService.findTripById(tripId);
         if (!trip) {
           socket.emit("error", { message: "Trip not found" });
           return;
@@ -102,14 +102,10 @@ export default function initSocket(io: Server): void {
         }
 
         // Save to DB
-        const message = await Message.create({
-          trip: tripId,
-          sender: userId,
-          content: content.trim(),
-        });
+        const message = await chatService.saveMessage(tripId, userId, content);
 
         // Get sender profile details
-        const sender = await User.findById(userId).select("username profilePicUrl").lean();
+        const sender = await userService.getUserById(userId);
 
         // Broadcast to room
         io.to(tripId).emit("receiveMessage", {

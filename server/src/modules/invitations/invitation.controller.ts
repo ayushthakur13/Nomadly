@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
-import User from '../users/user.model';
+import userService from '../users/user.service';
 import invitationService from './invitation.service';
 import { asyncHandler } from '../../shared';
 import { InvitationStatus } from './invitation.model';
@@ -50,7 +50,7 @@ class InvitationController {
 
     // Resolve username to userId if provided
     if (!resolvedUserId && invitedUsername) {
-      const targetUser = await User.findOne({ username: invitedUsername });
+      const targetUser = await userService.getUserByUsername(invitedUsername);
       if (!targetUser) {
         res.status(404).json({ success: false, message: 'User not found' });
         return;

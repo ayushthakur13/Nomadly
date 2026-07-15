@@ -113,7 +113,7 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="https://github.com/ayushthakur13/"
+                  href="https://github.com/ayush-prataps/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors inline-flex items-center gap-1"
@@ -179,7 +179,7 @@ const Footer = () => {
             {/* Social Links - Minimal & Professional */}
             <div className="flex items-center gap-4">
               <a
-                href="https://www.linkedin.com/in/ayush-pratap-singh-8b8958284/"
+                href="https://www.linkedin.com/in/ayush-prataps/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-500 hover:text-white transition-colors"
@@ -198,7 +198,7 @@ const Footer = () => {
                 </svg>
               </a>
               <a
-                href="https://github.com/ayushthakur13/"
+                href="https://github.com/ayush-prataps/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-500 hover:text-white transition-colors"

@@ -9,7 +9,7 @@ import { loginSuccess, setInitialized } from './features/auth/store/authSlice';
 import api, { setAccessToken, initializeTokenSync } from './services/api';
 import { getCsrfToken } from './services/csrf';
 import { PublicNavbar, AppLayout } from '@/ui/';
-import { Explore, ExploreTrip } from './pages';
+import { Explore, ExploreTrip } from './features/explore';
 import { LandingPage } from './features/landing'
 import { DashboardPage } from './features/dashboard';
 import { ProfilePage } from './features/profile'

@@ -1,10 +1,16 @@
 # Nomadly
 
-<!-- Live demo link to be added post-deployment -->
-
 > Project status: In Progress (actively developed). Many features are implemented; others are planned or partially available. See checklists below.
 
 Nomadly is a modern full-stack travel planning platform designed to simplify group travel. It centralizes trip organization, itineraries, task assignments, budgeting, and real-time collaboration. Built with TypeScript, React, Express, and MongoDB, the project is designed for robust group travel management.
+
+---
+
+## Architecture & Governance
+
+This repository adheres to a strict architectural contract. Before contributing or modifying the codebase, please review the following governance guidelines:
+* [Architecture Contract](docs/ARCHITECTURE.md) — Tech stack, folder boundaries, state patterns, API layers, validations, naming, and error guidelines.
+* [Architecture Decisions Log](docs/DECISIONS.md) — The ADR (Architecture Decision Record) tracking all past and accepted design selections.
 
 ---
 
@@ -233,14 +239,19 @@ await execute(async () => {
 - **React Hooks**: Operation state (loading, errors)
 - **Local State**: UI state (modals, pickers, form focus)
 
+### Shared Layer: Monorepo Domain Types
+Core domain models, API contract types, request/response DTOs, and shared enums (e.g., `TripCategory`, `TripLifecycleStatus`) are located in a root-level `shared/` folder:
+- **Single Source of Truth**: Prevents duplicating interfaces and enum definitions between the client and server codebases.
+- **Path Resolution**: Resolved dynamically using TS path mappings (`@shared/*`) in development, and compiled cleanly via `esbuild` for production distributions.
+
 ---
 
 ## Running Locally
 
 ### Backend Setup
 ```bash
-git clone https://github.com/ayushthakur13/nomadly.git
-cd nomadly/server
+git clone https://github.com/ayush-prataps/Nomadly.git
+cd Nomadly/server
 npm install
 cp .env.example .env
 npm run dev
@@ -260,26 +271,6 @@ To run backend unit tests:
 cd ../server
 npm run test
 ```
-
-**Dependencies installed:**
-- React 19 + TypeScript
-- Tailwind CSS for styling
-- Redux Toolkit for state management
-- React Hook Form for form handling
-- Axios for HTTP requests
-- react-hot-toast for notifications
-- Mapbox GL for map visualization
-- Vite as build tool
-
-The client expects `VITE_API_URL` to point to your server (default `http://localhost:4444/api`). The server sets an httpOnly refresh token cookie and the client keeps the access token in memory, using a CSRF token for refresh calls.
-
-**Build optimization:** Uses Vite for fast development and optimized production builds with automatic code splitting.
-
-### Two-terminal workflow
-- Terminal A (server): `cd server && npm run dev`
-- Terminal B (client): `cd client && npm run dev`
-
-Optionally, create a root-level script with `concurrently` to run both at once.
 
 ---
 

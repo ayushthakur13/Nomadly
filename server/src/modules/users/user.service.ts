@@ -43,6 +43,10 @@ export async function getUserById(userId: string) {
   return user;
 }
 
+export async function getUserByUsername(username: string) {
+  return await User.findOne({ username });
+}
+
 export async function updateUserProfile(userId: string, updates: UpdateProfileDTO) {
   const user = await User.findById(userId);
   
@@ -157,6 +161,7 @@ export async function changeUserPassword(userId: string, payload: { currentPassw
 
 export default {
   getUserById,
+  getUserByUsername,
   updateUserProfile,
   updateUserAvatar,
   deleteUserAvatar,

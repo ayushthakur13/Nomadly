@@ -525,6 +525,11 @@ class TripService {
       .populate('createdBy', 'username name profilePicUrl')
       .lean();
   }
+
+  async findTripById(tripId: string): Promise<ITrip | null> {
+    if (!Types.ObjectId.isValid(tripId)) return null;
+    return await Trip.findById(tripId).lean();
+  }
 }
 
 export default new TripService();

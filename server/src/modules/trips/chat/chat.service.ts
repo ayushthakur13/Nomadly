@@ -52,6 +52,20 @@ class ChatService {
   async deleteTripMessages(tripId: string): Promise<void> {
     await Message.deleteMany({ trip: new Types.ObjectId(tripId) });
   }
+
+  /**
+   * Save a new message
+   */
+  async saveMessage(tripId: string, senderId: string, content: string): Promise<IMessage> {
+    if (!Types.ObjectId.isValid(tripId)) {
+      throw new Error('Invalid trip ID');
+    }
+    return await Message.create({
+      trip: new Types.ObjectId(tripId),
+      sender: new Types.ObjectId(senderId),
+      content: content.trim(),
+    });
+  }
 }
 
 export default new ChatService();
