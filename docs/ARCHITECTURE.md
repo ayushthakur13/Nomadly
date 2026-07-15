@@ -146,3 +146,21 @@ Modules in Nomadly are classified under two stability tiers:
 | :--- | :--- | :--- | :--- |
 | **STABLE** | High | Architectural changes require a formal ADR entry in DECISIONS.md before execution. | `auth`, `users`, `invitations`, `trips/core`, `trips/budget`, `trips/chat`, `trips/tasks`, `trips/accommodations` |
 | **EXPERIMENTAL** | Low | Fast prototyping is allowed. ADR only required when promoting to STABLE. | `explore`, `trips/memories`, `maps` |
+
+---
+
+## 13. Roadmap Prioritization & AI Philosophy
+
+To establish a highly stable core, all development, refactoring, and feature additions must adhere to the following sequence and design constraints:
+
+### Backend-First Prioritization Sequence
+We prioritize foundational stability over front-facing features. The development sequence is:
+1. **Authentication & Authorization**: Hardening user sessions, route guards, token rotators, and member privilege controls.
+2. **Robust Backend Architecture**: Enforcing schema validators, structured logging integration, and centralized framework error mapping.
+3. **API Design & Documentation**: Standardizing request/response formats and generating OpenAPI specs.
+4. **Real-time Collaboration**: Integrating WebSocket event architectures where it actively benefits user cooperation.
+5. **Contextual AI Features**: Deeply integrating AI solutions *only* after items 1-4 are solid. "Bolted-on" homepage AI chatbots are strictly forbidden.
+
+### AI Integration Philosophy
+* **AI as a Backend Dependency**: AI engines, prompts, and Large Language Model wrappers must be treated as regular backend integrations (similar to email dispatchers or maps APIs).
+* **Rule**: AI must not dictate the core database schema or control application flow. The core business rules and relational schemas must remain independent, consuming AI outputs as external data payloads.

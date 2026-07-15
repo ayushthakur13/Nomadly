@@ -163,3 +163,23 @@ Refactoring immediately. While low risk, immediate refactoring was deferred to p
 **Consequences:**
 * **Pros**: Prevents scope creep.
 * **Cons**: Keeps a small inconsistency in API request layering active in the frontend.
+
+---
+
+## Roadmap Prioritization Sequence and AI Design Philosophy
+**Status:** Accepted
+
+**Context:**
+Modern full-stack systems often suffer from architectural instability when high-level features (like AI assistants or real-time features) are built on top of weak access control, raw database layers, or unstructured API interfaces. There is also a risk of treating AI as the center of the application rather than an API-driven utility.
+
+**Decision:**
+1. Enforce a strict "Backend-First" priority roadmap: hardening Authentication & Authorization -> Robust Backend (validation, logging, error handling) -> API Design/Docs -> Sockets -> AI.
+2. Freeze deep AI integrations until the backend is fully stabilized.
+3. Treat AI integrations as simple backend service dependencies, separating core database/flow rules from dynamic LLM outputs.
+
+**Alternatives considered:**
+Integrating AI early to showcase a prototype. Rejected because it leads to technical debt, security gaps, and unstable database schema dependencies.
+
+**Consequences:**
+* **Pros**: Guarantees a highly secure, stable, and well-designed core that can scale reliably.
+* **Cons**: Delays public AI feature releases until foundational architecture requirements are met.
