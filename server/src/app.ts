@@ -133,9 +133,13 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     }
 
     // Default error
-    res.status(err.statusCode || 500).json({
+    const statusCode = err.statusCode || 500;
+    const isProd = process.env.NODE_ENV === 'production';
+    res.status(statusCode).json({
         success: false,
-        message: err.message || 'Internal server error'
+        message: (isProd && statusCode === 500) 
+            ? 'Internal server error' 
+            : (err.message || 'Internal server error')
     });
 });
 
