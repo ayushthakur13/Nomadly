@@ -11,9 +11,6 @@ import memoryService from '../memories/memory.service';
 import chatService from '../chat/chat.service';
 import accommodationService from '../accommodations/accommodation.service';
 
-
-
-
 class TripService {
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
     if (!data.destinationLocation) {
@@ -249,6 +246,17 @@ class TripService {
 
     if (!canModifyTripResources(trip, userId)) {
       throw new Error('INSUFFICIENT_PERMISSIONS');
+    }
+
+    if (updates.category === 'solo') {
+      const hasOtherMembers = trip.members && trip.members.filter((m: any) => {
+        const mId = m.userId?.toString();
+        const cId = trip.createdBy?.toString();
+        return mId && cId && mId !== cId;
+      }).length > 0;
+      if (hasOtherMembers) {
+        throw new Error('Cannot change trip category to Solo while there are other members in the trip.');
+      }
     }
 
     if (updates.destinationLocation) {

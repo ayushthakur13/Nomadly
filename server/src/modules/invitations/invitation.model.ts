@@ -4,7 +4,6 @@ export enum InvitationStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
-  EXPIRED = 'expired',
   CANCELLED = 'cancelled'
 }
 
@@ -66,7 +65,7 @@ const invitationSchema = new Schema<IInvitation>(
     expiresAt: {
       type: Date,
       required: true,
-      index: true
+      index: { expireAfterSeconds: 0 }
     },
     respondedAt: {
       type: Date
@@ -92,14 +91,14 @@ invitationSchema.pre('save', function(next) {
   }
 });
 
-// Prevent modification of accepted/rejected/expired invitations
+// Prevent modification of accepted/rejected invitations
 invitationSchema.pre('save', function(next) {
   if (this.isModified('status') && !this.isNew) {
-    const immutableStatuses = [InvitationStatus.ACCEPTED, InvitationStatus.REJECTED, InvitationStatus.EXPIRED];
+    const immutableStatuses = [InvitationStatus.ACCEPTED, InvitationStatus.REJECTED];
     if (immutableStatuses.includes(this.status as InvitationStatus)) {
       const oldStatus = (this as any)._original?.status;
       if (oldStatus && immutableStatuses.includes(oldStatus)) {
-        next(new Error('Cannot modify an invitation that is already accepted, rejected, or expired'));
+        next(new Error('Cannot modify an invitation that is already accepted or rejected'));
         return;
       }
     }

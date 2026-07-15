@@ -177,17 +177,23 @@ class InvitationService {
       throw new Error('This invitation is not for you');
     }
 
-    // Update invitation status
-    invitation.status = InvitationStatus.ACCEPTED;
-    invitation.respondedAt = new Date();
-    await invitation.save();
-
     // Add member to trip using member service
     const trip = await memberService.addMemberToTrip(
       invitation.tripId,
       userObjectId,
       invitation.invitedBy
     );
+
+    // Auto-delete invitation on accept
+    try {
+      await Invitation.findByIdAndDelete(invitation._id);
+    } catch (err) {
+      console.error('[InvitationService] Failed to clean up accepted invitation:', err);
+    }
+
+    // Set status to ACCEPTED in memory so response payload remains consistent
+    invitation.status = InvitationStatus.ACCEPTED;
+    invitation.respondedAt = new Date();
 
     return {
       invitation: invitation as any,
@@ -227,10 +233,12 @@ class InvitationService {
       throw new Error('This invitation is not for you');
     }
 
-    // Update invitation status
+    // Auto-delete invitation on reject
+    await Invitation.findByIdAndDelete(invitation._id);
+
+    // Set status to REJECTED in memory so response payload remains consistent
     invitation.status = InvitationStatus.REJECTED;
     invitation.respondedAt = new Date();
-    await invitation.save();
 
     return invitation;
   }

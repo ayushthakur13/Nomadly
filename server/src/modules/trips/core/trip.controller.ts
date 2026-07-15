@@ -222,7 +222,7 @@ class TripController {
         });
         return;
       }
-      if (error.message.includes('coordinates')) {
+      if (error.message.includes('coordinates') || error.message.includes('Solo')) {
         res.status(400).json({ success: false, message: error.message });
         return;
       }

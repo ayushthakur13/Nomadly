@@ -251,7 +251,7 @@ CLOUDINARY_API_SECRET
 - **Accommodations**: tripId
 - **Memories**: tripId, tripId+createdAt
 - **Messages**: trip+createdAt
-- **Invitations**: tripId+status, invitedUserId+status, invitedEmail+status, token+status, expiresAt
+- **Invitations**: tripId+status, invitedUserId+status, invitedEmail+status, token+status, expiresAt (TTL index)
 
 ---
 

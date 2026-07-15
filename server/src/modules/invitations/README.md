@@ -12,10 +12,10 @@ Trip member invitations supporting both existing users and email-based invites. 
   invitedBy: ObjectId           // Inviter (trip creator)
   invitedUserId: ObjectId      // Invited user ID (if already registered)
   invitedEmail: string         // Invited email (for non-registered users)
-  status: InvitationStatus     // PENDING, ACCEPTED, REJECTED, EXPIRED, CANCELLED
+  status: InvitationStatus     // PENDING, ACCEPTED, REJECTED, CANCELLED
   message: string              // Invitation message (max 500 chars)
   token: string               // Unique token for email-based invites
-  expiresAt: Date             // Expiration timestamp
+  expiresAt: Date             // Expiration timestamp (TTL index)
   respondedAt: Date           // When user responded
   createdAt: Date
   updatedAt: Date
@@ -29,9 +29,8 @@ Trip member invitations supporting both existing users and email-based invites. 
 ```typescript
 enum InvitationStatus {
   PENDING = 'pending'      // Awaiting response
-  ACCEPTED = 'accepted'    // User accepted, added to members
-  REJECTED = 'rejected'    // User declined
-  EXPIRED = 'expired'      // Expiration passed
+  ACCEPTED = 'accepted'    // User accepted (in-memory state only, deleted from DB)
+  REJECTED = 'rejected'    // User declined (in-memory state only, deleted from DB)
   CANCELLED = 'cancelled'  // Cancelled by inviter
 }
 ```
@@ -45,7 +44,7 @@ enum InvitationStatus {
 - invitedUserId: 1, status: 1   (user's invitation list)
 - invitedEmail: 1, status: 1    (for email-based lookup)
 - token: 1, status: 1           (validate invitation token)
-- expiresAt: 1                  (for cleanup/expiration)
+- expiresAt: 1                  (TTL index with expireAfterSeconds: 0 for auto-deletion)
 ```
 
 ---
@@ -105,9 +104,6 @@ getInvitationsByUser(userId: string): Promise<Invitation[]>
 // Get user's received invitations
 // Filter by status and sort by recency
 
-expireStaleInvitations(): Promise<void>
-// Batch cleanup for cron jobs
-// Update invitations past expiresAt to EXPIRED status
 ```
 
 ---
@@ -138,9 +134,9 @@ validateInvitationRecipient(userId?: string, email?: string): void
 2. Unique token generated (though not used for registered users)
 3. Invitation stored in PENDING status
 4. User receives notification (via in-app or email)
-5. User accepts via UI button → `PATCH /accept`
+5. User accepts via UI button → `POST /accept`
 6. Service adds user to trip members
-7. Invitation marked ACCEPTED
+7. Invitation document deleted immediately from database
 
 ### For Non-Registered Users
 
@@ -150,7 +146,7 @@ validateInvitationRecipient(userId?: string, email?: string): void
 4. Non-registered user registers with token
 5. On successful registration, invitation accepted automatically
 6. User added to trip members
-7. Invitation marked ACCEPTED
+7. Invitation document deleted automatically from database
 
 ---
 
@@ -177,38 +173,20 @@ validateInvitationRecipient(userId?: string, email?: string): void
    - Backend finds invitation by token
    - Validates: status=PENDING, not expired, email matches
    - Creates new user
-   - Accepts invitation automatically
+   - Deletes invitation automatically
    - Adds user to trip members
 
 5. **Or Existing User**:
-   - Accepts invitation via UI
-   - Backend validates: status=PENDING, user not already member
-   - Adds to trip members
-   - Marks as ACCEPTED
+    - Accepts invitation via UI
+    - Backend validates: status=PENDING, user not already member
+    - Adds to trip members
+    - Deletes invitation document from database
 
 ---
 
-## Background Jobs
+## Background Maintenance
 
-**File**: `jobs/` (implied structure)
-
-Cron jobs for maintenance:
-
-```typescript
-expireStaleInvitations()
-// Run daily
-// Find invitations where expiresAt < now
-// Update status to EXPIRED
-
-sendReminderEmails()
-// Run weekly
-// Find PENDING invitations created 3+ days ago
-// Send reminder email to recipients
-
-cleanupExpiredInvitations()
-// Run monthly
-// Delete invitations with EXPIRED or CANCELLED status older than 30 days
-```
+Instead of application-level cron jobs, the invitations module relies on a MongoDB TTL index on the `expiresAt` field (`expireAfterSeconds: 0`) to automatically remove expired invitations from the database.
 
 ---
 
