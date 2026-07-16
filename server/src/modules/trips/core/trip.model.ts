@@ -56,6 +56,8 @@ export interface ITrip extends Document {
   engagement: IEngagement;
   budgetSummary?: { total: number; spent: number; };
   stayPermissions?: { allowMemberStayEdits: boolean };
+  memoriesPublic: boolean;
+  likeCount: number;
   createdAt: Date;
   updatedAt: Date;
   timeStatus?: 'upcoming' | 'ongoing' | 'completed';
@@ -126,6 +128,8 @@ const tripSchema = new Schema<ITrip>({
   tags: [{ type: String }],
   isPublic: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
+  memoriesPublic: { type: Boolean, default: false },
+  likeCount: { type: Number, default: 0, min: 0 },
   lifecycleStatus: { type: String, enum: Object.values(TripLifecycleStatus), default: TripLifecycleStatus.DRAFT },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   members: { type: [TripMemberSchema], default: [] },
@@ -142,6 +146,7 @@ tripSchema.index({ startDate: 1 });
 tripSchema.index({ 'destinationLocation.name': 1 });
 tripSchema.index({ lifecycleStatus: 1 });
 tripSchema.index({ isPublic: 1 });
+tripSchema.index({ isPublic: 1, createdAt: -1 });
 tripSchema.index({ 'engagement.views': -1 });
 
 tripSchema.pre('save', function(next) {

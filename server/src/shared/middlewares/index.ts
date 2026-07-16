@@ -1,3 +1,3 @@
-export { default as authMiddleware } from './auth.middleware';
+export { default as authMiddleware, optionalAuthMiddleware } from './auth.middleware';
 export * from './multer';
 export * from './rateLimit.middleware';

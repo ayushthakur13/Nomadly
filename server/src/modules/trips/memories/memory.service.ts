@@ -8,7 +8,7 @@ class MemoryService {
   /**
    * Get all memories for a trip
    */
-  async getMemoriesByTripId(tripId: string, userId: string): Promise<IMemory[]> {
+  async getMemoriesByTripId(tripId: string, userId?: string): Promise<IMemory[]> {
     if (!Types.ObjectId.isValid(tripId)) {
       throw new Error('Invalid trip ID');
     }
@@ -19,10 +19,12 @@ class MemoryService {
     }
 
     // Check permissions: if trip is private, user must be owner or member
-    const isOwner = isTripCreator(trip, userId);
-    const isMember = isTripMember(trip, userId);
+    const isOwner = userId ? isTripCreator(trip, userId) : false;
+    const isMember = userId ? isTripMember(trip, userId) : false;
 
-    if (!trip.isPublic && !isOwner && !isMember) {
+    const isPubliclyViewable = trip.isPublic && (trip as any).memoriesPublic;
+
+    if (!isPubliclyViewable && !isOwner && !isMember) {
       throw new Error('Unauthorized to view memories');
     }
 

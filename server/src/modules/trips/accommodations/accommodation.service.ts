@@ -5,7 +5,7 @@ import { isTripCreator, isTripMember } from "../members/member.utils";
 import { CreateAccommodationDTO, UpdateAccommodationDTO } from "../../../../../shared/types";
 
 class AccommodationService {
-  async getAccommodationsByTripId(tripId: string, userId: string): Promise<IAccommodation[]> {
+  async getAccommodationsByTripId(tripId: string, userId?: string): Promise<IAccommodation[]> {
     if (!Types.ObjectId.isValid(tripId)) {
       throw new Error("Invalid trip ID");
     }
@@ -15,8 +15,10 @@ class AccommodationService {
       throw new Error("Trip not found");
     }
 
-    const member = trip.members.some((member: any) => member.userId.toString() === userId.toString());
-    if (!member) {
+    const isMember = userId ? trip.members.some((member: any) => member.userId.toString() === userId.toString()) : false;
+    const isOwner = userId ? isTripCreator(trip, userId) : false;
+
+    if (!trip.isPublic && !isMember && !isOwner) {
       throw new Error("Unauthorized to view accommodations");
     }
 

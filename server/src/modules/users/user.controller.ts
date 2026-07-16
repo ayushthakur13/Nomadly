@@ -1,5 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import userService, { UserError, USER_ERRORS } from './user.service';
+import tripService from '../trips/core/trip.service';
+
+function publicProfileUser(u: any, publicTripCount: number) {
+  if (!u) return null;
+  return {
+    username: u.username,
+    name: u.name,
+    profilePicUrl: u.profilePicUrl,
+    bio: u.bio || '',
+    publicTripCount
+  };
+}
 
 function publicUser(u: any) {
   if (!u) return null;
@@ -249,11 +261,42 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function getPublicProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { username } = req.params;
+    if (!username) {
+      res.status(400).json({ success: false, message: 'Username is required' });
+      return;
+    }
+
+    const user = await userService.getUserByUsername(username);
+    if (!user || !user.isPublic) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    const count = await tripService.countPublicCreatedTripsByUserId(user.id);
+    const trips = await tripService.getPublicCreatedTripsByUserId(user.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Public profile retrieved successfully',
+      data: {
+        user: publicProfileUser(user, count),
+        trips
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export default {
   getProfile,
   updateProfile,
   uploadAvatar,
   deleteAvatar,
   changeUsername,
-  changePassword
+  changePassword,
+  getPublicProfile
 };

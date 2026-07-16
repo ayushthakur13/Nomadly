@@ -21,6 +21,7 @@ import { budgetRouter, tripExpenseRouter, expenseItemRouter } from './modules/tr
 import { accommodationRouter, accommodationItemRouter } from "./modules/trips/accommodations";
 import { memoryRouter, memoryItemRouter } from './modules/trips/memories';
 import { chatRouter } from './modules/trips/chat';
+import { exploreRouter } from './modules/explore';
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/trips', tripRouter);
+app.use('/api/explore', exploreRouter);
 app.use('/api/trips/:tripId/destinations', destinationRouter);
 app.use('/api/destinations', destinationItemRouter);
 app.use('/api/trips/:tripId/members', memberRoutes);

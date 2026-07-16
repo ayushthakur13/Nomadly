@@ -1,8 +1,11 @@
 import express from 'express';
 import ctrl from './user.controller';
 import { authMiddleware, uploadProfile } from '@shared/middlewares';
+import { asyncHandler } from '@shared/utils';
 
 const router = express.Router();
+
+router.get('/public/:username', asyncHandler(ctrl.getPublicProfile));
 
 router.use(authMiddleware);
 

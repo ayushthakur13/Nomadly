@@ -1,13 +1,14 @@
 import express from "express";
 import accommodationController from "./accommodation.controller";
-import { authMiddleware } from "@shared/middlewares";
+import { authMiddleware, optionalAuthMiddleware } from "@shared/middlewares";
 import { asyncHandler } from "@shared/utils";
 
 const router = express.Router({ mergeParams: true });
 
+router.get("/", optionalAuthMiddleware, asyncHandler(accommodationController.getAccommodations.bind(accommodationController)));
+
 router.use(authMiddleware);
 
-router.get("/", asyncHandler(accommodationController.getAccommodations.bind(accommodationController)));
 router.post("/", asyncHandler(accommodationController.createAccommodation.bind(accommodationController)));
 
 export const accommodationItemRouter = express.Router();

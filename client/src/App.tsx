@@ -12,8 +12,8 @@ import { PublicNavbar, AppLayout } from '@/ui/';
 import { Explore, ExploreTrip } from './features/explore';
 import { LandingPage } from './features/landing'
 import { DashboardPage } from './features/dashboard';
-import { ProfilePage } from './features/profile'
-import { MyTripsPage, CreateTripPage, TripWorkspacePage } from './features/trips/';
+import { ProfilePage, PublicProfilePage } from './features/profile'
+import { MyTripsPage, CreateTripPage, TripWorkspacePage, SavedTripsPage } from './features/trips/';
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
   <>
@@ -134,6 +134,17 @@ function AppContent() {
         />
 
         <Route
+          path="/trips/saved"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SavedTripsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/trips/new"
           element={
             <ProtectedRoute>
@@ -162,6 +173,15 @@ function AppContent() {
                 <ProfilePage />
               </AppLayout>
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile/:username"
+          element={
+            <ConditionalLayout>
+              <PublicProfilePage />
+            </ConditionalLayout>
           }
         />
       </Routes>

@@ -17,11 +17,6 @@ class AccommodationController {
       const { tripId } = req.params;
       const userId = req.user?.id;
 
-      if (!userId) {
-        res.status(401).json({ success: false, message: "Unauthorized" });
-        return;
-      }
-
       if (!tripId) {
         res.status(400).json({ success: false, message: "Trip ID is required" });
         return;

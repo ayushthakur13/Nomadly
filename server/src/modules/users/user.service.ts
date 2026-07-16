@@ -1,4 +1,5 @@
 import User from './user.model';
+import Trip from '../trips/core/trip.model';
 import { deleteFromCloudinary } from '@shared/utils';
 
 export const USER_ERRORS = {
@@ -71,7 +72,15 @@ export async function updateUserProfile(userId: string, updates: UpdateProfileDT
   }
 
   if (updates.isPublic !== undefined) {
-    user.isPublic = Boolean(updates.isPublic);
+    const nextIsPublic = Boolean(updates.isPublic);
+    if (user.isPublic && !nextIsPublic) {
+      // Transition all user's published trips to drafts automatically
+      await Trip.updateMany(
+        { createdBy: user._id, isPublic: true },
+        { isPublic: false, lifecycleStatus: 'draft' }
+      );
+    }
+    user.isPublic = nextIsPublic;
   }
 
   await user.save();

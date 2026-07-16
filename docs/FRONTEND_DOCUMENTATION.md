@@ -620,6 +620,11 @@ npm run dev
 4. Use `extractApiError` for error handling
 5. Export from service file
 
+**Development Guardrails**:
+- **Inline API requests**: Direct `api.get` / `api.post` or Axios calls inside React components/pages are strictly prohibited. You must use the `services/` layer functions.
+- **Icons Policy**: Direct imports from `lucide-react` inside features or pages are forbidden. Always import the central `Icon` component from `@/ui` and map any new icons in `client/src/ui/icon/Icon.tsx`.
+- **Component File Length**: No single React component or page file should exceed **300 lines**. Separate different views, sub-layouts, or complex tabs into dedicated sub-components within the feature's `components/` directory.
+
 **Styling Guidelines**:
 - Use Tailwind utilities
 - Define custom colors as CSS variables

@@ -67,6 +67,8 @@ export interface Trip {
   engagement: TripEngagement;
   budgetSummary?: TripBudgetSummary;
   stayPermissions?: TripStayPermissions;
+  memoriesPublic?: boolean;
+  likeCount?: number;
   createdAt: string;
   updatedAt: string;
   // Virtual fields computed by backend
@@ -88,6 +90,7 @@ export interface CreateTripDTO {
   category?: TripCategory | string;
   tags?: string[];
   isPublic?: boolean;
+  memoriesPublic?: boolean;
   stayPermissions?: Partial<TripStayPermissions>;
 }
 
@@ -104,6 +107,7 @@ export interface UpdateTripDTO {
   category?: TripCategory | string;
   tags?: string[];
   isPublic?: boolean;
+  memoriesPublic?: boolean;
   lifecycleStatus?: TripLifecycleStatus;
   stayPermissions?: Partial<TripStayPermissions>;
 }

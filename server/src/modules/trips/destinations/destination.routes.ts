@@ -1,18 +1,19 @@
 import express from 'express';
 import destinationController from './destination.controller';
-import { authMiddleware, uploadDestination } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware, uploadDestination } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
 
 const router = express.Router({ mergeParams: true });
 
-// All routes require authentication
-router.use(authMiddleware);
-
 // Trip-scoped routes (mounted at /trips/:tripId/destinations)
 router.get(
   '/',
+  optionalAuthMiddleware,
   asyncHandler(destinationController.getDestinations.bind(destinationController))
 );
+
+// All other routes require authentication
+router.use(authMiddleware);
 
 router.post(
   '/',

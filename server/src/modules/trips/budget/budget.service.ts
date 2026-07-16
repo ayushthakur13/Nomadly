@@ -649,6 +649,44 @@ class BudgetService {
       await this.syncTripBudgetSummary(tripId.toString());
     }
   }
+
+  async getPublicBudgetSummary(tripId: string): Promise<any> {
+    ValidationUtils.validateObjectId(tripId, 'trip ID');
+
+    const trip = await Trip.findById(tripId).lean();
+    if (!trip) throw new Error('Trip not found');
+    if (!trip.isPublic) {
+      throw new Error('Unauthorized to view budget');
+    }
+
+    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) }).lean();
+    if (!budget) throw new Error('Budget not found');
+
+    const totalPlanned = budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0);
+
+    const totalSpentAgg = await Expense.aggregate([
+      { $match: { tripId: new Types.ObjectId(tripId) } },
+      { $group: { _id: '$tripId', total: { $sum: '$amount' } } }
+    ]);
+    const totalSpent = totalSpentAgg[0]?.total || 0;
+
+    const categoryBreakdownAgg = await Expense.aggregate([
+      { $match: { tripId: new Types.ObjectId(tripId) } },
+      { $group: { _id: '$category', amount: { $sum: '$amount' } } }
+    ]);
+
+    const categoryBreakdown = categoryBreakdownAgg.map(item => ({
+      category: item._id || 'Uncategorized',
+      amount: FinancialUtils.normalizeMoney(item.amount)
+    }));
+
+    return {
+      totalPlanned: FinancialUtils.normalizeMoney(totalPlanned),
+      totalSpent: FinancialUtils.normalizeMoney(totalSpent),
+      categoryBreakdown,
+      baseCurrency: budget.baseCurrency
+    };
+  }
 }
 
 export default new BudgetService();

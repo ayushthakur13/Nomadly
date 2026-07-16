@@ -20,7 +20,7 @@ export const usePublishToggle = (tripId: string, isPublic: boolean) => {
         toast.success('Trip published successfully');
       }
     } catch (error: any) {
-      const errorMsg = extractApiError(error, `Failed to ${isPublic ? 'unpublish' : 'publish'} trip`);
+      const errorMsg = typeof error === 'string' ? error : extractApiError(error, `Failed to ${isPublic ? 'unpublish' : 'publish'} trip`);
       toast.error(errorMsg);
     }
   };

@@ -1,179 +1,260 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import api from '../../services/api';
-import { useAsyncAction } from '../../hooks/useAsyncAction';
-import Footer from '../../ui/common/Footer';
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import {
+  fetchExploreFeedAPI,
+  likeTripAPI,
+  unlikeTripAPI,
+  saveTripAPI,
+  unsaveTripAPI,
+  fetchTripSocialStatusAPI
+} from "../../services/explore.service";
+import api from "../../services/api";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import Footer from "../../ui/common/Footer";
+import toast from "react-hot-toast";
+import { Icon } from "@/ui";
+import ExploreHero from "./components/ExploreHero";
+import ExploreFilters from "./components/ExploreFilters";
+import ExploreGrid from "./components/ExploreGrid";
 
-const Explore = () => {
-  const [trips, setTrips] = useState<any[]>([]);
-  const [activeCategory, setActiveCategory] = useState('');
+interface Trip {
+  _id: string;
+  tripName: string;
+  description?: string;
+  startDate: string;
+  endDate: string;
+  destinationLocation?: { name: string };
+  coverImageUrl?: string;
+  category?: string;
+  likeCount?: number;
+  createdBy: {
+    username: string;
+    name?: string;
+    profilePicUrl?: string | null;
+  };
+}
+
+export default function Explore() {
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [searchDestination, setSearchDestination] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"recent" | "most-liked">("recent");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [socialStatus, setSocialStatus] = useState<Record<string, { liked: boolean; saved: boolean }>>({});
+
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state: any) => state.auth);
-  const { execute, isLoading: loading, error } = useAsyncAction({
-    showToast: true,
-    errorMessage: 'Failed to fetch public trips'
+
+  const { execute: fetchTrips, isLoading: loading } = useAsyncAction({
+    showToast: false,
+    errorMessage: "Failed to fetch public trips"
   });
 
-  const categories = [
-    { value: 'adventure', label: '🗻 Adventure' },
-    { value: 'leisure', label: '🏖️ Leisure' },
-    { value: 'business', label: '💼 Business' },
-    { value: 'family', label: '👨‍👩‍👧‍👦 Family' },
-    { value: 'solo', label: '🧳 Solo' },
-    { value: 'couple', label: '💑 Couple' },
-    { value: 'friends', label: '👯 Friends' },
-    { value: 'backpacking', label: '🎒 Backpacking' },
-    { value: 'luxury', label: '✨ Luxury' },
-    { value: 'budget', label: '💰 Budget' },
-  ];
+  const loadTrips = useCallback((cursor: string | null = null, append = false) => {
+    fetchTrips(async () => {
+      const data = await fetchExploreFeedAPI({
+        limit: 12,
+        sortBy,
+        category: activeCategory || undefined,
+        destination: searchDestination || undefined,
+        nextCursor: cursor || undefined
+      });
+
+      const fetchedTrips = data.trips;
+      const pagination = data.pagination;
+
+      if (append) {
+        setTrips(prev => [...prev, ...fetchedTrips]);
+      } else {
+        setTrips(fetchedTrips);
+      }
+      setNextCursor(pagination.nextCursor);
+
+      // Fetch social status for loaded trips if authenticated
+      if (isAuthenticated && fetchedTrips.length > 0) {
+        fetchedTrips.forEach(async (trip: Trip) => {
+          try {
+            const status = await fetchTripSocialStatusAPI(trip._id);
+            setSocialStatus(prev => ({
+              ...prev,
+              [trip._id]: status
+            }));
+          } catch (err) {
+            console.error("Failed to fetch social status for trip:", trip._id, err);
+          }
+        });
+      }
+    });
+  }, [fetchTrips, sortBy, activeCategory, searchDestination, isAuthenticated]);
 
   useEffect(() => {
-    execute(async () => {
-      const params = new URLSearchParams();
-      if (activeCategory) params.append('category', activeCategory);
-      const response = await api.get(`/trips/public?${params.toString()}`);
-      setTrips(response.data.trips);
-    });
-  }, [activeCategory, execute]);
+    loadTrips(null, false);
+  }, [loadTrips]);
 
-  const handleTripClick = (tripId: string) => { navigate(`/explore/trips/${tripId}`); };
+  const handleLoadMore = () => {
+    if (nextCursor) {
+      loadTrips(nextCursor, true);
+    }
+  };
+
+  const handleLike = async (e: React.MouseEvent, tripId: string) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error("Please login to like trips");
+      navigate("/auth/login");
+      return;
+    }
+
+    const currentStatus = socialStatus[tripId] || { liked: false, saved: false };
+    try {
+      if (currentStatus.liked) {
+        const newCount = await unlikeTripAPI(tripId);
+        setTrips(prev => prev.map(t => t._id === tripId ? { ...t, likeCount: newCount } : t));
+        setSocialStatus(prev => ({
+          ...prev,
+          [tripId]: { ...currentStatus, liked: false }
+        }));
+        toast.success("Removed like");
+      } else {
+        const newCount = await likeTripAPI(tripId);
+        setTrips(prev => prev.map(t => t._id === tripId ? { ...t, likeCount: newCount } : t));
+        setSocialStatus(prev => ({
+          ...prev,
+          [tripId]: { ...currentStatus, liked: true }
+        }));
+        toast.success("Trip liked!");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to toggle like");
+    }
+  };
+
+  const handleSave = async (e: React.MouseEvent, tripId: string) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error("Please login to save trips");
+      navigate("/auth/login");
+      return;
+    }
+
+    const currentStatus = socialStatus[tripId] || { liked: false, saved: false };
+    try {
+      if (currentStatus.saved) {
+        await unsaveTripAPI(tripId);
+        setSocialStatus(prev => ({
+          ...prev,
+          [tripId]: { ...currentStatus, saved: false }
+        }));
+        toast.success("Removed from bookmarks");
+      } else {
+        await saveTripAPI(tripId);
+        setSocialStatus(prev => ({
+          ...prev,
+          [tripId]: { ...currentStatus, saved: true }
+        }));
+        toast.success("Saved to bookmarks!");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to toggle bookmark");
+    }
+  };
+
+  const handleClone = async (e: React.MouseEvent, tripId: string, tripName: string) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      toast.error("Please login to clone trips");
+      navigate("/auth/login");
+      return;
+    }
+
+    const confirmClone = window.confirm(`Do you want to clone the trip "${tripName}"?`);
+    if (!confirmClone) return;
+
+    try {
+      const response = await api.post(`/trips/${tripId}/clone`, {
+        newTripName: `${tripName} (Clone)`,
+        includeBudget: true
+      });
+      toast.success("Trip cloned successfully!");
+      navigate(`/trips/${response.data.data.trip._id}`);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to clone trip");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Explore Amazing Trips
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Discover and get inspired by amazing trips shared by our community of travelers.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-emerald-50/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <ExploreHero searchDestination={searchDestination} setSearchDestination={setSearchDestination} />
 
-        {/* Category Filter */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 justify-center">
-            <button
-              onClick={() => setActiveCategory('')}
-              className={`px-4 py-2 rounded-full font-medium transition-colors ${
-                activeCategory === ''
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-              }`}
-            >
-              All
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => setActiveCategory(category.value)}
-                className={`px-4 py-2 rounded-full font-medium transition-colors ${
-                  activeCategory === category.value
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <ExploreFilters
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+        />
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        {loading && trips.length === 0 && (
+          <div className="flex justify-center items-center py-24">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 rounded-full border-4 border-emerald-200"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin"></div>
+            </div>
           </div>
         )}
 
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-20">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button
-              onClick={() => setActiveCategory('')}
-              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && !error && trips.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🌎</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No trips found
-            </h3>
-            <p className="text-gray-600">
-              {activeCategory 
-                ? `No trips found in ${activeCategory} category. Try another category!`
-                : 'No public trips available at the moment. Check back later!'}
+        {!loading && trips.length === 0 && (
+          <div className="text-center bg-white rounded-3xl border border-gray-200 p-16 shadow-sm">
+            <div className="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl">
+              🗺️
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No itineraries found</h3>
+            <p className="text-gray-600 max-w-md mx-auto mb-8">
+              We couldn't find any public trips matching your filters. Try selecting another category or typing a different search query.
             </p>
+            <button
+              onClick={() => {
+                setActiveCategory("");
+                setSearchDestination("");
+              }}
+              className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
+            >
+              Reset All Filters
+            </button>
           </div>
         )}
 
-        {/* Trips Grid */}
-        {!loading && !error && trips.length > 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trips.map((trip) => (
-              <div
-                key={trip._id}
-                onClick={() => handleTripClick(trip._id)}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden cursor-pointer group"
-              >
-                <div className="relative h-48">
-                  <img
-                    src={trip.imageUrl || '/images/default-trip.jpg'}
-                    alt={trip.tripName}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-3 right-3">
-                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                      <i className="fas fa-globe text-emerald-600"></i>
-                      Public
-                    </span>
-                  </div>
-                </div>
+        {trips.length > 0 && (
+          <ExploreGrid
+            trips={trips}
+            socialStatus={socialStatus}
+            handleLike={handleLike}
+            handleSave={handleSave}
+            handleClone={handleClone}
+            onCardClick={(id) => navigate(`/explore/trips/${id}`)}
+            onCreatorClick={(e, username) => {
+              e.stopPropagation();
+              navigate(`/profile/${username}`);
+            }}
+          />
+        )}
 
-                <div className="p-5">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {trip.tripName}
-                  </h3>
+        {nextCursor && !loading && (
+          <div className="text-center mt-12">
+            <button
+              onClick={handleLoadMore}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-white text-gray-800 border border-gray-200 rounded-xl font-bold shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-300"
+            >
+              Load More Itineraries
+              <Icon name="arrowRight" size={16} />
+            </button>
+          </div>
+        )}
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-600 text-sm">
-                      <i className="fas fa-map-marker-alt w-5 text-emerald-600"></i>
-                      <span className="ml-2">{trip.destinationLocation?.name || trip.mainDestination || '—'}</span>
-                    </div>
-
-                    <div className="flex items-center text-gray-600 text-sm">
-                      <i className="fas fa-calendar w-5 text-emerald-600"></i>
-                      <span className="ml-2">
-                        {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center text-gray-600 text-sm">
-                      <i className="fas fa-user w-5 text-emerald-600"></i>
-                      <span className="ml-2">
-                        By {trip.createdBy.name || trip.createdBy.username}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {trip.category}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {loading && trips.length > 0 && (
+          <div className="text-center py-8">
+            <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>
         )}
       </div>
@@ -181,6 +262,4 @@ const Explore = () => {
       {!isAuthenticated && <Footer />}
     </div>
   );
-};
-
-export default Explore;
+}

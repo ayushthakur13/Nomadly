@@ -1,5 +1,5 @@
 // Feature pages
-export { MyTripsPage } from './browse';
+export { MyTripsPage, SavedTripsPage } from './browse';
 export { CreateTripPage } from './create';
 export { TripWorkspacePage } from './workspace';
 

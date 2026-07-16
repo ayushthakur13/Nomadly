@@ -1,8 +1,10 @@
 import { Router } from 'express';
-import { authMiddleware } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware } from '@shared/middlewares';
 import budgetController from './budget.controller';
 
 const router = Router({ mergeParams: true });
+
+router.get('/public', optionalAuthMiddleware, budgetController.getPublicBudgetSummary);
 
 router.use(authMiddleware);
 

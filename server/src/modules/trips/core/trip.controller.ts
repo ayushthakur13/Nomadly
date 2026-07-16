@@ -434,6 +434,13 @@ class TripController {
         });
         return;
       }
+      if (error.message === 'USER_PROFILE_MUST_BE_PUBLIC_TO_PUBLISH') {
+        res.status(403).json({
+          success: false,
+          message: 'Your profile must be public to publish trips'
+        });
+        return;
+      }
       next(error);
     }
   }

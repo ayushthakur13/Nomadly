@@ -1,9 +1,15 @@
 import express from 'express';
 import taskController from './task.controllers';
-import { authMiddleware } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
 
 const router = express.Router({ mergeParams: true });
+
+router.get(
+  '/public',
+  optionalAuthMiddleware,
+  asyncHandler(taskController.getPublicTasks.bind(taskController))
+);
 
 // All routes require authentication
 router.use(authMiddleware);

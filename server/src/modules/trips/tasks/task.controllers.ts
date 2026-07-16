@@ -306,6 +306,38 @@ class TaskController {
       next(error);
     }
   }
+
+  async getPublicTasks(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { tripId } = req.params;
+
+      if (!tripId) {
+        res.status(400).json({ success: false, message: 'Trip ID is required' });
+        return;
+      }
+
+      const tasks = await taskService.getPublicTasksByTripId(tripId);
+
+      res.status(200).json({
+        success: true,
+        data: { tasks }
+      });
+    } catch (error: any) {
+      if (error.message === 'Trip not found') {
+        res.status(404).json({ success: false, message: error.message });
+        return;
+      }
+      if (error.message === 'Unauthorized to view tasks') {
+        res.status(403).json({ success: false, message: error.message });
+        return;
+      }
+      if (error.message === 'Invalid trip ID') {
+        res.status(400).json({ success: false, message: error.message });
+        return;
+      }
+      next(error);
+    }
+  }
 }
 
 export default new TaskController();

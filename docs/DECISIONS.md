@@ -183,3 +183,23 @@ Integrating AI early to showcase a prototype. Rejected because it leads to techn
 **Consequences:**
 * **Pros**: Guarantees a highly secure, stable, and well-designed core that can scale reliably.
 * **Cons**: Delays public AI feature releases until foundational architecture requirements are met.
+
+---
+
+## Centralized Icon Wrapper and Frontend Guardrails
+**Status:** Accepted
+
+**Context:**
+Direct imports from `lucide-react` in features make styling overrides difficult. Furthermore, direct Axios API requests inside components bypass normalization, validation, and centralized error mapping.
+
+**Decision:**
+1. Require the custom central `<Icon>` wrapper component (defined in `client/src/ui/icon/Icon.tsx`) for all client-side icons. Direct imports from `lucide-react` in page/feature files are forbidden.
+2. Mandate that all API routes be declared inside service files under `client/src/services/`. Direct inline `api.get` / `api.post` calls inside component hooks/effects are prohibited.
+3. Enforce a strict maximum component/hook file length of **300 lines**, splitting layouts and tabs into dedicated sub-components where needed.
+
+**Alternatives considered:**
+Allowing inline API requests and direct Lucide imports. While slightly faster for prototyping, this compromises visual consistency, replicates request wrappers, and violates standard error-handling bounds.
+
+**Consequences:**
+* **Pros**: Unifies client layouts, isolates transient requests, keeps page controllers readable, and ensures robust API error wrapping.
+* **Cons**: Requires registering new icons in `Icon.tsx` and adding thin wrappers in service modules.

@@ -1,17 +1,18 @@
 import express from 'express';
 import memoryController from './memory.controller';
-import { authMiddleware, uploadMemory } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware, uploadMemory } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
 
 const router = express.Router({ mergeParams: true });
 
-// All scoped trip memory routes require auth
-router.use(authMiddleware);
-
 router.get(
   '/',
+  optionalAuthMiddleware,
   asyncHandler(memoryController.getMemories.bind(memoryController))
 );
+
+// All other scoped trip memory routes require auth
+router.use(authMiddleware);
 
 router.post(
   '/',

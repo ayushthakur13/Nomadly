@@ -50,3 +50,25 @@ export default function authMiddleware(req: Request, res: Response, next: NextFu
     sendAuthError('Authentication failed');
   }
 }
+
+export function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction): void {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7).trim()
+      : null;
+
+    if (token) {
+      const payload: AccessTokenPayload = verifyAccessToken(token);
+      req.user = {
+        id: payload.sub,
+        username: payload.username,
+        email: payload.email,
+        isAdmin: payload.isAdmin || false
+      };
+    }
+    next();
+  } catch (err: any) {
+    next();
+  }
+}

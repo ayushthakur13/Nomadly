@@ -151,6 +151,15 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
 	}
 }
 
+export async function fetchPublicTasks(tripId: string): Promise<any[]> {
+	try {
+		const res = await api.get(`/trips/${tripId}/tasks/public`);
+		return res.data.data.tasks || [];
+	} catch (error) {
+		throw new Error(extractApiError(error as ApiError, 'Failed to fetch public tasks'));
+	}
+}
+
 export default {
 	fetchTasks,
 	createTask,
@@ -158,5 +167,6 @@ export default {
 	deleteTask,
 	completeTask,
 	uncompleteTask,
+	fetchPublicTasks,
 };
 

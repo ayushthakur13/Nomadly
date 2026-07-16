@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import Trip, { ITrip, TripLifecycleStatus } from './trip.model';
 import '../destinations/destination.model';
 import User from '../../users/user.model';
+import * as userService from '../../users/user.service';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters, CloneTripOptions } from './trip.types';
 import mapService from '../../maps/map.service';
 import tripUtils from './trip.utils';
@@ -79,6 +80,7 @@ class TripService {
       category: data.category,
       tags: data.tags || [],
       isPublic: data.isPublic || false,
+      memoriesPublic: data.memoriesPublic || false,
       lifecycleStatus: TripLifecycleStatus.DRAFT,
       createdBy: new Types.ObjectId(userId),
       members: [
@@ -366,6 +368,11 @@ class TripService {
       throw new Error('ONLY_CREATOR_CAN_PUBLISH');
     }
 
+    const user = await userService.getUserById(userId);
+    if (!user.isPublic) {
+      throw new Error('USER_PROFILE_MUST_BE_PUBLIC_TO_PUBLISH');
+    }
+
     trip.isPublic = true;
     trip.lifecycleStatus = TripLifecycleStatus.PUBLISHED;
 
@@ -529,6 +536,17 @@ class TripService {
   async findTripById(tripId: string): Promise<ITrip | null> {
     if (!Types.ObjectId.isValid(tripId)) return null;
     return await Trip.findById(tripId).lean();
+  }
+
+  async getPublicCreatedTripsByUserId(userId: string): Promise<ITrip[]> {
+    return Trip.find({ createdBy: new Types.ObjectId(userId), isPublic: true })
+      .populate('createdBy', 'username name profilePicUrl')
+      .sort({ createdAt: -1 })
+      .lean();
+  }
+
+  async countPublicCreatedTripsByUserId(userId: string): Promise<number> {
+    return Trip.countDocuments({ createdBy: new Types.ObjectId(userId), isPublic: true });
   }
 }
 

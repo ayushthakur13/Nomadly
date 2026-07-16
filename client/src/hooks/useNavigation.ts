@@ -20,7 +20,7 @@ export const useNavigation = () => {
       { label: 'Trips', path: '/trips', icon: 'plane' },
       { label: 'Explore', path: '/explore', icon: 'compass' },
       { label: 'AI Planner', icon: 'sparkles', badge: 'Coming soon', disabled: true },
-      { label: 'Saved Trips', icon: 'bookmark', badge: 'Soon', disabled: true },
+      { label: 'Saved Trips', path: '/trips/saved', icon: 'bookmark' },
       { label: 'Community', icon: 'users', badge: 'Soon', disabled: true },
     ],
     []

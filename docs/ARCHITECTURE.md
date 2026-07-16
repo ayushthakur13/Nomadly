@@ -9,6 +9,7 @@ This document defines the strict architectural rules, boundaries, and governance
 * **Client**:
   * Core: React (v19.1), Redux Toolkit, React Router DOM (v7.9), Axios, Socket.io-client.
   * Styling: TailwindCSS (v3), Headless UI, Lucide React.
+  * Icons Policy: Direct imports of icons from 'lucide-react' inside client features or components are strictly forbidden. All icons must be rendered using the central custom `<Icon>` wrapper component (defined in `client/src/ui/icon/Icon.tsx`) to enforce a single consistent styling interface.
   * Forms: React Hook Form (Standardized).
 * **Server**:
   * Core: Node.js (v24), Express (v5.1), Socket.io.
@@ -65,6 +66,8 @@ State lives in one of two places based on usage:
 * **Request Wrappers**:
   * API routes must be defined in Service files (`*.service.ts`) located in client/src/services.
   * Direct inline `api.post(...)` or `axios.get(...)` calls inside React components are forbidden.
+* **Response Normalization**: Service wrappers must normalize raw Axios response structures, extracting and returning only relevant data fields or entities.
+* **Error Propagation**: Service functions must catch connection failures and throw formatted error strings utilizing the `extractApiError(error as ApiError, fallback)` utility.
 
 ---
 
@@ -88,6 +91,7 @@ State lives in one of two places based on usage:
 * **Layer Sequence**: `Router -> Controller -> Service -> Model -> Database`.
 * **Cross-domain Queries**: A service from one domain (e.g., `invitations`) must query users via the `userService` layer rather than importing the `User` model directly.
 * **Sockets DB Access**: Sockets connections must delegate all queries and mutations to service classes (e.g. `chatService.saveMessage(...)`) instead of directly executing model queries inside socket handlers.
+* **Public-Facing Serializers (Social/Profile)**: Public-facing serializers must be explicitly allow-listed, returning only predefined fields (e.g. `publicProfileUser` returning only `username`, `name`, `profilePicUrl`, `bio`, and computed counts). They must never be derived by omitting/filtering fields from an authenticated-user serializer, to prevent accidental leakage of sensitive fields like `email`.
 
 ---
 

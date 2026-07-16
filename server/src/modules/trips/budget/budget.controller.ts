@@ -183,6 +183,26 @@ class BudgetController {
       data: { snapshot },
     });
   });
+
+  /**
+   * GET /api/trips/:tripId/budget/public
+   * Get public budget aggregate totals only
+   */
+  getPublicBudgetSummary = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { tripId } = req.params;
+
+    if (!tripId) {
+      res.status(400).json({ success: false, message: 'Trip ID is required' });
+      return;
+    }
+
+    const summary = await budgetService.getPublicBudgetSummary(tripId);
+
+    res.status(200).json({
+      success: true,
+      data: { summary }
+    });
+  });
 }
 
 export default new BudgetController();

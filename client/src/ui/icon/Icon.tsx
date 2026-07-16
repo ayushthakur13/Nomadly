@@ -28,6 +28,13 @@ import {
   Home,
   Compass,
   Sparkles,
+  Heart,
+  Copy,
+  ArrowLeft,
+  ShieldAlert,
+  Bed,
+  FileText,
+  CheckSquare,
   LogOut,
   ArrowRight,
   Lock,
@@ -121,6 +128,13 @@ const ICONS: Record<string, LucideIcon> = {
   wallet: Wallet,
   receipt: Receipt,
   piggyBank: PiggyBank,
+  heart: Heart,
+  copy: Copy,
+  arrowLeft: ArrowLeft,
+  shieldAlert: ShieldAlert,
+  bed: Bed,
+  fileText: FileText,
+  tasks: CheckSquare,
 };
 
 type IconName = keyof typeof ICONS;

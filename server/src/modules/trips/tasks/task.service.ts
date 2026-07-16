@@ -331,6 +331,30 @@ class TaskService {
       { $pull: { assignedTo: new Types.ObjectId(userId) } }
     );
   }
+
+  async getPublicTasksByTripId(tripId: string): Promise<any[]> {
+    if (!Types.ObjectId.isValid(tripId)) {
+      throw new Error('Invalid trip ID');
+    }
+
+    const trip = await this.getTripOrThrow(tripId);
+
+    if (!trip.isPublic) {
+      throw new Error('Unauthorized to view tasks');
+    }
+
+    const tasks = await Task.find({ tripId: new Types.ObjectId(tripId), isArchived: false })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return tasks.map(t => ({
+      _id: t._id.toString(),
+      title: t.title,
+      description: t.description || '',
+      dueDate: t.dueDate,
+      isCompleted: t.completions && t.completions.length > 0
+    }));
+  }
 }
 
 export default new TaskService();

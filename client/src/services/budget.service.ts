@@ -173,6 +173,15 @@ export async function deleteExpense(expenseId: string): Promise<BudgetSnapshot> 
   }
 }
 
+export async function fetchPublicBudgetSummary(tripId: string): Promise<any> {
+  try {
+    const res = await api.get(`/trips/${tripId}/budget/public`);
+    return res.data.data.summary || null;
+  } catch (error) {
+    throw new Error(extractApiError(error as ApiError, 'Failed to fetch public budget summary'));
+  }
+}
+
 export default {
   fetchBudgetSnapshot,
   createBudget,
@@ -181,4 +190,5 @@ export default {
   createExpense,
   updateExpense,
   deleteExpense,
+  fetchPublicBudgetSummary,
 };
