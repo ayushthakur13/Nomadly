@@ -3,7 +3,6 @@ import tripService from './trip.service';
 import mapService from '../../maps/map.service';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters } from './trip.types';
 import { deleteFromCloudinary } from '@shared/utils';
-import { TripLifecycleStatus } from './trip.model';
 
 interface AuthRequest extends Request {
   user?: {
@@ -25,7 +24,6 @@ class TripController {
 
       const filters: TripQueryFilters = {
         isPublic: true,
-        lifecycleStatus: TripLifecycleStatus.PUBLISHED,
         category: category as string,
         search: search as string,
         page: page ? Number(page) : 1,
@@ -108,11 +106,10 @@ class TripController {
         return;
       }
 
-      const { status: lifecycleStatus, category, search, sort = 'createdAt', order = 'desc', page, limit } = req.query;
+      const { category, search, sort = 'createdAt', order = 'desc', page, limit } = req.query;
 
       const filters: TripQueryFilters = {
         userId,
-        lifecycleStatus: lifecycleStatus as TripLifecycleStatus,
         category: category as string,
         search: search as string,
         page: page ? Number(page) : 1,

@@ -77,7 +77,7 @@ export async function updateUserProfile(userId: string, updates: UpdateProfileDT
       // Transition all user's published trips to drafts automatically
       await Trip.updateMany(
         { createdBy: user._id, isPublic: true },
-        { isPublic: false, lifecycleStatus: 'draft' }
+        { isPublic: false }
       );
     }
     user.isPublic = nextIsPublic;

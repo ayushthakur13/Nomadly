@@ -240,7 +240,7 @@ await execute(async () => {
 - **Local State**: UI state (modals, pickers, form focus)
 
 ### Shared Layer: Monorepo Domain Types
-Core domain models, API contract types, request/response DTOs, and shared enums (e.g., `TripCategory`, `TripLifecycleStatus`) are located in a root-level `shared/` folder:
+Core domain models, API contract types, request/response DTOs, and shared enums (e.g., `TripCategory`) are located in a root-level `shared/` folder:
 - **Single Source of Truth**: Prevents duplicating interfaces and enum definitions between the client and server codebases.
 - **Path Resolution**: Resolved dynamically using TS path mappings (`@shared/*`) in development, and compiled cleanly via `esbuild` for production distributions.
 

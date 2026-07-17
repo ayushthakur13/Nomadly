@@ -11,13 +11,12 @@ import type {
   UpdateTripDTO,
   Location,
   LocationDTO,
-  TripLifecycleStatus,
   TripCategory,
   TripTimeStatus,
 } from '../../../shared/types';
 
 // Re-export for backward compatibility
-export type { Trip, TripMember, Location, LocationDTO, TripLifecycleStatus, TripCategory, TripTimeStatus };
+export type { Trip, TripMember, Location, LocationDTO, TripCategory, TripTimeStatus };
 export type Engagement = TripEngagement;
 export type BudgetSummary = TripBudgetSummary;
 

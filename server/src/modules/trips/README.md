@@ -34,7 +34,6 @@ Comprehensive trip management with multi-level resource organization. Handles co
   tags: string[]              // Search/discovery tags
   isPublic: boolean           // Visibility flag (default: false)
   isFeatured: boolean         // Admin-featured trips (default: false)
-  lifecycleStatus: TripLifecycleStatus  // DRAFT, PLANNING, IN_PROGRESS, COMPLETED
   createdBy: ObjectId         // Trip creator (indexed)
   members: ITripMember[]      // Array with role ('creator' or 'member')
   destinations: ObjectId[]    // References to Destination documents
@@ -84,19 +83,11 @@ Comprehensive trip management with multi-level resource organization. Handles co
 - createdAt: -1 (for reverse chronological)
 - startDate: 1 (for sorting by date)
 - destinationLocation.name: 1 (for destination search)
-- lifecycleStatus: 1
 - isPublic: 1
 - engagement.views: -1
 - createdBy: 1
 - slug: unique
 ```
-
-### Trip Lifecycle Statuses
-
-- `DRAFT` - Trip being planned
-- `PLANNING` - Team is organizing
-- `IN_PROGRESS` - Currently traveling
-- `COMPLETED` - Trip finished
 
 ### Key Endpoints
 

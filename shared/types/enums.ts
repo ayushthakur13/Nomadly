@@ -5,14 +5,6 @@
  * Note: Using const enums for better ES module compatibility
  */
 
-export const TripLifecycleStatus = {
-  DRAFT: 'draft',
-  PUBLISHED: 'published',
-  ARCHIVED: 'archived',
-} as const;
-
-export type TripLifecycleStatus = typeof TripLifecycleStatus[keyof typeof TripLifecycleStatus];
-
 export const TripCategory = {
   ADVENTURE: 'adventure',
   LEISURE: 'leisure',

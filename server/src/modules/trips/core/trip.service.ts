@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import Trip, { ITrip, TripLifecycleStatus } from './trip.model';
+import Trip, { ITrip } from './trip.model';
 import '../destinations/destination.model';
 import User from '../../users/user.model';
 import * as userService from '../../users/user.service';
@@ -81,7 +81,6 @@ class TripService {
       tags: data.tags || [],
       isPublic: data.isPublic || false,
       memoriesPublic: data.memoriesPublic || false,
-      lifecycleStatus: TripLifecycleStatus.DRAFT,
       createdBy: new Types.ObjectId(userId),
       members: [
         {
@@ -108,7 +107,6 @@ class TripService {
   async getTrips(filters: TripQueryFilters, requestingUserId?: string) {
     const {
       userId,
-      lifecycleStatus,
       category,
       isPublic,
       isFeatured,
@@ -143,7 +141,6 @@ class TripService {
       query.isPublic = true;
     }
 
-    if (lifecycleStatus) query.lifecycleStatus = lifecycleStatus;
     if (category) query.category = category;
     if (isPublic !== undefined) query.isPublic = isPublic;
     if (isFeatured !== undefined) query.isFeatured = isFeatured;
@@ -374,7 +371,6 @@ class TripService {
     }
 
     trip.isPublic = true;
-    trip.lifecycleStatus = TripLifecycleStatus.PUBLISHED;
 
     await trip.save();
     return trip;
@@ -389,7 +385,6 @@ class TripService {
     }
 
     trip.isPublic = false;
-    trip.lifecycleStatus = TripLifecycleStatus.DRAFT;
 
     await trip.save();
     return trip;
@@ -470,7 +465,6 @@ class TripService {
       isPublic: false,
       createdBy: new Types.ObjectId(userId),
       members: [{ userId: new Types.ObjectId(userId), role: 'creator' as const, joinedAt: new Date() }],
-      lifecycleStatus: TripLifecycleStatus.DRAFT,
       engagement: {
         likes: 0,
         saves: 0,

@@ -244,7 +244,7 @@ CLOUDINARY_API_SECRET
 **Performance indexes** organized by collection:
 
 - **Users**: username (unique), email (unique sparse)
-- **Trips**: createdAt, startDate, destinationLocation.name, lifecycleStatus, isPublic, engagement.views, createdBy, slug (unique)
+- **Trips**: createdAt, startDate, destinationLocation.name, isPublic, engagement.views, createdBy, slug (unique)
 - **Destinations**: tripId, tripId+order
 - **Tasks**: tripId, isArchived
 - **Expenses**: tripId+date

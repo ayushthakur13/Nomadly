@@ -10,7 +10,7 @@ Provide a single source of truth for **API contracts** and core business domain 
 
 ### ✅ What belongs here:
 - **Domain models** representing API contracts (Trip, User, Destination)
-- **Enums** used across client and server (TripLifecycleStatus, TripCategory)
+- **Enums** used across client and server (TripCategory)
 - **DTOs** for API requests/responses (CreateTripDTO, UpdateTripDTO)
 - **Common types** used in API communication (Location, LocationDTO)
 
@@ -29,7 +29,7 @@ Provide a single source of truth for **API contracts** and core business domain 
 shared/
   types/
     index.ts          # Main export barrel
-    enums.ts          # Shared enums (TripLifecycleStatus, TripCategory, etc.)
+    enums.ts          # Shared enums (TripCategory, etc.)
     common.ts         # Common types (Location, LocationDTO)
     trip.ts           # Trip domain model and DTOs
     user.ts           # User domain model
@@ -40,7 +40,7 @@ shared/
 
 ### Client (React/TypeScript)
 ```typescript
-import type { Trip, TripLifecycleStatus, CreateTripDTO } from '../../../shared/types';
+import type { Trip, CreateTripDTO } from '../../../shared/types';
 
 // Use in service layer
 export const fetchTripAPI = async (id: string): Promise<Trip> => {
@@ -51,7 +51,7 @@ export const fetchTripAPI = async (id: string): Promise<Trip> => {
 
 ### Server (Node/TypeScript)
 ```typescript
-import { TripLifecycleStatus, TripCategory, type CreateTripDTO } from '../../../../../shared/types';
+import { TripCategory, type CreateTripDTO } from '../../../../../shared/types';
 
 // Use in controllers and services
 export const createTrip = async (data: CreateTripDTO): Promise<ITrip> => {

@@ -1,10 +1,10 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 // Import shared enums from monorepo shared types
-import { TripLifecycleStatus, TripCategory } from '../../../../../shared/types';
+import { TripCategory } from '../../../../../shared/types';
 
 // Re-export for backward compatibility within server modules
-export { TripLifecycleStatus, TripCategory };
+export { TripCategory };
 
 // Backend-specific interfaces (Mongoose Document extensions)
 export interface ITripMember {
@@ -47,7 +47,6 @@ export interface ITrip extends Document {
   tags?: string[];
   isPublic: boolean;
   isFeatured: boolean;
-  lifecycleStatus: TripLifecycleStatus;
   createdBy: Types.ObjectId;
   members: ITripMember[];
   destinations: Types.ObjectId[];
@@ -130,7 +129,6 @@ const tripSchema = new Schema<ITrip>({
   isFeatured: { type: Boolean, default: false },
   memoriesPublic: { type: Boolean, default: false },
   likeCount: { type: Number, default: 0, min: 0 },
-  lifecycleStatus: { type: String, enum: Object.values(TripLifecycleStatus), default: TripLifecycleStatus.DRAFT },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   members: { type: [TripMemberSchema], default: [] },
   destinations: [{ type: Schema.Types.ObjectId, ref: 'Destination' }],
@@ -144,7 +142,6 @@ const tripSchema = new Schema<ITrip>({
 tripSchema.index({ createdAt: -1 });
 tripSchema.index({ startDate: 1 });
 tripSchema.index({ 'destinationLocation.name': 1 });
-tripSchema.index({ lifecycleStatus: 1 });
 tripSchema.index({ isPublic: 1 });
 tripSchema.index({ isPublic: 1, createdAt: -1 });
 tripSchema.index({ 'engagement.views': -1 });

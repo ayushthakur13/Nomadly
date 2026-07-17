@@ -3,7 +3,7 @@
  * These types are framework-agnostic and represent the core business domain
  */
 
-import { TripLifecycleStatus, TripCategory, TripMemberRole, TripTimeStatus } from './enums';
+import { TripCategory, TripMemberRole, TripTimeStatus } from './enums';
 import { Location, LocationDTO } from './common';
 
 /**
@@ -58,7 +58,6 @@ export interface Trip {
   tags?: string[];
   isPublic: boolean;
   isFeatured: boolean;
-  lifecycleStatus: TripLifecycleStatus;
   createdBy: string;
   members: TripMember[];
   destinations: string[];
@@ -108,6 +107,5 @@ export interface UpdateTripDTO {
   tags?: string[];
   isPublic?: boolean;
   memoriesPublic?: boolean;
-  lifecycleStatus?: TripLifecycleStatus;
   stayPermissions?: Partial<TripStayPermissions>;
 }

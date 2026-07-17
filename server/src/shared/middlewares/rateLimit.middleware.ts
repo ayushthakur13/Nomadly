@@ -1,7 +1,18 @@
 import rateLimit from 'express-rate-limit';
 
-// Temporarily bypassed for testing workflow:
-export const authRateLimiter = (req: any, res: any, next: any) => next();
+// Prevent brute-force credential guessing on auth endpoints:
+// Limit to 15 requests per 15 minutes per IP.
+export const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15,
+  skipSuccessfulRequests: true,
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again after 15 minutes.',
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 // Protect location search endpoint from excessive billing requests:
 // Limit to 30 requests per 1 minute per IP.
