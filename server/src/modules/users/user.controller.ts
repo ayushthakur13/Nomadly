@@ -75,13 +75,7 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
 
     const { name, bio, isPublic } = req.body;
 
-    if (name === undefined && bio === undefined && isPublic === undefined) {
-      res.status(400).json({
-        success: false,
-        message: 'At least one field (name, bio, isPublic) must be provided'
-      });
-      return;
-    }
+
 
     const updatedUser = await userService.updateUserProfile(req.user.id, {
       name,
@@ -183,10 +177,7 @@ export async function changeUsername(req: Request, res: Response, next: NextFunc
     }
 
     const { username } = req.body || {};
-    if (typeof username !== 'string') {
-      res.status(400).json({ success: false, message: 'username is required' });
-      return;
-    }
+
 
     const updatedUser = await userService.changeUserUsername(req.user.id, username);
     res.status(200).json({ success: true, message: 'Username updated', data: { user: publicUser(updatedUser) } });
@@ -207,10 +198,7 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     }
 
     const { currentPassword, newPassword } = req.body || {};
-    if (typeof newPassword !== 'string') {
-      res.status(400).json({ success: false, message: 'newPassword is required' });
-      return;
-    }
+
 
     const updatedUser = await userService.changeUserPassword(req.user.id, { currentPassword, newPassword });
     res.status(200).json({ success: true, message: 'Password updated successfully', data: { user: publicUser(updatedUser) } });

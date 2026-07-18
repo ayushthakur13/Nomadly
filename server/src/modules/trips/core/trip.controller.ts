@@ -56,31 +56,7 @@ class TripController {
 
       const tripData: CreateTripDTO = req.body;
 
-      if (!tripData.tripName) {
-        res.status(400).json({ success: false, message: 'Trip name is required' });
-        return;
-      }
 
-      if (!tripData.startDate || !tripData.endDate) {
-        res.status(400).json({ success: false, message: 'Start and end dates are required' });
-        return;
-      }
-
-      if (!tripData.destinationLocation) {
-        res.status(400).json({ success: false, message: 'Destination location is required' });
-        return;
-      }
-
-      const start = new Date(tripData.startDate);
-      const end = new Date(tripData.endDate);
-
-      if (end < start) {
-        res.status(400).json({ 
-          success: false, 
-          message: 'End date must be after start date' 
-        });
-        return;
-      }
 
       const trip = await tripService.createTrip(userId, tripData);
 
@@ -181,18 +157,7 @@ class TripController {
 
       const updates: UpdateTripDTO = req.body;
 
-      if (updates.startDate && updates.endDate) {
-        const start = new Date(updates.startDate);
-        const end = new Date(updates.endDate);
 
-        if (end < start) {
-          res.status(400).json({ 
-            success: false, 
-            message: 'End date must be after start date' 
-          });
-          return;
-        }
-      }
 
       const trip = await tripService.updateTrip(tripId, userId, updates);
 

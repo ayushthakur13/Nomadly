@@ -1,17 +1,18 @@
 import express from 'express';
 import ctrl from './auth.controller';
-import { authMiddleware, authRateLimiter } from '@shared/middlewares';
+import { authMiddleware, authRateLimiter, validate, csrfProtection } from '@shared/middlewares';
+import { registerSchema, loginSchema } from './auth.schema';
 
 const router = express.Router();
 
 // Public
-router.post('/register', authRateLimiter, ctrl.register);
-router.post('/login', authRateLimiter, ctrl.login);
+router.post('/register', authRateLimiter, validate(registerSchema), ctrl.register);
+router.post('/login', authRateLimiter, validate(loginSchema), ctrl.login);
 router.post('/google', authRateLimiter, ctrl.google);
-router.post('/refresh', authRateLimiter, ctrl.refresh);
+router.post('/refresh', authRateLimiter, csrfProtection, ctrl.refresh);
 
 // Protected
-router.post('/logout', authMiddleware, ctrl.logout);
+router.post('/logout', authMiddleware, csrfProtection, ctrl.logout);
 router.get('/me', authMiddleware, ctrl.me);
 
 export default router;

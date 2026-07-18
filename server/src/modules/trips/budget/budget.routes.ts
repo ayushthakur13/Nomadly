@@ -1,6 +1,12 @@
 import { Router } from 'express';
-import { authMiddleware, optionalAuthMiddleware } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware, validate } from '@shared/middlewares';
 import budgetController from './budget.controller';
+import {
+  createBudgetSchema,
+  updateBudgetSchema,
+  updateBudgetMemberSchema,
+  bulkUpdateBudgetMembersSchema
+} from './budget.schema';
 
 const router = Router({ mergeParams: true });
 
@@ -8,11 +14,11 @@ router.get('/public', optionalAuthMiddleware, budgetController.getPublicBudgetSu
 
 router.use(authMiddleware);
 
-router.post('/', budgetController.createBudget);
+router.post('/', validate(createBudgetSchema), budgetController.createBudget);
 router.get('/', budgetController.getBudgetSnapshot);
-router.patch('/', budgetController.updateBudgetBase);
+router.patch('/', validate(updateBudgetSchema), budgetController.updateBudgetBase);
 // Note: /members must come before /members/:userId so Express doesn't treat 'bulk' as a userId
-router.patch('/members', budgetController.updateBudgetMembersBulk);
-router.patch('/members/:userId', budgetController.updateBudgetMember);
+router.patch('/members', validate(bulkUpdateBudgetMembersSchema), budgetController.updateBudgetMembersBulk);
+router.patch('/members/:userId', validate(updateBudgetMemberSchema), budgetController.updateBudgetMember);
 
 export default router;

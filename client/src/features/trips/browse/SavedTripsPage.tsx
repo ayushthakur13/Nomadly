@@ -67,7 +67,7 @@ export default function SavedTripsPage() {
       toast.success("Trip cloned successfully!");
       navigate(`/trips/${response.data.trip._id}`);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to clone trip");
+      toast.error(err.message || "Failed to clone trip");
     }
   };
 

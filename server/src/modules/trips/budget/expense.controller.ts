@@ -32,18 +32,7 @@ class ExpenseController {
     }
 
     const dto: CreateExpenseDTO = req.body;
-    if (typeof dto?.amount !== 'number') {
-      res.status(400).json({ success: false, message: 'amount is required' });
-      return;
-    }
-    if (!dto?.paidBy) {
-      res.status(400).json({ success: false, message: 'paidBy is required' });
-      return;
-    }
-    if (!dto?.splitMethod) {
-      res.status(400).json({ success: false, message: 'splitMethod is required' });
-      return;
-    }
+
 
     const snapshot = await budgetService.createExpense(tripId, userId, dto);
 

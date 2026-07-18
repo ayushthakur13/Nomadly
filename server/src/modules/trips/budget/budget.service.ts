@@ -52,7 +52,7 @@ class BudgetService {
       if (dto.totalBudgetAmount !== undefined) {
         ValidationUtils.validateAmount(dto.totalBudgetAmount);
         if (tripMemberList.length === 0) {
-          throw new Error('Trip must have at least one member to initialize budget');
+          throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Trip must have at least one member to initialize budget', 400);
         }
         const total = FinancialUtils.normalizeMoney(dto.totalBudgetAmount);
         const perMember = FinancialUtils.normalizeMoney(total / tripMemberList.length);
@@ -74,18 +74,18 @@ class BudgetService {
       } else if (Array.isArray(dto.members)) {
         for (const member of dto.members) {
           if (!member?.userId || !ValidationUtils.isValidObjectId(member.userId)) {
-            throw new Error('Invalid member user ID in budget members');
+            throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid member user ID in budget members', 400);
           }
           ValidationUtils.validateContribution(member.plannedContribution);
           contributionMap.set(member.userId, FinancialUtils.normalizeMoney(member.plannedContribution));
         }
       }
 
-    for (const memberId of contributionMap.keys()) {
-      if (!tripMemberIds.has(memberId)) {
-        throw new Error('All budget members must belong to the trip');
+      for (const memberId of contributionMap.keys()) {
+        if (!tripMemberIds.has(memberId)) {
+          throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'All budget members must belong to the trip', 400);
+        }
       }
-    }
 
     const budgetMembers: IBudgetMember[] = trip.members.map(m => {
       const memberId = m.userId.toString();
@@ -201,16 +201,16 @@ class BudgetService {
 
     if (!isCreator) {
       if (!isSelf) {
-        throw new Error('Only trip creator can update other members');
+        throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can update other members', 403);
       }
       if (!budget.rules?.allowMemberContributionEdits) {
-        throw new Error('Member contribution edits are disabled for this budget');
+        throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Member contribution edits are disabled for this budget', 400);
       }
     }
 
     const member = budget.members.find(m => m.userId.toString() === targetUserId.toString());
     if (!member) {
-      throw new Error('Budget member not found');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Budget member not found', 404);
     }
 
     const plannedContribution = FinancialUtils.normalizeMoney(dto.plannedContribution);
@@ -222,7 +222,7 @@ class BudgetService {
     // Upward edits — even ones that don't fully cover spent — are always allowed because
     // the member is moving in the right direction.
     if (plannedContribution < spentByMember && plannedContribution < currentPlanned) {
-      throw new Error('Planned contribution cannot be reduced below amount already spent');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Planned contribution cannot be reduced below amount already spent', 400);
     }
 
     member.plannedContribution = plannedContribution;
@@ -252,11 +252,11 @@ class BudgetService {
     if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!isTripCreator(trip, requesterId)) {
-      throw new Error('Only trip creator can bulk update contributions');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can bulk update contributions', 403);
     }
 
     if (!Array.isArray(dto.updates) || dto.updates.length === 0) {
-      throw new Error('updates must be a non-empty array');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'updates must be a non-empty array', 400);
     }
 
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
@@ -277,9 +277,9 @@ class BudgetService {
       ValidationUtils.validateContribution(update.plannedContribution);
 
       const member = budget.members.find((m) => m.userId.toString() === update.userId);
-      if (!member) throw new Error(`Budget member ${update.userId} not found`);
+      if (!member) throw new TripError(TRIP_ERRORS.INVALID_INPUT, `Budget member ${update.userId} not found`, 404);
       if (member.isPastMember) {
-        throw new Error(`Cannot update contribution for a past member (${update.userId})`);
+        throw new TripError(TRIP_ERRORS.INVALID_INPUT, `Cannot update contribution for a past member (${update.userId})`, 400);
       }
 
       const newPlanned = FinancialUtils.normalizeMoney(update.plannedContribution);
@@ -288,8 +288,10 @@ class BudgetService {
 
       // Same rule as individual update: block only if downward AND below spent
       if (newPlanned < spent && newPlanned < currentPlanned) {
-        throw new Error(
-          `Contribution for member ${update.userId} cannot be reduced below their already-spent amount`
+        throw new TripError(
+          TRIP_ERRORS.INVALID_INPUT,
+          `Contribution for member ${update.userId} cannot be reduced below their already-spent amount`,
+          400
         );
       }
     }
@@ -321,13 +323,13 @@ class BudgetService {
     BudgetAccessUtils.enforceExpensePermission('create', isCreator, userId, undefined, budget);
 
     if (!dto?.paidBy || !ValidationUtils.isValidObjectId(dto.paidBy)) {
-      throw new Error('Invalid paidBy user ID');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid paidBy user ID', 400);
     }
 
     const budgetMemberIds = BudgetAccessUtils.getBudgetMemberIds(budget);
     const activeBudgetMemberIds = BudgetAccessUtils.getActiveBudgetMemberIds(budget);
     if (!budgetMemberIds.has(dto.paidBy)) {
-      throw new Error('PaidBy must be a budget member');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'PaidBy must be a budget member', 400);
     }
 
     ValidationUtils.validateAmount(dto.amount);
@@ -375,7 +377,7 @@ class BudgetService {
     ValidationUtils.validateObjectId(expenseId, 'expense ID');
 
     const expense = await Expense.findById(expenseId);
-    if (!expense) throw new Error('Expense not found');
+    if (!expense) throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Expense not found', 404);
 
     const budget = await this.getBudgetByTripId(expense.tripId.toString());
     BudgetAccessUtils.ensureMemberAccess(budget, userId);
@@ -394,16 +396,16 @@ class BudgetService {
 
     const payload = dto as Record<string, unknown>;
     if (payload.splitMethod !== undefined) {
-      throw new Error('splitMethod cannot be updated');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'splitMethod cannot be updated', 400);
     }
     if (payload.createdBy !== undefined) {
-      throw new Error('createdBy cannot be updated');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'createdBy cannot be updated', 400);
     }
     if (payload.paidBy !== undefined) {
-      throw new Error('paidBy cannot be updated');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'paidBy cannot be updated', 400);
     }
     if (payload.tripId !== undefined) {
-      throw new Error('tripId cannot be updated');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'tripId cannot be updated', 400);
     }
 
     if (dto.title !== undefined) expense.title = dto.title;
@@ -449,7 +451,7 @@ class BudgetService {
     ValidationUtils.validateObjectId(expenseId, 'expense ID');
 
     const expense = await Expense.findById(expenseId);
-    if (!expense) throw new Error('Expense not found');
+    if (!expense) throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Expense not found', 404);
 
     const budget = await this.getBudgetByTripId(expense.tripId.toString());
     BudgetAccessUtils.ensureMemberAccess(budget, userId);
@@ -491,7 +493,7 @@ class BudgetService {
   private async getBudgetByTripId(tripId: string): Promise<ITripBudget> {
     ValidationUtils.validateObjectId(tripId, 'trip ID');
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
-    if (!budget) throw new Error('Budget not found');
+    if (!budget) throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Budget not found', 404);
     return budget;
   }
 
@@ -564,7 +566,7 @@ class BudgetService {
       tripId: new Types.ObjectId(originalTripId) 
     });
     if (!originalBudget) {
-      throw new Error('Original budget not found');
+      throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Original budget not found', 404);
     }
 
     // Check if new trip already has a budget
@@ -572,7 +574,7 @@ class BudgetService {
       tripId: new Types.ObjectId(newTripId) 
     });
     if (existingBudget) {
-      throw new Error('Budget already exists for the new trip');
+      throw new TripError(TRIP_ERRORS.BUDGET_ALREADY_EXISTS, 'Budget already exists for the new trip', 400);
     }
 
     // Transform members: cloning user becomes creator, others become members
@@ -590,13 +592,13 @@ class BudgetService {
     // Ensure exactly one creator
     const creatorCount = clonedMembers.filter(m => m.role === 'creator').length;
     if (creatorCount !== 1) {
-      throw new Error('Cloned budget must have exactly one creator');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Cloned budget must have exactly one creator', 400);
     }
 
     // Validate planned contributions are non-negative
     for (const member of clonedMembers) {
       if (member.plannedContribution < 0) {
-        throw new Error('Planned contribution cannot be negative');
+        throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Planned contribution cannot be negative', 400);
       }
     }
 

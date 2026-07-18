@@ -262,4 +262,32 @@ Standard string-based error checking. Rejected because simple text matching is p
 * **Pros**: Centralizes HTTP status codes mapping, isolates transient errors, and ensures visual consistency for all toast messages.
 * **Cons**: Requires writing custom error classes for new services and using action wrappers.
 
+---
+
+## Deferred Request Validation Migration (First Pass)
+**Status:** Tracked (Deferred)
+
+**Context:**
+As part of the initial implementation of Zod schema-based request validation (defined in the Request Validation Contract), we migrated the primary high-risk, frequently modified modules (`auth`, `users`, `trips/core`, and `trips/budget`). The remaining modules have their validation migration deferred to a future pass.
+
+**Decision:**
+Defer request validation schema attachment for the following modules:
+1. `explore` routes (`server/src/modules/explore/explore.routes.ts`)
+2. `invitations` routes (`server/src/modules/invitations/invitation.routes.ts`)
+3. `trips/accommodations` routes (`server/src/modules/trips/accommodations/accommodation.routes.ts`)
+4. `trips/chat` routes (`server/src/modules/trips/chat/chat.routes.ts`)
+5. `trips/destinations` routes (`server/src/modules/trips/destinations/destination.routes.ts`)
+6. `trips/members` routes (`server/src/modules/trips/members/member.routes.ts`)
+7. `trips/memories` routes (`server/src/modules/trips/memories/memory.routes.ts`)
+8. `trips/tasks` routes (`server/src/modules/trips/tasks/task.routes.ts`)
+
+These files will be updated in a subsequent pass to apply schema validations natively at the router boundary.
+
+**Alternatives considered:**
+Migrating all 13 route modules simultaneously. Rejected due to validation testing scope, ensuring we validate stability on primary components first.
+
+**Consequences:**
+* **Pros**: Limits risk in the first migration step, allowing thorough coverage of core paths.
+* **Cons**: Temporary inconsistency where some route parameters rely on manual service/controller checks instead of uniform schema validations.
+
 

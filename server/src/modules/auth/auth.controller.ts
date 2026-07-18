@@ -42,23 +42,6 @@ function setCsrfCookie(res: Response): string {
   return token;
 }
 
-function verifyCsrf(req: Request): boolean {
-  const header = Array.isArray(req.headers['x-csrf-token'])
-    ? req.headers['x-csrf-token'][0]
-    : req.headers['x-csrf-token'];
-
-  const headerToken = typeof header === 'string' ? header : undefined;
-  const cookieToken = typeof req.cookies?.csrf_token === 'string' ? req.cookies.csrf_token : undefined;
-
-  return Boolean(headerToken && cookieToken && headerToken === cookieToken);
-}
-
-function enforceCsrf(req: Request, res: Response): boolean {
-  if (verifyCsrf(req)) return true;
-
-  res.status(403).json({ success: false, message: 'CSRF validation failed' });
-  return false;
-}
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
@@ -68,13 +51,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
   try {
     const { username, password, email } = req.body;
     
-    if (!isNonEmptyString(username) || !isNonEmptyString(password) || !isNonEmptyString(email)) {
-      res.status(400).json({
-        success: false,
-        message: 'username, email and password are required'
-      });
-      return;
-    }
+
 
     const name = isNonEmptyString(req.body.name) ? req.body.name : username;
 
@@ -110,13 +87,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   try {
     const { usernameOrEmail, password } = req.body;
     
-    if (!isNonEmptyString(usernameOrEmail) || !isNonEmptyString(password)) {
-      res.status(400).json({
-        success: false,
-        message: 'usernameOrEmail and password are required'
-      });
-      return;
-    }
+
 
     const result = await authService.loginUser(usernameOrEmail, password);
     
@@ -144,7 +115,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 
 export async function logout(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    if (!enforceCsrf(req, res)) return;
+
 
     const userId = req.user?.id;
     if (userId) {
@@ -189,7 +160,7 @@ export async function me(req: AuthRequest, res: Response, next: NextFunction): P
 
 export async function refresh(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    if (!enforceCsrf(req, res)) return;
+
 
     const token = req.cookies?.refresh_token as string | undefined;
     

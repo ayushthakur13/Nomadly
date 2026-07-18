@@ -32,14 +32,7 @@ class BudgetController {
     }
 
     const dto: CreateBudgetDTO = req.body;
-    if (!dto?.baseCurrency || typeof dto.baseCurrency !== 'string') {
-      res.status(400).json({ success: false, message: 'Base currency is required' });
-      return;
-    }
-    if (dto.totalBudgetAmount !== undefined && typeof dto.totalBudgetAmount !== 'number') {
-      res.status(400).json({ success: false, message: 'totalBudgetAmount must be a number' });
-      return;
-    }
+
 
     const snapshot = await budgetService.createBudget(tripId, userId, dto);
 
@@ -69,10 +62,7 @@ class BudgetController {
     }
 
     const dto: UpdateBudgetDTO = req.body;
-    if (dto.baseBudgetAmount !== undefined && dto.baseBudgetAmount !== null && typeof dto.baseBudgetAmount !== 'number') {
-      res.status(400).json({ success: false, message: 'baseBudgetAmount must be a number or null' });
-      return;
-    }
+
 
     const snapshot = await budgetService.updateBaseBudget(tripId, userId, dto);
 
@@ -128,10 +118,7 @@ class BudgetController {
     }
 
     const dto: UpdateBudgetMemberDTO = req.body;
-    if (dto?.plannedContribution === undefined) {
-      res.status(400).json({ success: false, message: 'plannedContribution is required' });
-      return;
-    }
+
 
     const snapshot = await budgetService.updateMemberContribution(tripId, userId, requesterId, dto);
 
@@ -161,10 +148,7 @@ class BudgetController {
     }
 
     const dto: BulkUpdateBudgetMembersDTO = req.body;
-    if (!Array.isArray(dto?.updates) || dto.updates.length === 0) {
-      res.status(400).json({ success: false, message: 'updates must be a non-empty array' });
-      return;
-    }
+
 
     const snapshot = await budgetService.bulkUpdateMemberContributions(tripId, requesterId, dto);
 
