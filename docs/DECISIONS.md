@@ -203,3 +203,63 @@ Allowing inline API requests and direct Lucide imports. While slightly faster fo
 **Consequences:**
 * **Pros**: Unifies client layouts, isolates transient requests, keeps page controllers readable, and ensures robust API error wrapping.
 * **Cons**: Requires registering new icons in `Icon.tsx` and adding thin wrappers in service modules.
+
+---
+
+## Mandating Centralized Service Layer for HTTP Queries
+**Status:** Accepted
+
+**Context:**
+Components like [ProfilePage.tsx](../client/src/features/profile/pages/ProfilePage.tsx) and cloning pages execute direct inline Axios calls (e.g. `api.get("/users/me")`, `api.post("/trips/:tripId/clone")`) bypassing standard service files in `client/src/services`.
+
+**Decision:**
+All API requests must be defined inside service modules. Components are prohibited from directly invoking the Axios instance. Cloning must be wrapped in `trips.service.ts` and user profile logic in `users.service.ts`.
+
+**Alternatives considered:**
+Inline Axios requests inside component lifecycle effects. Rejected because it bypasses response serialization, duplicates routing constants, and leads to unhandled/fragmented error messages.
+
+**Consequences:**
+* **Pros**: Guarantees all API calls are centralized and documented, types are consistently mapped, and connection errors are globally caught and parsed.
+* **Cons**: Requires minor wrapper code blocks inside service layers.
+
+---
+
+## Standardization of React Hook Form (RHF) and Banning Hybrid Validation
+**Status:** Accepted
+
+**Context:**
+Feature components manage input validation inconsistently. Large screens (`Login.tsx`, `ProfilePage.tsx`) use `react-hook-form`, while sub-workspace modals (`AccommodationFormModal.tsx`, `DestinationFormModal.tsx`) use manual React state checking. Furthermore, `Login.tsx` implements a hybrid model: registering field requirements inside RHF but manually validating credentials using custom regex inside `onSubmit`.
+
+**Decision:**
+1. Propose standardizing on RHF for all forms, including collaborative modals (stays, destinations, tasks).
+2. Ban hybrid checks: all inputs must validate natively through RHF constraints or registered schemas rather than running manual checks in submit handlers.
+
+**Alternatives considered:**
+* Keeping manual React state for modals: Rejected because manual state variables bloat component code, lack native access to RHF error bindings, and break layout uniformity.
+* Continuing the hybrid validator pattern in `Login.tsx`: Rejected as it duplicates logic and bypasses standard form lifecycle structures.
+
+**Consequences:**
+* **Pros**: Unifies forms and accessibility structures, simplifies layout components, and ensures consistent error rendering interfaces.
+* **Cons**: Requires refactoring existing state binders in modals and tasks.
+
+---
+
+## Centralizing Backend Custom Errors and Client Error Extraction
+**Status:** Accepted
+
+**Context:**
+Workspace domains (stays, destinations, budget) throw standard JavaScript `Error` objects carrying plain text messages (e.g. `throw new Error('Trip not found')` in `server/src/modules/trips/budget/budget.service.ts`), which results in brittle string comparison checks in controllers. On the client, caught errors are resolved inconsistently: some components capture raw error messages and dispatch manual toast alerts.
+
+**Decision:**
+1. Require all backend domains to define custom error classes (extending a common app class) with typed error code enums.
+2. Standardize client-side error normalization on the centralized `extractApiError` helper in `client/src/utils/errorHandling.ts`.
+3. Require asynchronous actions to wrap calls inside helper hooks like `useAsyncAction` to manage indicators and trigger toast warnings automatically.
+
+**Alternatives considered:**
+Standard string-based error checking. Rejected because simple text matching is prone to typos, lacks type safety, and is hard to localize or match across architectural borders.
+
+**Consequences:**
+* **Pros**: Centralizes HTTP status codes mapping, isolates transient errors, and ensures visual consistency for all toast messages.
+* **Cons**: Requires writing custom error classes for new services and using action wrappers.
+
+

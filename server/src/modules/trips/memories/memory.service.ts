@@ -3,6 +3,7 @@ import Memory, { IMemory } from './memory.model';
 import Trip from '../core/trip.model';
 import { isTripMember, isTripCreator } from '../members/member.utils';
 import { deleteFromCloudinary } from '@shared/utils';
+import { TripError, TRIP_ERRORS } from '../core/trip.errors';
 
 class MemoryService {
   /**
@@ -10,12 +11,12 @@ class MemoryService {
    */
   async getMemoriesByTripId(tripId: string, userId?: string): Promise<IMemory[]> {
     if (!Types.ObjectId.isValid(tripId)) {
-      throw new Error('Invalid trip ID');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid trip ID', 400);
     }
 
     const trip = await Trip.findById(tripId).lean();
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
     }
 
     // Check permissions: if trip is private, user must be owner or member
@@ -25,7 +26,7 @@ class MemoryService {
     const isPubliclyViewable = trip.isPublic && (trip as any).memoriesPublic;
 
     if (!isPubliclyViewable && !isOwner && !isMember) {
-      throw new Error('Unauthorized to view memories');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to view memories', 403);
     }
 
     const memories = await Memory.find({ tripId: new Types.ObjectId(tripId) })
@@ -47,12 +48,12 @@ class MemoryService {
     caption?: string
   ): Promise<IMemory> {
     if (!Types.ObjectId.isValid(tripId)) {
-      throw new Error('Invalid trip ID');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid trip ID', 400);
     }
 
     const trip = await Trip.findById(tripId);
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
     }
 
     // Must be owner or member to upload
@@ -60,7 +61,7 @@ class MemoryService {
     const isMember = isTripMember(trip, userId);
 
     if (!isOwner && !isMember) {
-      throw new Error('Unauthorized to upload memories');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to upload memories', 403);
     }
 
     const memory = new Memory({
@@ -88,24 +89,24 @@ class MemoryService {
     caption: string
   ): Promise<IMemory> {
     if (!Types.ObjectId.isValid(memoryId)) {
-      throw new Error('Invalid memory ID');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid memory ID', 400);
     }
 
     const memory = await Memory.findById(memoryId);
     if (!memory) {
-      throw new Error('Memory not found');
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Memory not found', 404);
     }
 
     const trip = await Trip.findById(memory.tripId);
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
     }
 
     const isUploader = memory.uploadedBy.toString() === userId;
     const isTripOwner = isTripCreator(trip, userId);
 
     if (!isUploader && !isTripOwner) {
-      throw new Error('Unauthorized to update memory caption');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to update memory caption', 403);
     }
 
     memory.caption = caption?.trim();
@@ -121,24 +122,24 @@ class MemoryService {
    */
   async deleteMemory(memoryId: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(memoryId)) {
-      throw new Error('Invalid memory ID');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid memory ID', 400);
     }
 
     const memory = await Memory.findById(memoryId);
     if (!memory) {
-      throw new Error('Memory not found');
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Memory not found', 404);
     }
 
     const trip = await Trip.findById(memory.tripId);
     if (!trip) {
-      throw new Error('Trip not found');
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
     }
 
     const isUploader = memory.uploadedBy.toString() === userId;
     const isTripOwner = isTripCreator(trip, userId);
 
     if (!isUploader && !isTripOwner) {
-      throw new Error('Unauthorized to delete memory');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to delete memory', 403);
     }
 
     // Delete image from Cloudinary if publicId exists

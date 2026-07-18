@@ -66,6 +66,7 @@ State lives in one of two places based on usage:
 * **Request Wrappers**:
   * API routes must be defined in Service files (`*.service.ts`) located in client/src/services.
   * Direct inline `api.post(...)` or `axios.get(...)` calls inside React components are forbidden.
+  * **Auth Exception**: Authentication-related requests (login, register, logout, google auth) are managed directly within the Redux Thunks (`client/src/features/auth/store/authThunks.ts`) and auth utils (`client/src/features/auth/utils/auth.ts`) which serve as the state-bound service layer for authentication.
 * **Response Normalization**: Service wrappers must normalize raw Axios response structures, extracting and returning only relevant data fields or entities.
 * **Error Propagation**: Service functions must catch connection failures and throw formatted error strings utilizing the `extractApiError(error as ApiError, fallback)` utility.
 
@@ -74,8 +75,9 @@ State lives in one of two places based on usage:
 ## 5. Validation Pattern
 
 ### Client-Side Validation
-* **Standard**: **React Hook Form (RHF)** is the required standard for all forms.
-* **Rule**: All new forms (e.g., user profiles, social likes/saves) must register validation rules inside RHF fields, showing inline errors beneath invalid fields. Custom manual state validators are deprecated for new features.
+* **Standard**: **React Hook Form (RHF)** is the singular system-wide standard for all forms (including full-page components like login/profile, and collaborative popups/modals like stays, destinations, and tasks).
+* **Rule**: Forms must register constraints directly inside RHF fields. Custom local state inputs that manually validate fields are forbidden.
+* **No Hybrid Validation Checks**: Forms utilizing RHF must not run manual validation checks (e.g., executing separate validation functions) inside the `onSubmit` handler. All field constraints must be registered and handled natively via RHF rules or schemas.
 
 ### Server-Side Validation
 * **Rule**: Multi-layered validation is required:
@@ -116,8 +118,11 @@ State lives in one of two places based on usage:
 ## 8. Error Handling Strategy
 
 * **API Error Representation**:
-  * Generic JavaScript `Error` objects with string comparison checking (e.g. `error.message === 'Trip not found'`) are deprecated.
-  * All modules must implement custom typed error classes derived from a common application error class, using structured code enums (e.g., `AuthError` and `AUTH_ERRORS`) for status code mapping.
+  * Generic JavaScript `Error` objects with string comparison checking (e.g. `throw new Error('Trip not found')`) are strictly prohibited in service domains.
+  * All modules (including trips, budget, accommodations, etc.) must define custom typed error classes extending a base application error class, mapping to specific error code enums (like `AuthError` and `UserError`) for response parsing.
+* **Client-Side Normalization**:
+  * Client components and hooks must consistently resolve errors using the centralized `extractApiError` utility from [`client/src/utils/errorHandling.ts`].
+  * Inline catch blocks must not configure manual toast warnings; instead, components should wrap async operations using centralized async handlers or action utilities (like the `useAsyncAction` hook) to automate user-facing alert delivery.
 * **Error Bubbling**: Services throw custom typed errors; Express controllers catch, resolve, and bubble unhandled issues via `next(err)`.
 
 ---

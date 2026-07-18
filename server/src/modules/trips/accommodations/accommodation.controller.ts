@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import accommodationService from "./accommodation.service";
 import { CreateAccommodationDTO, UpdateAccommodationDTO } from "../../../../../shared/types";
+import { TripError } from "../core/trip.errors";
 
 interface AuthRequest extends Request {
   user?: {
@@ -29,16 +30,8 @@ class AccommodationController {
         data: { accommodations },
       });
     } catch (error: any) {
-      if (error.message === "Trip not found" || error.message === "Accommodation not found") {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === "Unauthorized to view accommodations") {
-        res.status(403).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === "Invalid trip ID") {
-        res.status(400).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -104,23 +97,8 @@ class AccommodationController {
         data: { accommodation },
       });
     } catch (error: any) {
-      if (error.message === "Trip not found" || error.message === "Accommodation not found") {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === "Unauthorized to create accommodations in this trip") {
-        res.status(403).json({ success: false, message: error.message });
-        return;
-      }
-      if (
-        error.message === "Invalid trip ID" ||
-        error.message === "Check-out date must be after check-in date" ||
-        error.message === "Price per night cannot be negative" ||
-        error.message === "Invalid booking URL" ||
-        error.message === "Invalid destination ID" ||
-        error.message === "Accommodation name is required"
-      ) {
-        res.status(400).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -182,23 +160,8 @@ class AccommodationController {
         data: { accommodation },
       });
     } catch (error: any) {
-      if (error.message === "Trip not found" || error.message === "Accommodation not found") {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === "Unauthorized to update this accommodation") {
-        res.status(403).json({ success: false, message: error.message });
-        return;
-      }
-      if (
-        error.message === "Invalid accommodation ID" ||
-        error.message === "Check-out date must be after check-in date" ||
-        error.message === "Price per night cannot be negative" ||
-        error.message === "Invalid booking URL" ||
-        error.message === "Invalid destination ID" ||
-        error.message === "Accommodation name is required"
-      ) {
-        res.status(400).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -227,16 +190,8 @@ class AccommodationController {
         message: "Accommodation deleted successfully",
       });
     } catch (error: any) {
-      if (error.message === "Trip not found" || error.message === "Accommodation not found") {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === "Unauthorized to delete this accommodation") {
-        res.status(403).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === "Invalid accommodation ID") {
-        res.status(400).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);

@@ -178,3 +178,18 @@ export const unpublishTripAPI = async (tripId: string): Promise<Trip> => {
     throw new Error(extractApiError(error as ApiError, 'Failed to unpublish trip'));
   }
 };
+
+/**
+ * Clone a trip
+ */
+export const cloneTripAPI = async (
+  tripId: string,
+  payload: { newTripName: string; includeBudget: boolean }
+): Promise<any> => {
+  try {
+    const response = await api.post(`/trips/${tripId}/clone`, payload);
+    return response.data;
+  } catch (error) {
+    throw new Error(extractApiError(error as ApiError, 'Failed to clone trip'));
+  }
+};

@@ -1,4 +1,4 @@
-import { AlertCircle } from 'lucide-react';
+import { Icon } from '../icon';
 
 interface ErrorAlertProps {
   error?: string | null;
@@ -11,7 +11,7 @@ const ErrorAlert = ({ error, title = 'Something went wrong', onDismiss }: ErrorA
 
   return (
     <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3">
-      <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+      <Icon name="alertCircle" size={20} className="mt-0.5 flex-shrink-0" />
       <div className="flex-1">
         <p className="font-semibold">{title}</p>
         <p className="text-sm">{error}</p>

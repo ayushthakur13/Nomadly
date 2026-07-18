@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useForm } from 'react-hook-form';
 import { Popover } from '@headlessui/react';
 import type { TripMember } from '@/services/members.service';
 import { Icon } from '@/ui/icon/';
@@ -16,61 +17,76 @@ interface AddTaskRowProps {
   }) => void;
 }
 
+interface TaskFormInputs {
+  title: string;
+  description: string;
+  dueDate: string;
+  assignees: string[];
+}
+
 export default function AddTaskRow({
   members,
   membersLoading,
   creating,
   onSubmit,
 }: AddTaskRowProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [assignees, setAssignees] = useState<string[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const containerRef = useRef<HTMLFormElement>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const descRef = useRef<HTMLTextAreaElement>(null);
-  const dateRef = useRef<HTMLInputElement>(null);
+  const { register, handleSubmit, reset, setValue, watch } = useForm<TaskFormInputs>({
+    defaultValues: {
+      title: '',
+      description: '',
+      dueDate: '',
+      assignees: [],
+    }
+  });
+
+  const titleValue = watch('title') || '';
+  const assigneesValue = watch('assignees') || [];
 
   useOnClickOutside(containerRef, () => setShowAdvanced(false), showAdvanced);
 
-  const handleSubmit = () => {
-    if (!title.trim()) return;
+  const onFormSubmit = (data: TaskFormInputs) => {
+    if (!data.title.trim()) return;
 
     onSubmit({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      dueDate: dueDate || undefined,
-      assignees,
+      title: data.title.trim(),
+      description: data.description.trim() || undefined,
+      dueDate: data.dueDate || undefined,
+      assignees: data.assignees,
     });
 
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setDueDate('');
-    setAssignees([]);
+    reset({
+      title: '',
+      description: '',
+      dueDate: '',
+      assignees: [],
+    });
     setShowAdvanced(false);
-    titleRef.current?.focus();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit();
+      handleSubmit(onFormSubmit)();
     }
   };
 
   const toggleAssignee = (userId: string) => {
-    setAssignees((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
+    const currentAssignees = assigneesValue;
+    const nextAssignees = currentAssignees.includes(userId)
+      ? currentAssignees.filter((id) => id !== userId)
+      : [...currentAssignees, userId];
+    setValue('assignees', nextAssignees);
   };
 
   return (
-    <div ref={containerRef} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <form
+      ref={containerRef}
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+    >
       <div className="flex items-center gap-2 mb-3">
         <Icon name="checkCircle" size={18} className="text-emerald-600" />
         <div className="text-sm text-gray-600">Add a task for this trip</div>
@@ -79,11 +95,9 @@ export default function AddTaskRow({
       <div className="flex gap-3">
         {/* Title Input */}
         <input
-          ref={titleRef}
+          {...register("title", { required: true })}
           className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           placeholder="Task title (required)"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
           onFocus={() => setShowAdvanced(true)}
           onKeyDown={handleKeyDown}
         />
@@ -93,9 +107,9 @@ export default function AddTaskRow({
           <Popover.Button className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center gap-2">
             <Icon name="users" size={16} />
             Assign
-            {assignees.length > 0 && (
+            {assigneesValue.length > 0 && (
               <span className="ml-1 px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">
-                {assignees.length}
+                {assigneesValue.length}
               </span>
             )}
           </Popover.Button>
@@ -115,7 +129,7 @@ export default function AddTaskRow({
                   >
                     <input
                       type="checkbox"
-                      checked={assignees.includes(member.userId)}
+                      checked={assigneesValue.includes(member.userId)}
                       onChange={() => toggleAssignee(member.userId)}
                       className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
                     />
@@ -131,8 +145,8 @@ export default function AddTaskRow({
 
         {/* Add Button */}
         <button
-          onClick={handleSubmit}
-          disabled={creating || !title.trim()}
+          type="submit"
+          disabled={creating || !titleValue.trim()}
           className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {creating ? (
@@ -152,12 +166,10 @@ export default function AddTaskRow({
               Description (optional)
             </label>
             <textarea
-              ref={descRef}
+              {...register("description")}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
               placeholder="Add details..."
               rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -166,15 +178,13 @@ export default function AddTaskRow({
               Due date (optional)
             </label>
             <input
-              ref={dateRef}
               type="date"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              {...register("dueDate")}
             />
           </div>
         </div>
       )}
-    </div>
+    </form>
   );
 }

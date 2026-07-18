@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { Icon } from '@/ui/icon/';
 
 interface ImageLightboxProps {
   src: string;
@@ -16,7 +16,7 @@ const ImageLightbox = ({ src, title, onClose }: ImageLightboxProps) => {
           onClick={onClose}
           className="absolute top-3 right-3 p-2 rounded-full bg-black/70 text-white hover:bg-black"
         >
-          <X className="w-5 h-5" />
+          <Icon name="close" size={20} />
         </button>
       </div>
     </div>

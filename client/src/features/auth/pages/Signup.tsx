@@ -1,9 +1,8 @@
-﻿import { useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSignup, useAuth } from "../hooks";
 import { TOAST_MESSAGES } from "../../../constants/toastMessages";
-import { validateSignupCredentials } from "../validators/authValidators";
 import { AUTH_ROUTES } from "../constants/authConstants";
 import { 
   GoogleLoginButton, 
@@ -27,17 +26,6 @@ const Signup = () => {
   const passwordValue = watch("password") || "";
 
   const onSubmit = async (data: SignupCredentials) => {
-    const validation = validateSignupCredentials(
-      data.username,
-      data.email,
-      data.password
-    );
-    
-    if (!validation.isValid) {
-      toast.error(validation.error || "Please check your inputs");
-      return;
-    }
-
     try {
       await signup({
         username: data.username.trim(),

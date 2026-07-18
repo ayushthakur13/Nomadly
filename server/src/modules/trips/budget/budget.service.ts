@@ -3,6 +3,7 @@ import TripBudget, { ITripBudget, IBudgetMember } from './budget.model';
 import Expense, { IExpense } from './expense.model';
 import Trip from '../core/trip.model';
 import { isTripCreator, isTripMember } from '../members/member.utils';
+import { TripError, TRIP_ERRORS } from '../core/trip.errors';
 import {
   FinancialUtils,
   ValidationUtils,
@@ -26,15 +27,15 @@ class BudgetService {
     ValidationUtils.validateObjectId(tripId, 'trip ID');
 
     const trip = await Trip.findById(tripId);
-    if (!trip) throw new Error('Trip not found');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!isTripCreator(trip, userId)) {
-      throw new Error('Only trip creator can create budget');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can create budget', 403);
     }
 
     const existing = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
     if (existing) {
-      throw new Error('Budget already exists for this trip');
+      throw new TripError(TRIP_ERRORS.BUDGET_ALREADY_EXISTS, 'Budget already exists for this trip', 400);
     }
 
     const baseCurrency = dto.baseCurrency?.trim().toUpperCase();
@@ -128,14 +129,14 @@ class BudgetService {
     ValidationUtils.validateObjectId(tripId, 'trip ID');
 
     const trip = await Trip.findById(tripId);
-    if (!trip) throw new Error('Trip not found');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!isTripCreator(trip, userId)) {
-      throw new Error('Only trip creator can update base budget');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can update base budget', 403);
     }
 
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
-    if (!budget) throw new Error('Budget not found');
+    if (!budget) throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Budget not found', 404);
 
     if (dto.baseBudgetAmount === null) {
       budget.baseBudgetAmount = null;
@@ -158,14 +159,14 @@ class BudgetService {
     ValidationUtils.validateObjectId(tripId, 'trip ID');
 
     const trip = await Trip.findById(tripId);
-    if (!trip) throw new Error('Trip not found');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!isTripCreator(trip, userId) && !isTripMember(trip, userId)) {
-      throw new Error('Unauthorized to view budget');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to view budget', 403);
     }
 
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
-    if (!budget) throw new Error('Budget not found');
+    if (!budget) throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Budget not found', 404);
 
     const expenses = await Expense.find({ tripId: new Types.ObjectId(tripId) })
       .sort({ date: -1, createdAt: -1 })
@@ -184,14 +185,14 @@ class BudgetService {
     ValidationUtils.validateObjectId(targetUserId, 'user ID');
 
     const trip = await Trip.findById(tripId);
-    if (!trip) throw new Error('Trip not found');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!isTripCreator(trip, requesterId) && !isTripMember(trip, requesterId)) {
-      throw new Error('Unauthorized to update budget member');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to update budget member', 403);
     }
 
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
-    if (!budget) throw new Error('Budget not found');
+    if (!budget) throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Budget not found', 404);
 
     ValidationUtils.validateContribution(dto.plannedContribution);
 
@@ -248,7 +249,7 @@ class BudgetService {
     ValidationUtils.validateObjectId(tripId, 'trip ID');
 
     const trip = await Trip.findById(tripId);
-    if (!trip) throw new Error('Trip not found');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!isTripCreator(trip, requesterId)) {
       throw new Error('Only trip creator can bulk update contributions');
@@ -259,7 +260,7 @@ class BudgetService {
     }
 
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
-    if (!budget) throw new Error('Budget not found');
+    if (!budget) throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Budget not found', 404);
 
     // Collect spent amounts for all target members in parallel before validation
     const spentMap = new Map<string, number>();
@@ -654,13 +655,13 @@ class BudgetService {
     ValidationUtils.validateObjectId(tripId, 'trip ID');
 
     const trip = await Trip.findById(tripId).lean();
-    if (!trip) throw new Error('Trip not found');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
     if (!trip.isPublic) {
-      throw new Error('Unauthorized to view budget');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Unauthorized to view budget', 403);
     }
 
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) }).lean();
-    if (!budget) throw new Error('Budget not found');
+    if (!budget) throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Budget not found', 404);
 
     const totalPlanned = budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0);
 

@@ -3,23 +3,24 @@ import Accommodation, { IAccommodation } from "./accommodation.model";
 import Trip from "../core/trip.model";
 import { isTripCreator, isTripMember } from "../members/member.utils";
 import { CreateAccommodationDTO, UpdateAccommodationDTO } from "../../../../../shared/types";
+import { TripError, TRIP_ERRORS } from "../core/trip.errors";
 
 class AccommodationService {
   async getAccommodationsByTripId(tripId: string, userId?: string): Promise<IAccommodation[]> {
     if (!Types.ObjectId.isValid(tripId)) {
-      throw new Error("Invalid trip ID");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid trip ID", 400);
     }
 
     const trip = await Trip.findById(tripId).lean();
     if (!trip) {
-      throw new Error("Trip not found");
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, "Trip not found", 404);
     }
 
     const isMember = userId ? trip.members.some((member: any) => member.userId.toString() === userId.toString()) : false;
     const isOwner = userId ? isTripCreator(trip, userId) : false;
 
     if (!trip.isPublic && !isMember && !isOwner) {
-      throw new Error("Unauthorized to view accommodations");
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, "Unauthorized to view accommodations", 403);
     }
 
     return Accommodation.find({ tripId: new Types.ObjectId(tripId) })
@@ -34,16 +35,16 @@ class AccommodationService {
     data: CreateAccommodationDTO
   ): Promise<IAccommodation> {
     if (!Types.ObjectId.isValid(tripId)) {
-      throw new Error("Invalid trip ID");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid trip ID", 400);
     }
 
     const trip = await Trip.findById(tripId);
     if (!trip) {
-      throw new Error("Trip not found");
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, "Trip not found", 404);
     }
 
-    if (!isTripMember(trip, userId)) {
-      throw new Error("Unauthorized to create accommodations in this trip");
+    if (!isTripCreator(trip, userId) && !isTripMember(trip, userId)) {
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, "Unauthorized to create accommodations in this trip", 403);
     }
 
     this.validatePayload(data);
@@ -79,21 +80,21 @@ class AccommodationService {
     data: UpdateAccommodationDTO
   ): Promise<IAccommodation> {
     if (!Types.ObjectId.isValid(accommodationId)) {
-      throw new Error("Invalid accommodation ID");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid accommodation ID", 400);
     }
 
     const accommodation = await Accommodation.findById(accommodationId);
     if (!accommodation) {
-      throw new Error("Accommodation not found");
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, "Accommodation not found", 404);
     }
 
     const trip = await Trip.findById(accommodation.tripId);
     if (!trip) {
-      throw new Error("Trip not found");
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, "Trip not found", 404);
     }
 
     if (!this.canEditAccommodation(trip, accommodation, userId)) {
-      throw new Error("Unauthorized to update this accommodation");
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, "Unauthorized to update this accommodation", 403);
     }
 
     this.validatePayload(data, accommodation);
@@ -130,21 +131,21 @@ class AccommodationService {
 
   async deleteAccommodation(accommodationId: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(accommodationId)) {
-      throw new Error("Invalid accommodation ID");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid accommodation ID", 400);
     }
 
     const accommodation = await Accommodation.findById(accommodationId);
     if (!accommodation) {
-      throw new Error("Accommodation not found");
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, "Accommodation not found", 404);
     }
 
     const trip = await Trip.findById(accommodation.tripId);
     if (!trip) {
-      throw new Error("Trip not found");
+      throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, "Trip not found", 404);
     }
 
     if (!this.canEditAccommodation(trip, accommodation, userId)) {
-      throw new Error("Unauthorized to delete this accommodation");
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, "Unauthorized to delete this accommodation", 403);
     }
 
     await Accommodation.findByIdAndDelete(accommodationId);
@@ -152,29 +153,29 @@ class AccommodationService {
 
   private validatePayload(payload: Partial<CreateAccommodationDTO | UpdateAccommodationDTO>, current?: IAccommodation) {
     if ("name" in payload && payload.name !== undefined && !payload.name.trim()) {
-      throw new Error("Accommodation name is required");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Accommodation name is required", 400);
     }
 
     const nextPricePerNight = payload.pricePerNight !== undefined ? payload.pricePerNight : current?.pricePerNight;
     if (nextPricePerNight !== undefined && nextPricePerNight < 0) {
-      throw new Error("Price per night cannot be negative");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Price per night cannot be negative", 400);
     }
 
     const nextCheckIn = payload.checkIn !== undefined ? payload.checkIn : current?.checkIn;
     const nextCheckOut = payload.checkOut !== undefined ? payload.checkOut : current?.checkOut;
 
     if (nextCheckIn && nextCheckOut && new Date(nextCheckOut) < new Date(nextCheckIn)) {
-      throw new Error("Check-out date must be after check-in date");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Check-out date must be after check-in date", 400);
     }
 
     const nextBookingUrlRaw = payload.bookingUrl !== undefined ? payload.bookingUrl : current?.bookingUrl;
     const nextBookingUrl = this.normalizeBookingUrl(nextBookingUrlRaw);
     if (nextBookingUrl && !this.isValidUrl(nextBookingUrl)) {
-      throw new Error("Invalid booking URL");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid booking URL", 400);
     }
 
     if (payload.destinationId !== undefined && payload.destinationId && !Types.ObjectId.isValid(payload.destinationId)) {
-      throw new Error("Invalid destination ID");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid destination ID", 400);
     }
   }
 
@@ -197,7 +198,7 @@ class AccommodationService {
 
   async deleteTripAccommodations(tripId: string): Promise<void> {
     if (!Types.ObjectId.isValid(tripId)) {
-      throw new Error("Invalid trip ID");
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid trip ID", 400);
     }
     await Accommodation.deleteMany({ tripId: new Types.ObjectId(tripId) });
   }

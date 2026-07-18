@@ -12,7 +12,14 @@ import {
   logout,
   secureLogout
 } from "@/features/auth";
-import api from "@/services/api";
+import {
+  fetchCurrentUserAPI,
+  updateProfileAPI,
+  updateUsernameAPI,
+  uploadAvatarAPI,
+  deleteAvatarAPI,
+  updatePasswordAPI
+} from "@/services/users.service";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { TOAST_MESSAGES } from "@/constants/toastMessages";
 import { AvatarManager, SecuritySection } from "../components";
@@ -55,8 +62,8 @@ export default function Profile() {
 
   useEffect(() => {
     fetchProfile(async () => {
-      const { data } = await api.get("/users/me");
-      const profile = data.data.user;
+      const response = await fetchCurrentUserAPI();
+      const profile = response.data.user;
       reset({
         username: profile.username ?? "",
         name: profile.name ?? "",
@@ -91,7 +98,7 @@ export default function Profile() {
 
     if (Object.keys(updates).length > 0) {
       try {
-        const { data: response } = await api.patch("/users/me", updates);
+        const response = await updateProfileAPI(updates);
         latestUser = response.data.user;
         dispatch(updateProfileSuccess({ user: response.data.user }));
         anySuccess = true;
@@ -110,9 +117,7 @@ export default function Profile() {
         );
       } else {
         try {
-          const { data: response } = await api.patch("/users/me/username", {
-            username: newUsername,
-          });
+          const response = await updateUsernameAPI(newUsername);
           latestUser = response.data.user;
           dispatch(updateProfileSuccess({ user: response.data.user }));
           anySuccess = true;
@@ -160,9 +165,7 @@ export default function Profile() {
     await updateAvatar(async () => {
       const formData = new FormData();
       formData.append("avatar", file);
-      const { data: response } = await api.post("/users/me/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await uploadAvatarAPI(formData);
       dispatch(updateProfileSuccess({ user: response.data.user }));
       URL.revokeObjectURL(preview);
     });
@@ -174,7 +177,7 @@ export default function Profile() {
     if (!user?.profilePicUrl) return;
 
     await deleteAvatar(async () => {
-      const { data: response } = await api.delete("/users/me/avatar");
+      const response = await deleteAvatarAPI();
       dispatch(updateProfileSuccess({ user: response.data.user }));
     });
   };
@@ -204,7 +207,7 @@ export default function Profile() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get("/users/me");
+        const data = await fetchCurrentUserAPI();
         setHasPassword(Boolean(data?.data?.user?.hasPassword));
       } catch {}
     })();
@@ -223,7 +226,7 @@ export default function Profile() {
     await changePassword(async () => {
       const payload: any = { newPassword };
       if (hasPassword) payload.currentPassword = currentPassword;
-      await api.patch("/users/me/password", payload);
+      await updatePasswordAPI(payload);
     });
   };
 

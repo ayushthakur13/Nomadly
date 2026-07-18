@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchSavedTripsAPI, unsaveTripAPI } from "../../../services/explore.service";
-import api from "../../../services/api";
+import { cloneTripAPI } from "../../../services/trips.service";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
 import { Icon } from "@/ui";
@@ -60,12 +60,12 @@ export default function SavedTripsPage() {
     if (!confirmClone) return;
 
     try {
-      const response = await api.post(`/trips/${tripId}/clone`, {
+      const response = await cloneTripAPI(tripId, {
         newTripName: `${tripName} (Clone)`,
         includeBudget: true
       });
       toast.success("Trip cloned successfully!");
-      navigate(`/trips/${response.data.data.trip._id}`);
+      navigate(`/trips/${response.data.trip._id}`);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to clone trip");
     }

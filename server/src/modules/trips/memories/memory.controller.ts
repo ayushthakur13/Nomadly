@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import memoryService from './memory.service';
+import { TripError } from '../core/trip.errors';
 
 interface AuthRequest extends Request {
   user?: {
@@ -37,12 +38,8 @@ class MemoryController {
         data: { memories }
       });
     } catch (error: any) {
-      if (error.message === 'Trip not found') {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === 'Unauthorized to view memories') {
-        res.status(403).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -99,12 +96,8 @@ class MemoryController {
         data: { memory }
       });
     } catch (error: any) {
-      if (error.message === 'Trip not found') {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === 'Unauthorized to upload memories') {
-        res.status(403).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -143,12 +136,8 @@ class MemoryController {
         data: { memory }
       });
     } catch (error: any) {
-      if (error.message === 'Memory not found' || error.message === 'Trip not found') {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === 'Unauthorized to update memory caption') {
-        res.status(403).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -180,12 +169,8 @@ class MemoryController {
         message: 'Memory deleted successfully'
       });
     } catch (error: any) {
-      if (error.message === 'Memory not found' || error.message === 'Trip not found') {
-        res.status(404).json({ success: false, message: error.message });
-        return;
-      }
-      if (error.message === 'Unauthorized to delete memory') {
-        res.status(403).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);

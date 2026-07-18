@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { LocationSearchInput } from '@/ui/common/';
 import type { Destination, DestinationPayload } from '@/services/destinations.service';
 import { Icon } from '@/ui/icon/';
@@ -17,9 +18,15 @@ interface DestinationFormModalProps {
 }
 
 const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestination }: DestinationFormModalProps) => {
-  const [payload, setPayload] = useState<DestinationPayload>({ name: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { register, handleSubmit, reset, setValue, watch } = useForm<DestinationPayload>({
+    defaultValues: { name: '', notes: '' }
+  });
+
+  const locationValue = watch('location');
+  const nameValue = watch('name');
 
   // Calculate proximity from trip's main destination
   const proximity = tripDestination?.point?.coordinates ? {
@@ -28,37 +35,38 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
   } : undefined;
 
   useEffect(() => {
-    if (initial) {
-      setPayload({
-        name: initial.name,
-        location: initial.location?.point?.coordinates
-          ? {
-              name: initial.location?.name || initial.location?.address,
-              address: initial.location?.address,
-              placeId: initial.location?.placeId,
-              coordinates: initial.location.point.coordinates,
-            }
-          : initial.location,
-        arrivalDate: normalizeDateInput(initial.arrivalDate),
-        departureDate: normalizeDateInput(initial.departureDate),
-        notes: initial.notes ?? '',
-      });
-    } else {
-      setPayload({ name: '', notes: '' });
+    if (open) {
+      if (initial) {
+        reset({
+          name: initial.name,
+          location: initial.location?.point?.coordinates
+            ? {
+                name: initial.location?.name || initial.location?.address,
+                address: initial.location?.address,
+                placeId: initial.location?.placeId,
+                coordinates: initial.location.point.coordinates,
+              }
+            : initial.location,
+          arrivalDate: normalizeDateInput(initial.arrivalDate),
+          departureDate: normalizeDateInput(initial.departureDate),
+          notes: initial.notes ?? '',
+        });
+      } else {
+        reset({ name: '', notes: '', location: undefined, arrivalDate: undefined, departureDate: undefined });
+      }
+      setError(null);
     }
-    setError(null);
-  }, [initial, open]);
+  }, [initial, open, reset]);
 
   if (!open) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: DestinationPayload) => {
     setSubmitting(true);
     setError(null);
     try {
-      const trimmedNotes = payload.notes?.trim();
+      const trimmedNotes = data.notes?.trim();
       const submission: DestinationPayload = {
-        ...payload,
+        ...data,
         notes: trimmedNotes ?? '',
       };
 
@@ -87,30 +95,27 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="p-6 space-y-5">
           <div>
             <label className="text-sm font-medium text-gray-700 mb-2 block">Place</label>
             <LocationSearchInput
               searchContext="destination"
               proximity={proximity}
-              initialValue={payload.location?.name || payload.name}
+              initialValue={locationValue?.name || nameValue}
               placeholder="Search for places, POIs, addresses..."
-              onSelect={(loc) =>
-                setPayload((prev) => ({
-                  ...prev,
-                  name: loc.name || prev.name,
-                  location: loc.lat && loc.lng ? {
-                    name: loc.name,
-                    address: loc.address,
-                    placeId: loc.placeId,
-                    coordinates: [loc.lng, loc.lat],
-                  } : {
-                    name: loc.name,
-                    address: loc.address,
-                    placeId: loc.placeId,
-                  },
-                }))
-              }
+              onSelect={(loc) => {
+                setValue('name', loc.name || '');
+                setValue('location', loc.lat && loc.lng ? {
+                  name: loc.name,
+                  address: loc.address,
+                  placeId: loc.placeId,
+                  coordinates: [loc.lng, loc.lat],
+                } : {
+                  name: loc.name,
+                  address: loc.address,
+                  placeId: loc.placeId,
+                });
+              }}
             />
           </div>
 
@@ -122,8 +127,7 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
               <input
                 type="date"
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                value={payload.arrivalDate || ''}
-                onChange={(e) => setPayload((p) => ({ ...p, arrivalDate: e.target.value || undefined }))}
+                {...register("arrivalDate")}
               />
             </div>
             <div>
@@ -133,8 +137,7 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
               <input
                 type="date"
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                value={payload.departureDate || ''}
-                onChange={(e) => setPayload((p) => ({ ...p, departureDate: e.target.value || undefined }))}
+                {...register("departureDate")}
               />
             </div>
           </div>
@@ -146,8 +149,7 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
             <textarea
               rows={3}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              value={payload.notes || ''}
-              onChange={(e) => setPayload((p) => ({ ...p, notes: e.target.value }))}
+              {...register("notes")}
               placeholder="Capture intentions, vibes, people to meet..."
             />
           </div>
@@ -178,3 +180,4 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
 };
 
 export default DestinationFormModal;
+

@@ -97,22 +97,10 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
       }
     });
   } catch (err: any) {
-    if (err instanceof UserError && err.code === USER_ERRORS.USER_NOT_FOUND) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    if (err instanceof UserError) {
+      res.status(err.statusCode).json({ success: false, message: err.message });
       return;
     }
-    
-    if (err.message?.includes('Name must be') || err.message?.includes('Bio must be')) {
-      res.status(400).json({
-        success: false,
-        message: err.message
-      });
-      return;
-    }
-
     next(err);
   }
 }
@@ -151,11 +139,8 @@ export async function uploadAvatar(req: Request, res: Response, next: NextFuncti
       }
     });
   } catch (err: any) {
-    if (err instanceof UserError && err.code === USER_ERRORS.USER_NOT_FOUND) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    if (err instanceof UserError) {
+      res.status(err.statusCode).json({ success: false, message: err.message });
       return;
     }
     next(err);
@@ -182,11 +167,8 @@ export async function deleteAvatar(req: Request, res: Response, next: NextFuncti
       }
     });
   } catch (err: any) {
-    if (err instanceof UserError && err.code === USER_ERRORS.USER_NOT_FOUND) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+    if (err instanceof UserError) {
+      res.status(err.statusCode).json({ success: false, message: err.message });
       return;
     }
     next(err);
@@ -210,18 +192,8 @@ export async function changeUsername(req: Request, res: Response, next: NextFunc
     res.status(200).json({ success: true, message: 'Username updated', data: { user: publicUser(updatedUser) } });
   } catch (err: any) {
     if (err instanceof UserError) {
-      if (err.code === USER_ERRORS.INVALID_USERNAME) {
-        res.status(400).json({ success: false, message: 'Invalid username (3-20 chars, letters/numbers/underscore only)' });
-        return;
-      }
-      if (err.code === USER_ERRORS.USERNAME_TAKEN) {
-        res.status(409).json({ success: false, message: 'Username already taken' });
-        return;
-      }
-      if (err.code === USER_ERRORS.USER_NOT_FOUND) {
-        res.status(404).json({ success: false, message: 'User not found' });
-        return;
-      }
+      res.status(err.statusCode).json({ success: false, message: err.message });
+      return;
     }
     next(err);
   }
@@ -244,18 +216,8 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     res.status(200).json({ success: true, message: 'Password updated successfully', data: { user: publicUser(updatedUser) } });
   } catch (err: any) {
     if (err instanceof UserError) {
-      if (err.code === USER_ERRORS.INVALID_PASSWORD) {
-        res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
-        return;
-      }
-      if (err.code === USER_ERRORS.WRONG_CURRENT_PASSWORD) {
-        res.status(400).json({ success: false, message: 'Invalid current password' });
-        return;
-      }
-      if (err.code === USER_ERRORS.USER_NOT_FOUND) {
-        res.status(404).json({ success: false, message: 'User not found' });
-        return;
-      }
+      res.status(err.statusCode).json({ success: false, message: err.message });
+      return;
     }
     next(err);
   }

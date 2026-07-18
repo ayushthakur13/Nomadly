@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useLogin, useAuth } from "../hooks";
 import { TOAST_MESSAGES } from "../../../constants/toastMessages";
-import { validateLoginCredentials } from "../validators/authValidators";
 import { AUTH_ROUTES } from "../constants/authConstants";
 import { 
   GoogleLoginButton, 
@@ -23,13 +22,6 @@ const Login = () => {
   } = useForm<LoginCredentials>();
 
   const onSubmit = async (data: LoginCredentials) => {
-    const validation = validateLoginCredentials(data.usernameOrEmail, data.password);
-    
-    if (!validation.isValid) {
-      toast.error(validation.error || "Please provide valid credentials");
-      return;
-    }
-
     try {
       await login({
         usernameOrEmail: data.usernameOrEmail.trim(),

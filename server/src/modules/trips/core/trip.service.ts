@@ -4,6 +4,7 @@ import '../destinations/destination.model';
 import User from '../../users/user.model';
 import * as userService from '../../users/user.service';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters, CloneTripOptions } from './trip.types';
+import { TripError, TRIP_ERRORS } from './trip.errors';
 import mapService from '../../maps/map.service';
 import tripUtils from './trip.utils';
 import { canModifyTripResources } from '../members/member.permissions';
@@ -15,7 +16,7 @@ import accommodationService from '../accommodations/accommodation.service';
 class TripService {
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
     if (!data.destinationLocation) {
-      throw new Error('Destination location is required');
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Destination location is required', 400);
     }
     
     // Validate destination coordinates if provided
@@ -23,7 +24,7 @@ class TripService {
     if (data.destinationLocation.coordinates) {
       const { lat: destLat, lng: destLng } = data.destinationLocation.coordinates;
       if (!mapService.validateCoordinates(destLat, destLng)) {
-        throw new Error('Invalid destination coordinates');
+        throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid destination coordinates', 400);
       }
       destinationLocation = {
         ...data.destinationLocation,
@@ -44,7 +45,7 @@ class TripService {
       if (data.sourceLocation.coordinates) {
         const { lat, lng } = data.sourceLocation.coordinates;
         if (!mapService.validateCoordinates(lat, lng)) {
-          throw new Error('Invalid source coordinates');
+          throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid source coordinates', 400);
         }
         sourceLocation = {
           ...data.sourceLocation,
@@ -64,7 +65,7 @@ class TripService {
     const endDate = new Date(data.endDate);
     const dateValidation = tripUtils.validateTripDates(startDate, endDate);
     if (!dateValidation.valid) {
-      throw new Error(dateValidation.error);
+      throw new TripError(TRIP_ERRORS.INVALID_INPUT, dateValidation.error || 'Invalid dates', 400);
     }
 
     const slug = await tripUtils.generateUniqueSlug(data.tripName);
@@ -228,7 +229,7 @@ class TripService {
     );
 
     if (!canAccess) {
-      throw new Error('TRIP_PRIVATE');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'This trip is private', 403);
     }
 
     const isMember = requestingUserId && isTripMember(trip as ITrip, requestingUserId);
@@ -244,17 +245,12 @@ class TripService {
     if (!trip) return null;
 
     if (!canModifyTripResources(trip, userId)) {
-      throw new Error('INSUFFICIENT_PERMISSIONS');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'You do not have permission to edit this trip', 403);
     }
 
-    if (updates.category === 'solo') {
-      const hasOtherMembers = trip.members && trip.members.filter((m: any) => {
-        const mId = m.userId?.toString();
-        const cId = trip.createdBy?.toString();
-        return mId && cId && mId !== cId;
-      }).length > 0;
-      if (hasOtherMembers) {
-        throw new Error('Cannot change trip category to Solo while there are other members in the trip.');
+    if (updates.category === 'Solo') {
+      if (trip.members && trip.members.length > 1) {
+        throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Cannot change trip category to Solo while there are other members in the trip.', 400);
       }
     }
 
@@ -262,7 +258,7 @@ class TripService {
       if (updates.destinationLocation.coordinates) {
         const { lat, lng } = updates.destinationLocation.coordinates;
         if (!mapService.validateCoordinates(lat, lng)) {
-          throw new Error('Invalid destination coordinates');
+          throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid destination coordinates', 400);
         }
         (updates as any).destinationLocation = {
           ...updates.destinationLocation,
@@ -282,7 +278,7 @@ class TripService {
       if (updates.sourceLocation.coordinates) {
         const { lat, lng } = updates.sourceLocation.coordinates;
         if (!mapService.validateCoordinates(lat, lng)) {
-          throw new Error('Invalid source coordinates');
+          throw new TripError(TRIP_ERRORS.INVALID_INPUT, 'Invalid source coordinates', 400);
         }
         (updates as any).sourceLocation = {
           ...updates.sourceLocation,
@@ -304,7 +300,7 @@ class TripService {
         new Date(updates.endDate)
       );
       if (!dateValidation.valid) {
-        throw new Error(dateValidation.error);
+        throw new TripError(TRIP_ERRORS.INVALID_INPUT, dateValidation.error || 'Invalid dates', 400);
       }
     }
 
@@ -330,7 +326,7 @@ class TripService {
     if (!trip) return false;
 
     if (!isTripCreator(trip, userId)) {
-      throw new Error('ONLY_CREATOR_CAN_DELETE');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can delete this trip', 403);
     }
 
     await Trip.findByIdAndDelete(tripId);
@@ -362,12 +358,12 @@ class TripService {
     if (!trip) return null;
 
     if (!isTripCreator(trip, userId)) {
-      throw new Error('ONLY_CREATOR_CAN_PUBLISH');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can publish this trip', 403);
     }
 
     const user = await userService.getUserById(userId);
     if (!user.isPublic) {
-      throw new Error('USER_PROFILE_MUST_BE_PUBLIC_TO_PUBLISH');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'User profile must be public to publish', 403);
     }
 
     trip.isPublic = true;
@@ -381,7 +377,7 @@ class TripService {
     if (!trip) return null;
 
     if (!isTripCreator(trip, userId)) {
-      throw new Error('ONLY_CREATOR_CAN_UNPUBLISH');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can unpublish this trip', 403);
     }
 
     trip.isPublic = false;
@@ -397,10 +393,10 @@ class TripService {
     publicId: string
   ): Promise<{ trip: ITrip; oldPublicId: string | null }> {
     const trip = await Trip.findById(tripId);
-    if (!trip) throw new Error('TRIP_NOT_FOUND');
+    if (!trip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!canModifyTripResources(trip, userId)) {
-      throw new Error('INSUFFICIENT_PERMISSIONS');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Insufficient permissions', 403);
     }
 
     const oldPublicId = trip.coverImagePublicId || null;
@@ -416,7 +412,7 @@ class TripService {
     if (!trip) return null;
 
     if (!canModifyTripResources(trip, userId)) {
-      throw new Error('INSUFFICIENT_PERMISSIONS');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Insufficient permissions', 403);
     }
 
     trip.coverImageUrl = null as any;
@@ -444,10 +440,10 @@ class TripService {
 
   async cloneTrip(tripId: string, userId: string, options: CloneTripOptions = {}): Promise<ITrip> {
     const originalTrip = await Trip.findById(tripId).populate('destinations').lean();
-    if (!originalTrip) throw new Error('TRIP_NOT_FOUND');
+    if (!originalTrip) throw new TripError(TRIP_ERRORS.TRIP_NOT_FOUND, 'Trip not found', 404);
 
     if (!tripUtils.canAccessTrip(originalTrip as ITrip, userId)) {
-      throw new Error('TRIP_PRIVATE');
+      throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'This trip is private', 403);
     }
 
     const { newTripName, newStartDate, includeBudget = true } = options;

@@ -1,4 +1,4 @@
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppLayout } from '@/ui/layout/';
 import { TripLayout } from '@/features/trips/workspace/shell';
@@ -14,7 +14,6 @@ import DestinationsPage from '@/features/trips/workspace/modules/destinations/De
 
 const TripWorkspacePage = () => {
   const { tripId } = useParams<{ tripId: string }>();
-  const location = useLocation();
   const { user } = useSelector((state: any) => state.auth);
 
   // Fetch trip data
@@ -60,30 +59,6 @@ const TripWorkspacePage = () => {
 
   const isOwner = Boolean(tripOwnerId && currentUserId && tripOwnerId === currentUserId);
 
-  // Determine which content to show based on current route
-  const renderContent = () => {
-    const path = location.pathname.replace(`/trips/${tripId}`, '');
-
-    switch (path) {
-      case '/destinations':
-        return <DestinationsPage />;
-      case '/tasks':
-        return <TasksPage />;
-      case '/budget':
-        return <BudgetPage />;
-      case '/accommodations':
-        return <AccommodationsPage />;
-      case '/members':
-        return <MembersPage tripId={tripId!} trip={trip} isOwner={isOwner} />;
-      case '/memories':
-        return <MemoriesPage />;
-      case '/chat':
-        return <ChatPage />;
-      default:
-        return <OverviewPage trip={trip} />;
-    }
-  };
-
   return (
     <AppLayout>
       <TripLayout
@@ -93,7 +68,16 @@ const TripWorkspacePage = () => {
         onPublishToggle={handlePublishToggle}
         onDeleteClick={() => {}}
       >
-        {renderContent()}
+        <Routes>
+          <Route index element={<OverviewPage trip={trip} />} />
+          <Route path="destinations" element={<DestinationsPage />} />
+          <Route path="tasks" element={<TasksPage />} />
+          <Route path="budget" element={<BudgetPage />} />
+          <Route path="accommodations" element={<AccommodationsPage />} />
+          <Route path="members" element={<MembersPage tripId={tripId!} trip={trip} isOwner={isOwner} />} />
+          <Route path="memories" element={<MemoriesPage />} />
+          <Route path="chat" element={<ChatPage />} />
+        </Routes>
       </TripLayout>
     </AppLayout>
   );

@@ -9,6 +9,7 @@ import { ErrorAlert, PageHeader, ConfirmationModal } from '@/ui/common/';
 import { Icon } from '@/ui/icon/';
 import type { AddMemberPayload } from '@/services/members.service';
 import { createInvitation, cancelInvitation } from '@/services/invitations.service';
+import { useAsyncAction } from '@/hooks/useAsyncAction';
 import type { Trip } from '@shared/types';
 
 interface MembersPageProps {
@@ -22,74 +23,74 @@ const MembersPage = ({ tripId, trip, isOwner }: MembersPageProps) => {
   const currentUser = useSelector((state: any) => state.auth?.user);
   const currentUserId = currentUser?._id ?? currentUser?.id;
     
-  // Fetch pending invitations first (needed for conditional polling)
   const { invitations, loading: invitesLoading, refetch: refetchInvitations } = useTripInvitations(tripId);
-  
-  // Members hook with eventual consistency:
-  // - Refetches on visibility change and window focus
-  // - Polls every 45s only when pending invitations exist
-  // - Stops polling when no pending invitations
   const { members, loading, error, removeMember, leaveTrip, reload } = useTripMembers(tripId, { 
     pendingInvitesCount: invitations.length 
   });
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addingMember, setAddingMember] = useState(false);
   const [removingUserId, setRemovingUserId] = useState<string | null>(null);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [leavingTrip, setLeavingTrip] = useState(false);
 
   const isSoloTrip = trip?.category === 'solo';
 
+  const { execute: inviteMember, isLoading: addingMember } = useAsyncAction({
+    onSuccess: () => {
+      refetchInvitations();
+      setShowAddModal(false);
+    },
+    errorMessage: 'Failed to send invitation'
+  });
+
   const handleAddMember = async (payload: AddMemberPayload) => {
-    setAddingMember(true);
-    try {
+    await inviteMember(async () => {
       await createInvitation(tripId, {
         email: payload.email,
         username: payload.username,
         message: payload.message,
       });
-      await refetchInvitations();
       toast.success('Invitation sent');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to send invitation');
-      throw err;
-    } finally {
-      setAddingMember(false);
-    }
+    });
   };
+
+  const { execute: performRemoveMember } = useAsyncAction({
+    onSuccess: () => {
+      setRemovingUserId(null);
+      reload();
+    },
+    errorMessage: 'Failed to remove member'
+  });
 
   const handleRemoveMember = async () => {
     if (!removingUserId) return;
-    try {
+    await performRemoveMember(async () => {
       await removeMember(removingUserId);
       toast.success('Member removed from trip');
-      setRemovingUserId(null);
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to remove member');
-    }
+    });
   };
 
+  const { execute: performLeaveTrip, isLoading: leavingTrip } = useAsyncAction({
+    errorMessage: 'Failed to leave trip'
+  });
+
   const handleLeaveTrip = async () => {
-    setLeavingTrip(true);
-    try {
+    await performLeaveTrip(async () => {
       await leaveTrip();
       toast.success('You have left the trip');
       navigate('/trips');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to leave trip');
-      setLeavingTrip(false);
-    }
+    });
   };
 
+  const { execute: performCancelInvitation } = useAsyncAction({
+    onSuccess: () => refetchInvitations(),
+    errorMessage: 'Failed to cancel invitation'
+  });
+
   const handleCancelInvitation = async (invitationId: string) => {
-    try {
+    await performCancelInvitation(async () => {
       await cancelInvitation(invitationId);
-      await refetchInvitations();
       toast.success('Invitation cancelled');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to cancel invitation');
-    }
+    });
   };
 
   if (isSoloTrip) {

@@ -7,6 +7,7 @@ import { MemoryCard } from './components/MemoryCard';
 import { MemoryLightbox } from './components/MemoryLightbox';
 import { Icon } from '@/ui/icon';
 import { PageHeader, ConfirmationModal, ErrorAlert } from '@/ui/common';
+import { useAsyncAction } from '@/hooks/useAsyncAction';
 
 export const MemoriesPage = () => {
   const { user } = useSelector((state: any) => state.auth);
@@ -29,23 +30,22 @@ export const MemoriesPage = () => {
 
   const [activeLightboxIndex, setActiveLightboxIndex] = useState<number | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const { execute: performUpload, isLoading: isUploadLoading } = useAsyncAction({
+    onSuccess: () => toast.success('Photo uploaded successfully'),
+    errorMessage: 'Failed to upload photo'
+  });
 
   const { fileInputRef, handleFileChange, openFilePicker, isUploading } = useImageUpload({
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxSize: 5 * 1024 * 1024, // 5MB limit
     onUploadSuccess: async (file) => {
-      setActionError(null);
-      try {
+      await performUpload(async () => {
         const formData = new FormData();
         formData.append('image', file);
         await uploadMemory(formData);
-        toast.success('Photo uploaded successfully');
-      } catch (err: any) {
-        setActionError(err.message || 'Failed to upload photo');
-        toast.error(err.message || 'Failed to upload photo');
-      }
+      });
     },
   });
 
@@ -53,43 +53,41 @@ export const MemoriesPage = () => {
     setDeleteTargetId(id);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!deleteTargetId) return;
-    setIsDeleting(true);
-    setActionError(null);
-    try {
-      await deleteMemory(deleteTargetId);
+  const { execute: performDelete, isLoading: isDeleteLoading } = useAsyncAction({
+    onSuccess: () => {
       toast.success('Photo deleted successfully');
-      // If lightbox is open and we delete the current index, close it
       if (activeLightboxIndex !== null && memories[activeLightboxIndex]?._id === deleteTargetId) {
         setActiveLightboxIndex(null);
       }
-    } catch (err: any) {
-      setActionError(err.message || 'Failed to delete photo');
-      toast.error(err.message || 'Failed to delete photo');
-    } finally {
       setDeleteTargetId(null);
-      setIsDeleting(false);
-    }
+    },
+    errorMessage: 'Failed to delete photo'
+  });
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    await performDelete(async () => {
+      await deleteMemory(deleteTargetId);
+    });
   };
 
+  const { execute: performUpdateCaption } = useAsyncAction({
+    onSuccess: () => toast.success('Caption updated successfully'),
+    errorMessage: 'Failed to update caption'
+  });
+
   const handleEditCaption = async (id: string, caption: string) => {
-    setActionError(null);
-    try {
+    await performUpdateCaption(async () => {
       await updateMemoryCaption(id, caption);
-      toast.success('Caption updated successfully');
-    } catch (err: any) {
-      setActionError(err.message || 'Failed to update caption');
-      toast.error(err.message || 'Failed to update caption');
-    }
+    });
   };
 
   const showEmpty = !loading && memories.length === 0;
 
-  const isBusy = isUploading || actionLoading || isDeleting;
+  const isBusy = isUploading || actionLoading || isDeleteLoading || isUploadLoading;
   const loaderText = isUploading 
     ? 'Uploading...' 
-    : isDeleting 
+    : isDeleteLoading 
       ? 'Deleting...' 
       : 'Saving...';
 
@@ -180,7 +178,7 @@ export const MemoriesPage = () => {
           confirmText="Delete"
           cancelText="Cancel"
           isDangerous={true}
-          isLoading={isDeleting}
+          isLoading={isDeleteLoading}
           onConfirm={handleConfirmDelete}
           onCancel={() => setDeleteTargetId(null)}
         />

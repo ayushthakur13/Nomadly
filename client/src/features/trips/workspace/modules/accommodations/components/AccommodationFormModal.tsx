@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
 import { Icon } from "@/ui/icon";
 import type { Accommodation, CreateAccommodationDTO } from "@shared/types";
 import { DEFAULT_ACCOMMODATION_FORM_VALUES } from "../utils/constants";
@@ -28,13 +29,18 @@ const AccommodationFormModal = ({
   onClose,
   onSubmit,
 }: AccommodationFormModalProps) => {
-  const [payload, setPayload] = useState<CreateAccommodationDTO>(DEFAULT_ACCOMMODATION_FORM_VALUES);
   const [error, setError] = useState<string | null>(null);
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CreateAccommodationDTO>({
+    defaultValues: DEFAULT_ACCOMMODATION_FORM_VALUES
+  });
+
+  const destinationIdValue = watch("destinationId");
 
   useEffect(() => {
     if (!open) return;
     if (initial) {
-      setPayload({
+      reset({
         name: initial.name,
         address: initial.address ?? "",
         bookingUrl: initial.bookingUrl ?? "",
@@ -50,10 +56,10 @@ const AccommodationFormModal = ({
         handoffNotes: initial.handoffNotes ?? "",
       });
     } else {
-      setPayload(DEFAULT_ACCOMMODATION_FORM_VALUES);
+      reset(DEFAULT_ACCOMMODATION_FORM_VALUES);
     }
     setError(null);
-  }, [open, initial]);
+  }, [open, initial, reset]);
 
   const title = useMemo(() => (initial ? "Update stay" : "Add a stay"), [initial]);
   const subtitle = useMemo(
@@ -63,22 +69,21 @@ const AccommodationFormModal = ({
 
   if (!open) return null;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const onFormSubmit = async (data: CreateAccommodationDTO) => {
     setError(null);
 
-    if (!payload.name || !payload.name.trim()) {
+    if (!data.name || !data.name.trim()) {
       setError("Accommodation name is required");
       return;
     }
 
     try {
       await onSubmit({
-        ...payload,
-        name: payload.name.trim(),
-        address: payload.address?.trim(),
-        bookingUrl: payload.bookingUrl?.trim(),
-        notes: payload.notes?.trim(),
+        ...data,
+        name: data.name.trim(),
+        address: data.address?.trim(),
+        bookingUrl: data.bookingUrl?.trim(),
+        notes: data.notes?.trim(),
       });
       onClose();
     } catch (err: any) {
@@ -103,25 +108,24 @@ const AccommodationFormModal = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="flex-1 overflow-y-auto p-6 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Name</label>
               <input
                 type="text"
-                value={payload.name}
-                onChange={(e) => setPayload((prev) => ({ ...prev, name: e.target.value }))}
+                {...register("name", { required: "Accommodation name is required" })}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Hotel, hostel, Airbnb..."
               />
+              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
             </div>
 
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Address</label>
               <input
                 type="text"
-                value={payload.address || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, address: e.target.value }))}
+                {...register("address")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Street address or locality"
               />
@@ -131,17 +135,14 @@ const AccommodationFormModal = ({
               <div className="md:col-span-2">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Link destination (optional)</label>
                 <select
-                  value={(payload.destinationId as string) || ""}
+                  value={(destinationIdValue as string) || ""}
                   onChange={(e) => {
                     const selectedId = e.target.value || undefined;
                     const selected = destinationSuggestions.find((item) => item.id === selectedId);
-                    setPayload((prev) => ({
-                      ...prev,
-                      destinationId: selectedId,
-                      address: selected?.address || prev.address,
-                      checkIn: selected?.arrivalDate ? toDateInputValue(selected.arrivalDate) : prev.checkIn,
-                      checkOut: selected?.departureDate ? toDateInputValue(selected.departureDate) : prev.checkOut,
-                    }));
+                    setValue("destinationId", selectedId);
+                    if (selected?.address) setValue("address", selected.address);
+                    if (selected?.arrivalDate) setValue("checkIn", toDateInputValue(selected.arrivalDate));
+                    if (selected?.departureDate) setValue("checkOut", toDateInputValue(selected.departureDate));
                   }}
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
                 >
@@ -159,8 +160,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Check-in</label>
               <input
                 type="date"
-                value={typeof payload.checkIn === "string" ? payload.checkIn : ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, checkIn: e.target.value || undefined }))}
+                {...register("checkIn")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -169,8 +169,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Check-out</label>
               <input
                 type="date"
-                value={typeof payload.checkOut === "string" ? payload.checkOut : ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, checkOut: e.target.value || undefined }))}
+                {...register("checkOut")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
@@ -181,13 +180,9 @@ const AccommodationFormModal = ({
                 type="number"
                 min={0}
                 step="0.01"
-                value={payload.pricePerNight ?? ""}
-                onChange={(e) =>
-                  setPayload((prev) => ({
-                    ...prev,
-                    pricePerNight: e.target.value === "" ? undefined : Number(e.target.value),
-                  }))
-                }
+                {...register("pricePerNight", {
+                  setValueAs: (v) => v === "" ? undefined : Number(v)
+                })}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="0.00"
               />
@@ -197,8 +192,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Booking URL</label>
               <input
                 type="text"
-                value={payload.bookingUrl || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, bookingUrl: e.target.value }))}
+                {...register("bookingUrl")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="booking.com/... or full URL"
               />
@@ -208,8 +202,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Notes</label>
               <textarea
                 rows={3}
-                value={payload.notes || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, notes: e.target.value }))}
+                {...register("notes")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Check-in instructions, host contact, reminders..."
               />
@@ -219,8 +212,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Check-in instructions</label>
               <input
                 type="text"
-                value={(payload.checkInInstructions as string) || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, checkInInstructions: e.target.value }))}
+                {...register("checkInInstructions")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Door code, front desk note..."
               />
@@ -230,8 +222,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Host contact name</label>
               <input
                 type="text"
-                value={(payload.hostContactName as string) || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, hostContactName: e.target.value }))}
+                {...register("hostContactName")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Host/manager name"
               />
@@ -241,8 +232,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Host phone</label>
               <input
                 type="text"
-                value={(payload.hostContactPhone as string) || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, hostContactPhone: e.target.value }))}
+                {...register("hostContactPhone")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="+91..."
               />
@@ -252,8 +242,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Host WhatsApp</label>
               <input
                 type="text"
-                value={(payload.hostContactWhatsApp as string) || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, hostContactWhatsApp: e.target.value }))}
+                {...register("hostContactWhatsApp")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="+91..."
               />
@@ -263,8 +252,7 @@ const AccommodationFormModal = ({
               <label className="text-sm font-medium text-gray-700 mb-2 block">Handoff notes</label>
               <textarea
                 rows={2}
-                value={(payload.handoffNotes as string) || ""}
-                onChange={(e) => setPayload((prev) => ({ ...prev, handoffNotes: e.target.value }))}
+                {...register("handoffNotes")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Who carries keys, late arrival plan, handover sequence..."
               />
@@ -298,3 +286,4 @@ const AccommodationFormModal = ({
 };
 
 export default AccommodationFormModal;
+

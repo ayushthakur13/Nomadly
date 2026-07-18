@@ -58,18 +58,8 @@ class ExploreController {
       });
     } catch (error: any) {
       if (error instanceof ExploreError) {
-        if (error.code === EXPLORE_ERRORS.TRIP_NOT_FOUND) {
-          res.status(404).json({ success: false, message: error.message });
-          return;
-        }
-        if (error.code === EXPLORE_ERRORS.TRIP_NOT_ACCESSIBLE) {
-          res.status(403).json({ success: false, message: error.message });
-          return;
-        }
-        if (error.code === EXPLORE_ERRORS.ALREADY_LIKED) {
-          res.status(409).json({ success: false, message: error.message });
-          return;
-        }
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
       }
       next(error);
     }
@@ -101,14 +91,8 @@ class ExploreController {
       });
     } catch (error: any) {
       if (error instanceof ExploreError) {
-        if (error.code === EXPLORE_ERRORS.TRIP_NOT_FOUND) {
-          res.status(404).json({ success: false, message: error.message });
-          return;
-        }
-        if (error.code === EXPLORE_ERRORS.NOT_LIKED) {
-          res.status(400).json({ success: false, message: error.message });
-          return;
-        }
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
       }
       next(error);
     }
@@ -139,18 +123,8 @@ class ExploreController {
       });
     } catch (error: any) {
       if (error instanceof ExploreError) {
-        if (error.code === EXPLORE_ERRORS.TRIP_NOT_FOUND) {
-          res.status(404).json({ success: false, message: error.message });
-          return;
-        }
-        if (error.code === EXPLORE_ERRORS.TRIP_NOT_ACCESSIBLE) {
-          res.status(403).json({ success: false, message: error.message });
-          return;
-        }
-        if (error.code === EXPLORE_ERRORS.ALREADY_SAVED) {
-          res.status(409).json({ success: false, message: error.message });
-          return;
-        }
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
       }
       next(error);
     }
@@ -181,14 +155,8 @@ class ExploreController {
       });
     } catch (error: any) {
       if (error instanceof ExploreError) {
-        if (error.code === EXPLORE_ERRORS.TRIP_NOT_FOUND) {
-          res.status(404).json({ success: false, message: error.message });
-          return;
-        }
-        if (error.code === EXPLORE_ERRORS.NOT_SAVED) {
-          res.status(400).json({ success: false, message: error.message });
-          return;
-        }
+        res.status(error.statusCode).json({ success: false, message: error.message });
+        return;
       }
       next(error);
     }

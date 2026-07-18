@@ -101,16 +101,7 @@ class BudgetController {
       return;
     }
 
-    let snapshot;
-    try {
-      snapshot = await budgetService.getBudgetSnapshot(tripId, userId);
-    } catch (err: any) {
-      if (err.message === 'Budget not found') {
-        res.status(404).json({ success: false, message: 'Budget not found' });
-        return;
-      }
-      throw err;
-    }
+    const snapshot = await budgetService.getBudgetSnapshot(tripId, userId);
 
     res.status(200).json({
       success: true,

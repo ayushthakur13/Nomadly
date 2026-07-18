@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import tripService from './trip.service';
 import mapService from '../../maps/map.service';
 import { CreateTripDTO, UpdateTripDTO, TripQueryFilters } from './trip.types';
+import { TripError } from './trip.errors';
 import { deleteFromCloudinary } from '@shared/utils';
 
 interface AuthRequest extends Request {
@@ -155,11 +156,8 @@ class TripController {
         data: { trip }
       });
     } catch (error: any) {
-      if (error.message === 'TRIP_PRIVATE') {
-        res.status(403).json({ 
-          success: false, 
-          message: 'This trip is private' 
-        });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -212,15 +210,8 @@ class TripController {
         data: { trip }
       });
     } catch (error: any) {
-      if (error.message === 'INSUFFICIENT_PERMISSIONS') {
-        res.status(403).json({ 
-          success: false, 
-          message: 'You do not have permission to edit this trip' 
-        });
-        return;
-      }
-      if (error.message.includes('coordinates') || error.message.includes('Solo')) {
-        res.status(400).json({ success: false, message: error.message });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -271,11 +262,8 @@ class TripController {
         message: 'Trip deleted successfully'
       });
     } catch (error: any) {
-      if (error.message === 'ONLY_CREATOR_CAN_DELETE') {
-        res.status(403).json({ 
-          success: false, 
-          message: 'Only the trip creator can delete this trip' 
-        });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -424,18 +412,8 @@ class TripController {
         data: { trip }
       });
     } catch (error: any) {
-      if (error.message === 'ONLY_CREATOR_CAN_PUBLISH') {
-        res.status(403).json({ 
-          success: false, 
-          message: 'Only the trip creator can publish this trip' 
-        });
-        return;
-      }
-      if (error.message === 'USER_PROFILE_MUST_BE_PUBLIC_TO_PUBLISH') {
-        res.status(403).json({
-          success: false,
-          message: 'Your profile must be public to publish trips'
-        });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -470,11 +448,8 @@ class TripController {
         data: { trip }
       });
     } catch (error: any) {
-      if (error.message === 'ONLY_CREATOR_CAN_UNPUBLISH') {
-        res.status(403).json({ 
-          success: false, 
-          message: 'Only the trip creator can unpublish this trip' 
-        });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);
@@ -506,15 +481,8 @@ class TripController {
         data: { trip: clonedTrip }
       });
     } catch (error: any) {
-      if (error.message === 'TRIP_NOT_FOUND') {
-        res.status(404).json({ success: false, message: 'Trip not found' });
-        return;
-      }
-      if (error.message === 'TRIP_PRIVATE') {
-        res.status(403).json({ 
-          success: false, 
-          message: 'This trip is private and cannot be cloned' 
-        });
+      if (error instanceof TripError) {
+        res.status(error.statusCode).json({ success: false, message: error.message });
         return;
       }
       next(error);

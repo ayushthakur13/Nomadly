@@ -8,18 +8,27 @@ export const USER_ERRORS = {
   INVALID_USERNAME: 'INVALID_USERNAME',
   USERNAME_TAKEN: 'USERNAME_TAKEN',
   WRONG_CURRENT_PASSWORD: 'WRONG_CURRENT_PASSWORD',
-  INVALID_PASSWORD: 'INVALID_PASSWORD'
+  INVALID_PASSWORD: 'INVALID_PASSWORD',
+  INVALID_INPUT: 'INVALID_INPUT'
 } as const;
 
 export type UserErrorCode = (typeof USER_ERRORS)[keyof typeof USER_ERRORS];
 
 export class UserError extends Error {
   code: UserErrorCode;
+  statusCode: number;
 
-  constructor(code: UserErrorCode) {
-    super(code);
+  constructor(code: UserErrorCode, message?: string) {
+    super(message || code);
     this.name = 'UserError';
     this.code = code;
+    if (code === 'USER_NOT_FOUND') {
+      this.statusCode = 404;
+    } else if (code === 'USERNAME_TAKEN') {
+      this.statusCode = 409;
+    } else {
+      this.statusCode = 400;
+    }
   }
 }
 
@@ -58,7 +67,7 @@ export async function updateUserProfile(userId: string, updates: UpdateProfileDT
   if (updates.name !== undefined) {
     const trimmedName = updates.name.trim();
     if (trimmedName.length > 50) {
-      throw new Error('Name must be 50 characters or less');
+      throw new UserError(USER_ERRORS.INVALID_INPUT, 'Name must be 50 characters or less');
     }
     user.name = trimmedName;
   }
@@ -66,7 +75,7 @@ export async function updateUserProfile(userId: string, updates: UpdateProfileDT
   if (updates.bio !== undefined) {
     const trimmedBio = updates.bio.trim();
     if (trimmedBio.length > 300) {
-      throw new Error('Bio must be 300 characters or less');
+      throw new UserError(USER_ERRORS.INVALID_INPUT, 'Bio must be 300 characters or less');
     }
     user.bio = trimmedBio;
   }
@@ -133,15 +142,15 @@ export async function deleteUserAvatar(userId: string) {
 
 export async function changeUserUsername(userId: string, newUsername: string) {
   const user = await User.findById(userId);
-  if (!user) throw new UserError(USER_ERRORS.USER_NOT_FOUND);
+  if (!user) throw new UserError(USER_ERRORS.USER_NOT_FOUND, 'User not found');
 
   const username = (newUsername || '').trim();
   const isValid = /^[a-zA-Z0-9_]{3,20}$/.test(username);
-  if (!isValid) throw new UserError(USER_ERRORS.INVALID_USERNAME);
+  if (!isValid) throw new UserError(USER_ERRORS.INVALID_USERNAME, 'Invalid username (3-20 chars, letters/numbers/underscore only)');
 
   const exists = await User.findOne({ username });
   if (exists && exists.id !== user.id) {
-    throw new UserError(USER_ERRORS.USERNAME_TAKEN);
+    throw new UserError(USER_ERRORS.USERNAME_TAKEN, 'Username already taken');
   }
 
   user.username = username;
@@ -151,16 +160,16 @@ export async function changeUserUsername(userId: string, newUsername: string) {
 
 export async function changeUserPassword(userId: string, payload: { currentPassword?: string; newPassword: string; }) {
   const user = await User.findById(userId);
-  if (!user) throw new UserError(USER_ERRORS.USER_NOT_FOUND);
+  if (!user) throw new UserError(USER_ERRORS.USER_NOT_FOUND, 'User not found');
 
   const newPwd = (payload.newPassword || '').trim();
-  if (newPwd.length < 6) throw new UserError(USER_ERRORS.INVALID_PASSWORD);
+  if (newPwd.length < 6) throw new UserError(USER_ERRORS.INVALID_PASSWORD, 'Password must be at least 6 characters');
 
   const hasExisting = !!user.passwordHash;
   if (hasExisting) {
     const current = (payload.currentPassword || '').trim();
     const ok = await (user as any).comparePassword(current);
-    if (!ok) throw new UserError(USER_ERRORS.WRONG_CURRENT_PASSWORD);
+    if (!ok) throw new UserError(USER_ERRORS.WRONG_CURRENT_PASSWORD, 'Incorrect current password');
   }
 
   (user as any)._plainPassword = newPwd;

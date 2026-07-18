@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { fetchTripByIdAPI } from "../../services/trips.service";
+import { fetchTripByIdAPI, cloneTripAPI } from "../../services/trips.service";
 import { fetchDestinations } from "../../services/destinations.service";
 import { fetchAccommodations } from "../../services/accommodations.service";
 import { fetchMemories } from "../../services/memories.service";
@@ -14,7 +14,6 @@ import {
   unsaveTripAPI,
   fetchTripSocialStatusAPI
 } from "../../services/explore.service";
-import api from "../../services/api";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import Footer from "../../ui/common/Footer";
 import toast from "react-hot-toast";
@@ -170,12 +169,12 @@ export default function ExploreTrip() {
     if (!confirmClone) return;
 
     try {
-      const response = await api.post(`/trips/${tripId}/clone`, {
+      const response = await cloneTripAPI(tripId, {
         newTripName: `${trip.tripName} (Clone)`,
         includeBudget: true
       });
       toast.success("Trip cloned successfully!");
-      navigate(`/trips/${response.data.data.trip._id}`);
+      navigate(`/trips/${response.data.trip._id}`);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to clone trip");
     }

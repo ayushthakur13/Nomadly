@@ -10,18 +10,31 @@ export const EXPLORE_ERRORS = {
   ALREADY_LIKED: "ALREADY_LIKED",
   NOT_LIKED: "NOT_LIKED",
   ALREADY_SAVED: "ALREADY_SAVED",
-  NOT_SAVED: "NOT_SAVED"
+  NOT_SAVED: "NOT_SAVED",
+  INVALID_INPUT: "INVALID_INPUT"
 } as const;
 
 export type ExploreErrorCode = (typeof EXPLORE_ERRORS)[keyof typeof EXPLORE_ERRORS];
 
 export class ExploreError extends Error {
   code: ExploreErrorCode;
+  statusCode: number;
 
   constructor(code: ExploreErrorCode, message?: string) {
     super(message || code);
     this.name = "ExploreError";
     this.code = code;
+    if (code === "TRIP_NOT_FOUND") {
+      this.statusCode = 404;
+    } else if (code === "TRIP_NOT_ACCESSIBLE") {
+      this.statusCode = 403;
+    } else if (code === "ALREADY_LIKED" || code === "ALREADY_SAVED") {
+      this.statusCode = 409;
+    } else if (code === "INVALID_INPUT" || code === "NOT_LIKED" || code === "NOT_SAVED") {
+      this.statusCode = 400;
+    } else {
+      this.statusCode = 500;
+    }
   }
 }
 
@@ -119,7 +132,7 @@ class ExploreService {
    */
   async likeTrip(tripId: string, userId: string): Promise<number> {
     if (!Types.ObjectId.isValid(tripId) || !Types.ObjectId.isValid(userId)) {
-      throw new Error("Invalid ID");
+      throw new ExploreError(EXPLORE_ERRORS.INVALID_INPUT, "Invalid ID");
     }
 
     const trip = await Trip.findById(tripId);
@@ -157,7 +170,7 @@ class ExploreService {
    */
   async unlikeTrip(tripId: string, userId: string): Promise<number> {
     if (!Types.ObjectId.isValid(tripId) || !Types.ObjectId.isValid(userId)) {
-      throw new Error("Invalid ID");
+      throw new ExploreError(EXPLORE_ERRORS.INVALID_INPUT, "Invalid ID");
     }
 
     const trip = await Trip.findById(tripId);
@@ -187,7 +200,7 @@ class ExploreService {
    */
   async saveTrip(tripId: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(tripId) || !Types.ObjectId.isValid(userId)) {
-      throw new Error("Invalid ID");
+      throw new ExploreError(EXPLORE_ERRORS.INVALID_INPUT, "Invalid ID");
     }
 
     const trip = await Trip.findById(tripId);
@@ -220,7 +233,7 @@ class ExploreService {
    */
   async unsaveTrip(tripId: string, userId: string): Promise<void> {
     if (!Types.ObjectId.isValid(tripId) || !Types.ObjectId.isValid(userId)) {
-      throw new Error("Invalid ID");
+      throw new ExploreError(EXPLORE_ERRORS.INVALID_INPUT, "Invalid ID");
     }
 
     const trip = await Trip.findById(tripId);
@@ -245,7 +258,7 @@ class ExploreService {
    */
   async getSavedTrips(userId: string) {
     if (!Types.ObjectId.isValid(userId)) {
-      throw new Error("Invalid user ID");
+      throw new ExploreError(EXPLORE_ERRORS.INVALID_INPUT, "Invalid user ID");
     }
 
     const saves = await SavedTrip.find({ userId: new Types.ObjectId(userId) })
