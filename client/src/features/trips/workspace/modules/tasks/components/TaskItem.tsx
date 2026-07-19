@@ -159,7 +159,7 @@ export default function TaskItem({ task, currentUserId, trip, members, pending, 
       ref={taskItemRef}
       className={`
         flex items-start gap-3 py-3 border-b border-gray-100 transition-all
-        ${isAssignedToMe ? 'border-l-4 border-l-emerald-500 pl-3 -ml-1' : ''}
+        ${isAssignedToMe ? 'bg-emerald-50 border border-emerald-100 rounded-xl px-3 my-0.5 shadow-sm' : ''}
         ${pending?.deleting ? 'opacity-50' : ''}
       `}
     >

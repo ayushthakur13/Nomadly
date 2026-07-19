@@ -22,11 +22,11 @@ const Hero = () => {
           <div className="space-y-8">
             <div className="flex flex-col items-start">
               <span className="badge-soft">
-                <span className='animate-bounce'>📍</span> Find your vibe. Plan smarter. Travel further.
+                <span>📍</span> Find your vibe. Plan smarter. Travel further.
               </span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight text-gray-900 leading-tight">
-              The modern way to <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 bg-clip-text text-transparent animate-gradient">plan trips</span>
+              The modern way to <span className="text-emerald-600">plan trips</span>
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl">
               Nomadly isn't just a planner — it's your travel hub. Discover destinations, manage budgets, chat with your group, and even clone trips from fellow explorers.
