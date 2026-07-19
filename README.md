@@ -250,8 +250,8 @@ Core domain models, API contract types, request/response DTOs, and shared enums 
 
 ### Backend Setup
 ```bash
-git clone https://github.com/ayush-prataps/Nomadly.git
-cd Nomadly/server
+git clone https://github.com/ayush-prataps/nomadly.git
+cd nomadly/server
 npm install
 cp .env.example .env
 npm run dev

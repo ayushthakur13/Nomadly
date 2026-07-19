@@ -104,9 +104,9 @@ Exchanges refresh token for new access token.
 ### CSRF Protection
 
 - **Token Generation**: 32-byte hex tokens
-- **Storage**: HTTP-only cookie + request header comparison
+- **Storage**: Non-HttpOnly cookie + request header comparison
 - **Validation**: Required on sensitive operations (logout, refresh)
-- **Cookie Flags**: httpOnly, secure (production), sameSite
+- **Cookie Flags**: httpOnly: false, secure (production), sameSite
 
 ### Cookie Configuration
 

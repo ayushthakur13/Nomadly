@@ -47,7 +47,7 @@ Single Source of Truth in Redux. Putting all transient workspace data (like dest
 The client implements five different validation and error reporting strategies, ranging from RHF inline checks to custom hooks and toast warnings. This makes form handling unpredictable.
 
 **Decision:**
-Require React Hook Form (RHF) for all new forms (e.g., profiles, social layer features). Existing forms remain as-is but are scheduled for refactoring.
+Require React Hook Form (RHF) for all forms. Legacy manual bindings have been fully migrated to RHF, and hybrid checks in submit handlers are banned.
 
 **Alternatives considered:**
 Custom react form state hooks (like `useCreateTripForm.ts`). While custom validation requires no external libraries, it adds complex state logic and fails to support standard field register events.

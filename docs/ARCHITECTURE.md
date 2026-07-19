@@ -13,6 +13,7 @@ This document defines the strict architectural rules, boundaries, and governance
   * Forms: React Hook Form (Standardized).
 * **Server**:
   * Core: Node.js (v24), Express (v5.1), Socket.io.
+  * Validation: Zod.
   * Database: MongoDB + Mongoose (v8.16).
   * Storage: Cloudinary (Multer storage).
 * **Common**:
@@ -115,7 +116,19 @@ State lives in one of two places based on usage:
 
 ---
 
-## 8. Error Handling Strategy
+## 8. Request Validation & Security Strategy
+
+* **Schema-Based Request Validation**:
+  * Request payload validation is enforced at the Express router boundary using Zod schemas. Manual field/type checks inside controllers are strictly prohibited for schema-validated routes.
+  * Zod schemas must be colocated with route files (e.g., `trip.schema.ts` next to `trip.routes.ts`) and must inherit types from root `/shared` definitions.
+  * Validation errors must respond with a `400` status code carrying a consistent error shape matching Mongoose validation errors: `{ success: false, message: 'Validation error', errors: string[] }`.
+* **CSRF Protection**:
+  * Any route authenticating via session cookies (such as refresh and logout) must enforce CSRF protection.
+  * CSRF validation must be run as route-level middleware using `csrfProtection` which verifies that the `x-csrf-token` header matches the `csrf_token` cookie.
+
+---
+
+## 9. Error Handling Strategy
 
 * **API Error Representation**:
   * Generic JavaScript `Error` objects with string comparison checking (e.g. `throw new Error('Trip not found')`) are strictly prohibited in service domains.
@@ -127,27 +140,27 @@ State lives in one of two places based on usage:
 
 ---
 
-## 9. Code Limit Guidelines
+## 10. Code Limit Guidelines
 
 * **Component Length**: A single component or hook file should not exceed **300 lines**.
 * **Responsibility Threshold**: If a component handles more than one major task (e.g. rendering UI + layout + local mapping state + editing modal logic), it must be split into sub-components.
 
 ---
 
-## 10. Dependency Management
+## 11. Dependency Management
 
 * **Pre-requisite ADR**: Before installing any new dependency, the author must create a one-line justification in DECISIONS.md detailing why an existing dependency or custom helper is insufficient.
 
 ---
 
-## 11. Testing Rules
+## 12. Testing Rules
 
 * **Scope**: All business-critical logic, permissions checking algorithms, and financial split utils must be tested with Vitest.
 * **Exemptions**: Client-side UI visual layout is out of scope.
 
 ---
 
-## 12. Stability Tiers
+## 13. Stability Tiers
 
 Modules in Nomadly are classified under two stability tiers:
 
@@ -158,7 +171,7 @@ Modules in Nomadly are classified under two stability tiers:
 
 ---
 
-## 13. Roadmap Prioritization & AI Philosophy
+## 14. Roadmap Prioritization & AI Philosophy
 
 To establish a highly stable core, all development, refactoring, and feature additions must adhere to the following sequence and design constraints:
 

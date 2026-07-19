@@ -112,6 +112,7 @@ server/src/
 /api/trips/:tripId/tasks         - Trip tasks
 /api/trips/:tripId/budget        - Trip budget
 /api/trips/:tripId/expenses      - Expenses
+/api/expenses                    - Expense items
 /api/trips/:tripId/accommodations - Trip accommodations
 /api/accommodations              - Accommodation items
 /api/invitations                 - Invitations
@@ -202,9 +203,9 @@ CLOUDINARY_API_SECRET
 
 1. **Password Security**: Bcrypt hashing (10 salt rounds)
 2. **Token Security**: JWT access (short-lived) + refresh tokens (long-lived)
-3. **CSRF Protection**: Token generation, cookie comparison on sensitive ops
+3. **CSRF Protection**: Centralized `csrfProtection` middleware matching `x-csrf-token` header against the `csrf_token` cookie on refresh and logout
 4. **Data Privacy**: Private trips, permission checks, soft deletes
-5. **Input Validation**: Email format, date validation, bounds checking
+5. **Input Validation**: Schema-based validation using Zod at the router boundary for core modules (auth, users, trips, budget)
 6. **CORS**: Restricted to CLIENT_URL, credentials enabled
 7. **Rate Limiting**: Targeted `express-rate-limit` configuration:
    - `/api/auth/register`, `/api/auth/login`, `/api/auth/google`, and `/api/auth/refresh` are limited to **15 requests per 15 minutes per IP** to prevent brute-force and resource-exhaustion attacks (exempting `/me` and `/logout` to protect active session polling).

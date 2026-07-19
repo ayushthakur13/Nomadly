@@ -254,8 +254,9 @@ Manages UI toggles (sidebar, modals, etc.).
 - `initializeTokenSync(store)` - Subscribe to Redux state changes
 
 **CSRF Protection**:
-- CSRF token stored in cookies (set by backend)
-- Sent via `x-csrf-token` header on refresh endpoint
+- CSRF token returned in login/signup response body and persisted in localStorage
+- Server also issues a non-HttpOnly `csrf_token` cookie
+- Sent via `x-csrf-token` header (read from localStorage) on refresh and logout endpoints to match cookie verification
 - See `services/csrf.ts` for helper functions
 
 ### Service Layer
@@ -503,13 +504,10 @@ Landing page accessible only to unauthenticated users.
 **Validators**:
 - `validateEmail(email)` - Email format
 - `validateUsername(username)` - Username rules (3-20 chars, alphanumeric + underscore)
-- `validatePassword(password)` - Password strength
-- `validateLoginCredentials(data)` - Full login form
-- `validateSignupCredentials(data)` - Full signup form
+- `validatePassword(password)` - Password strength (Used inside custom schemas / RHF validation rules; direct manual credentials validation calls are deprecated in favor of native RHF validation bindings)
 
-**Password Strength**:
-- `calculatePasswordStrength(password)` - Returns 0-4 strength score
-- `getPasswordStrengthInfo(strength)` - Returns color, message, requirements
+- `calculatePasswordStrength(password)` - Returns 0-100 strength score
+- `getPasswordStrengthInfo(score)` - Returns label, barColor, and textColor
 - `PASSWORD_REQUIREMENTS` constant
 
 ### React Hook Form Integration

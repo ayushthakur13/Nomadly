@@ -116,10 +116,11 @@ cloneBudget(originalTripId, newTripId, userId, mode) → void
 POST   /api/trips/:tripId/budget                         Create budget (creator only)
 GET    /api/trips/:tripId/budget                         Full BudgetSnapshot
 PATCH  /api/trips/:tripId/budget                         Update baseBudgetAmount (creator only)
+PATCH  /api/trips/:tripId/budget/members                 Bulk update plannedContributions
 PATCH  /api/trips/:tripId/budget/members/:userId         Update plannedContribution
 POST   /api/trips/:tripId/expenses                       Create expense
-PATCH  /api/trips/:tripId/expenses/:expenseId            Update expense
-DELETE /api/trips/:tripId/expenses/:expenseId            Delete expense
+PATCH  /api/expenses/:expenseId                          Update expense
+DELETE /api/expenses/:expenseId                          Delete expense
 ```
 
 ---

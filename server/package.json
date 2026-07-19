@@ -1,5 +1,6 @@
 {
   "name": "nomadly",
+  "comment": "esbuild must remain in dependencies rather than devDependencies so it is available during production builds where devDependencies are omitted.",
   "version": "1.0.0",
   "main": "dist/server.js",
   "type": "module",

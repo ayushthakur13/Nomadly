@@ -62,12 +62,14 @@ enum InvitationStatus {
 ## HTTP Endpoints
 
 **Protected Routes**:
-- `GET /api/invitations` - Get user's received invitations
-- `GET /api/invitations/sent` - Get sent invitations (if trip creator)
-- `POST /api/invitations` - Create invitation (trip creator only)
-- `PATCH /api/invitations/:invitationId/accept` - Accept invitation
-- `PATCH /api/invitations/:invitationId/reject` - Reject invitation
-- `DELETE /api/invitations/:invitationId/cancel` - Cancel (sender only)
+- `GET /api/invitations` - Get invitations with optional query filters (status, tripId, invitedUserId, invitedEmail, invitedBy)
+- `GET /api/invitations/me/pending` - Get current user's pending received invitations
+- `GET /api/invitations/trips/:tripId` - Get all invitations for a specific trip (trip creator/member only)
+- `GET /api/invitations/:invitationId` - Get invitation details by ID
+- `POST /api/invitations` - Create an invitation (trip creator only)
+- `POST /api/invitations/:invitationId/accept` - Accept invitation
+- `POST /api/invitations/:invitationId/reject` - Reject invitation
+- `POST /api/invitations/:invitationId/cancel` - Cancel invitation (sender only)
 
 ---
 
@@ -300,7 +302,7 @@ Content-Type: application/json
 ### Accept Invitation
 
 ```typescript
-PATCH /api/invitations/507f1f77bcf86cd799439011/accept
+POST /api/invitations/507f1f77bcf86cd799439011/accept
 Authorization: Bearer eyJhbGc...
 ```
 
