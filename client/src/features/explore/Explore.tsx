@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -14,9 +14,8 @@ import { useAsyncAction } from "../../hooks/useAsyncAction";
 import Footer from "../../ui/common/Footer";
 import toast from "react-hot-toast";
 import { Icon } from "@/ui";
-import ExploreHero from "./components/ExploreHero";
-import ExploreFilters from "./components/ExploreFilters";
-import ExploreGrid from "./components/ExploreGrid";
+import { ExploreHero, ExploreFilters, ExploreGrid } from "./components";
+import { debounce } from "../../utils/debounce";
 
 interface Trip {
   _id: string;
@@ -39,12 +38,29 @@ export default function Explore() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [searchDestination, setSearchDestination] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
   const [sortBy, setSortBy] = useState<"recent" | "most-liked">("recent");
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [socialStatus, setSocialStatus] = useState<Record<string, { liked: boolean; saved: boolean }>>({});
 
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state: any) => state.auth);
+
+  const tripsSnapshotRef = useRef<Trip[]>([]);
+  const socialStatusSnapshotRef = useRef<Record<string, { liked: boolean; saved: boolean }>>({});
+
+  const debouncedSetDestination = useMemo(
+    () => debounce((val: string) => setSearchDestination(val), 400),
+    []
+  );
+
+  const handleSearchChange = useCallback(
+    (val: string) => {
+      setSearchInput(val);
+      debouncedSetDestination(val);
+    },
+    [debouncedSetDestination]
+  );
 
   const { execute: fetchTrips, isLoading: loading } = useAsyncAction({
     showToast: false,
@@ -107,25 +123,45 @@ export default function Explore() {
     }
 
     const currentStatus = socialStatus[tripId] || { liked: false, saved: false };
+    const willLike = !currentStatus.liked;
+
+    // Snapshot current state for rollback
+    tripsSnapshotRef.current = trips;
+    socialStatusSnapshotRef.current = socialStatus;
+
+    // Optimistic Update
+    setSocialStatus(prev => ({
+      ...prev,
+      [tripId]: { ...currentStatus, liked: willLike }
+    }));
+    setTrips(prev =>
+      prev.map(t =>
+        t._id === tripId
+          ? {
+              ...t,
+              likeCount: willLike
+                ? (t.likeCount || 0) + 1
+                : Math.max(0, (t.likeCount || 0) - 1),
+            }
+          : t
+      )
+    );
+
     try {
+      let newCount: number;
       if (currentStatus.liked) {
-        const newCount = await unlikeTripAPI(tripId);
-        setTrips(prev => prev.map(t => t._id === tripId ? { ...t, likeCount: newCount } : t));
-        setSocialStatus(prev => ({
-          ...prev,
-          [tripId]: { ...currentStatus, liked: false }
-        }));
+        newCount = await unlikeTripAPI(tripId);
         toast.success("Removed like");
       } else {
-        const newCount = await likeTripAPI(tripId);
-        setTrips(prev => prev.map(t => t._id === tripId ? { ...t, likeCount: newCount } : t));
-        setSocialStatus(prev => ({
-          ...prev,
-          [tripId]: { ...currentStatus, liked: true }
-        }));
+        newCount = await likeTripAPI(tripId);
         toast.success("Trip liked!");
       }
+      // Reconcile likes count with backend response
+      setTrips(prev => prev.map(t => t._id === tripId ? { ...t, likeCount: newCount } : t));
     } catch (err: any) {
+      // Rollback to saved snapshots on failure
+      setTrips(tripsSnapshotRef.current);
+      setSocialStatus(socialStatusSnapshotRef.current);
       toast.error(err.message || "Failed to toggle like");
     }
   };
@@ -182,10 +218,23 @@ export default function Explore() {
     }
   };
 
+  const getEmptyMessage = () => {
+    if (searchDestination && activeCategory) {
+      return `We couldn't find any public itineraries in category "${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)}" matching "${searchDestination}".`;
+    }
+    if (searchDestination) {
+      return `We couldn't find any public itineraries matching "${searchDestination}".`;
+    }
+    if (activeCategory) {
+      return `We couldn't find any public itineraries in the "${activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)}" category.`;
+    }
+    return "We couldn't find any public itineraries right now.";
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-emerald-50/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <ExploreHero searchDestination={searchDestination} setSearchDestination={setSearchDestination} />
+    <div className="min-h-screen bg-gray-50">
+      <div className={`max-w-7xl mx-auto ${isAuthenticated ? "px-0" : "px-4"} sm:px-6 lg:px-8 py-6 sm:py-10 md:py-12`}>
+        <ExploreHero searchDestination={searchInput} setSearchDestination={handleSearchChange} />
 
         <ExploreFilters
           activeCategory={activeCategory}
@@ -204,20 +253,21 @@ export default function Explore() {
         )}
 
         {!loading && trips.length === 0 && (
-          <div className="text-center bg-white rounded-xl border border-gray-200 p-16 shadow-sm">
-            <div className="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl">
-              🗺️
+          <div className="text-center bg-white rounded-2xl border border-gray-200 p-16 shadow-sm">
+            <div className="w-16 h-16 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-6 text-emerald-600">
+              <Icon name="compass" size={28} />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No itineraries found</h3>
-            <p className="text-gray-600 max-w-md mx-auto mb-8">
-              We couldn't find any public trips matching your filters. Try selecting another category or typing a different search query.
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No itineraries found</h3>
+            <p className="text-gray-600 max-w-md mx-auto mb-8 text-sm leading-relaxed">
+              {getEmptyMessage()} Try resetting the filters or modifying your search query to explore other journeys.
             </p>
             <button
               onClick={() => {
                 setActiveCategory("");
+                setSearchInput("");
                 setSearchDestination("");
               }}
-              className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20"
+              className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
             >
               Reset All Filters
             </button>
@@ -243,7 +293,7 @@ export default function Explore() {
           <div className="text-center mt-12">
             <button
               onClick={handleLoadMore}
-              className="inline-flex items-center gap-2 px-8 py-3 bg-white text-gray-800 border border-gray-200 rounded-xl font-bold shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-300"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-white text-gray-800 border border-gray-200 rounded-2xl font-bold shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-300"
             >
               Load More Itineraries
               <Icon name="arrowRight" size={16} />

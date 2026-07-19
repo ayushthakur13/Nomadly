@@ -63,6 +63,12 @@ import {
   PiggyBank,
   Download,
   Send,
+  Coffee,
+  Briefcase,
+  Smile,
+  Backpack,
+  Gem,
+  TrendingUp,
 } from "lucide-react";
 
 
@@ -135,6 +141,12 @@ const ICONS: Record<string, LucideIcon> = {
   bed: Bed,
   fileText: FileText,
   tasks: CheckSquare,
+  coffee: Coffee,
+  briefcase: Briefcase,
+  smile: Smile,
+  backpack: Backpack,
+  gem: Gem,
+  trendingUp: TrendingUp,
 };
 
 type IconName = keyof typeof ICONS;

@@ -53,7 +53,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
         {/* Main Content */}
         <main
-          className={`flex-1 bg-gray-50 transition-all duration-200 ${
+          className={`flex-1 min-w-0 bg-gray-50 transition-all duration-200 ${
             collapsed ? "md:ml-20" : "md:ml-64"
           } ${
             isTripWorkspace

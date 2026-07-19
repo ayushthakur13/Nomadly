@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import type { ReactNode } from 'react';
@@ -21,6 +21,16 @@ const PublicLayout = ({ children }: { children: ReactNode }) => (
     <div className="bg-gray-50 pt-16">{children}</div>
   </>
 );
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 const ConditionalLayout = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useSelector((state: any) => state.auth);
@@ -68,6 +78,7 @@ function AppContent() {
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
         <Route
           path="/"

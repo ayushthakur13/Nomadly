@@ -2,6 +2,19 @@ import { Icon } from "@/ui";
 import defaultTripCardCover from "@/assets/illustrations/default-trip-cover.webp";
 import { formatDateRange } from "@/utils/formatDateRange";
 
+const CATEGORY_ICONS: Record<string, string> = {
+  adventure: "compass",
+  leisure: "coffee",
+  business: "briefcase",
+  family: "smile",
+  solo: "user",
+  couple: "heart",
+  friends: "users",
+  backpacking: "backpack",
+  luxury: "gem",
+  budget: "wallet"
+};
+
 interface Trip {
   _id: string;
   tripName: string;
@@ -48,10 +61,10 @@ export default function ExploreGrid({
           <div
             key={trip._id}
             onClick={() => onCardClick(trip._id)}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-emerald-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden group flex flex-col h-full text-left"
+            className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:border-emerald-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden group flex flex-col h-full text-left"
           >
-            {/* Card Cover Image */}
-            <div className="relative h-56 overflow-hidden bg-gray-100">
+            {/* Card Cover Image - taller proportion (h-64) */}
+            <div className="relative h-64 overflow-hidden bg-gray-100 flex-shrink-0">
               <img
                 src={trip.coverImageUrl || defaultTripCardCover}
                 alt={trip.tripName}
@@ -59,45 +72,39 @@ export default function ExploreGrid({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
 
-              {/* Quick Category Tag */}
+              {/* Standardized Overlay Category Tag */}
               {trip.category && (
-                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-bold uppercase px-3 py-1 rounded-lg shadow-sm border border-white/50">
+                <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold uppercase shadow-sm border backdrop-blur-sm bg-white/90 text-gray-800 border-white/50">
+                  <Icon
+                    name={(CATEGORY_ICONS[trip.category.toLowerCase()] || "globe") as any}
+                    size={12}
+                    className="text-gray-600 flex-shrink-0"
+                  />
                   {trip.category}
                 </span>
               )}
 
-              {/* Floating Social Action Buttons */}
-              <div className="absolute top-3 right-3 flex flex-col gap-2">
-                <button
-                  onClick={(e) => handleLike(e, trip._id)}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md hover:scale-110 duration-200 ${
-                    liked
-                      ? "bg-rose-500 text-white border border-rose-500"
-                      : "bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white"
+              {/* Circular Action Buttons */}
+              <button
+                onClick={(e) => handleSave(e, trip._id)}
+                className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md hover:scale-110 duration-200 ${saved
+                    ? "bg-teal-600 text-white border-teal-600"
+                    : "bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white"
                   }`}
-                >
-                  <Icon name="heart" size={16} className={liked ? "text-white" : "text-gray-700"} />
-                </button>
-                <button
-                  onClick={(e) => handleSave(e, trip._id)}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md hover:scale-110 duration-200 ${
-                    saved
-                      ? "bg-teal-600 text-white border border-teal-600"
-                      : "bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white"
-                  }`}
-                >
-                  <Icon name="bookmark" size={16} className={saved ? "text-white" : "text-gray-700"} />
-                </button>
-              </div>
+                aria-label={saved ? "Unsave trip from bookmarks" : "Save trip to bookmarks"}
+              >
+                <Icon name="bookmark" size={16} className={saved ? "text-white" : "text-gray-700"} />
+              </button>
             </div>
 
             {/* Card Content */}
             <div className="p-6 flex flex-col flex-grow">
-              <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-1 mb-2">
+              <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-1 mb-1">
                 {trip.tripName}
               </h3>
-              <p className="text-gray-500 text-xs line-clamp-2 mb-4 leading-relaxed">
-                {trip.description || "Explore this amazing custom itinerary."}
+              {/* One-line description/hook beneath the title */}
+              <p className="text-gray-500 text-xs line-clamp-1 mb-4 leading-relaxed">
+                {trip.description || "Explore this public travel blueprint itinerary."}
               </p>
 
               {/* Metadata Items */}
@@ -116,42 +123,55 @@ export default function ExploreGrid({
                 </div>
               </div>
 
-              <div className="mt-auto border-t border-gray-100 pt-4 flex items-center justify-between">
+              <div className="mt-auto border-t border-gray-100 pt-4 flex items-center justify-between gap-2">
                 {/* Creator Profile Link */}
                 <div
                   onClick={(e) => onCreatorClick(e, trip.createdBy.username)}
-                  className="flex items-center gap-2.5 group/creator"
+                  className="flex items-center gap-2.5 group/creator min-w-0"
                 >
                   {trip.createdBy.profilePicUrl ? (
                     <img
                       src={trip.createdBy.profilePicUrl}
                       alt={trip.createdBy.username}
-                      className="w-8 h-8 rounded-full object-cover border border-emerald-500/20"
+                      className="w-8 h-8 rounded-full object-cover border border-emerald-500/20 flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700 flex-shrink-0">
                       {trip.createdBy.name?.[0] || trip.createdBy.username[0].toUpperCase()}
                     </div>
                   )}
-                  <div className="text-left">
-                    <p className="text-xs font-semibold text-gray-800 group-hover/creator:text-emerald-600 transition-colors">
+                  <div className="text-left min-w-0">
+                    <p className="text-xs font-semibold text-gray-800 group-hover/creator:text-emerald-600 transition-colors truncate">
                       {trip.createdBy.name || trip.createdBy.username}
                     </p>
-                    <p className="text-[10px] text-gray-400">@{trip.createdBy.username}</p>
+                    <p className="text-[10px] text-gray-400 truncate">@{trip.createdBy.username}</p>
                   </div>
                 </div>
 
                 {/* Right Section: Likes count & Clone trigger */}
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-gray-500 flex items-center gap-1">
-                    <Icon name="heart" size={14} className="text-rose-500" />
-                    {trip.likeCount || 0}
-                  </span>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <button
+                    onClick={(e) => handleLike(e, trip._id)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 ${
+                      liked
+                        ? "bg-rose-500 text-white border-rose-500 shadow-sm"
+                        : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    }`}
+                    aria-label={liked ? "Unlike trip" : "Like trip"}
+                  >
+                    <Icon
+                      name="heart"
+                      size={14}
+                      className={liked ? "text-white fill-white" : "text-gray-400"}
+                    />
+                    <span>{trip.likeCount || 0}</span>
+                  </button>
 
                   <button
                     onClick={(e) => handleClone(e, trip._id, trip.tripName)}
                     className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg transition-all"
-                    title="Clone itinerary"
+                    title="Clone to your trips"
+                    aria-label="Clone trip blueprint to your trips"
                   >
                     <Icon name="copy" size={14} />
                   </button>

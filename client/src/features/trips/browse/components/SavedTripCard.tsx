@@ -49,7 +49,7 @@ export default function SavedTripCard({ trip, onUnsave, onClone, onClick }: Save
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group relative border border-gray-100 hover:border-emerald-200 hover:-translate-y-1 text-left flex flex-col h-full"
+      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group relative border border-gray-100 hover:border-emerald-200 hover:-translate-y-1 text-left flex flex-col h-full"
     >
       {/* Cover Image */}
       <div className="relative h-48 w-full overflow-hidden bg-gray-100 flex-shrink-0">

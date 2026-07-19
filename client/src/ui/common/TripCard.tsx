@@ -147,7 +147,7 @@ const TripCard = ({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group relative border border-gray-100 hover:border-emerald-200 hover:-translate-y-1"
+      className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group relative border border-gray-100 hover:border-emerald-200 hover:-translate-y-1"
     >
       {/* Cover Image with gradient overlay */}
       <div className="relative h-48 w-full overflow-hidden">
@@ -227,8 +227,8 @@ const TripCard = ({
             </span>
           )}
         </div>
-        <div className="mb-3">
-          <div className="flex items-center gap-1.5 text-gray-600 mb-2">
+        <div className="mb-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-gray-600">
             <Icon
               name="location"
               size={16}
@@ -238,7 +238,16 @@ const TripCard = ({
               {getLocationDisplay()}
             </p>
           </div>
-          <p className="text-xs text-gray-500">{formatDateRange(trip.startDate, trip.endDate)}</p>
+          <div className="flex items-center gap-1.5 text-gray-600">
+            <Icon
+              name="calendar"
+              size={16}
+              className="text-emerald-500 flex-shrink-0"
+            />
+            <p className="text-xs text-gray-500">
+              {formatDateRange(trip.startDate, trip.endDate)}
+            </p>
+          </div>
         </div>
 
         {/* Key info grid */}

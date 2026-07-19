@@ -11,6 +11,7 @@ This document defines the strict architectural rules, boundaries, and governance
   * Styling: TailwindCSS (v3), Headless UI, Lucide React.
   * Icons Policy: Direct imports of icons from 'lucide-react' inside client features or components are strictly forbidden. All icons must be rendered using the central custom `<Icon>` wrapper component (defined in `client/src/ui/icon/Icon.tsx`) to enforce a single consistent styling interface.
   * Forms: React Hook Form (Standardized).
+  * Navigation: All route transitions must automatically reset scroll position back to top via the `<ScrollToTop />` scroll restoration helper defined in `App.tsx`.
 * **Server**:
   * Core: Node.js (v24), Express (v5.1), Socket.io.
   * Validation: Zod.
@@ -120,6 +121,7 @@ State lives in one of two places based on usage:
 
 To prevent visual drift across trip card layouts, all card components (e.g., `TripCard`, `ExploreGrid`, `SavedTripCard`) must follow these rules:
 
+* **Card Corner Radius**: All card containers must strictly reference the corner styles defined in [DESIGN.md](docs/DESIGN.md) (currently `rounded-2xl` / 16px). Do not duplicate or hardcode specific card container radius tokens inside this contract.
 * **Date Range Formatting**: All components displaying date ranges must import and delegate formatting to the shared utility `client/src/utils/formatDateRange.ts`. Direct, inline formatting using `.toLocaleDateString()` with no arguments is prohibited to avoid local default variations.
 * **Overlay Badges (Top-Left on Cover Image)**:
   - Class structure: `absolute top-3 left-3 px-3 py-1 rounded-lg text-xs font-bold uppercase shadow-sm border backdrop-blur-sm`
@@ -128,6 +130,9 @@ To prevent visual drift across trip card layouts, all card components (e.g., `Tr
   - Class structure: `w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 duration-200`
   - Inactive states must use a glassmorphic background: `bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white`.
   - Active states must use solid themed colors: `bg-teal-600 text-white border-teal-600` (for saved/bookmarked) or `bg-rose-500 text-white border-rose-500` (for liked).
+* **Horizontal Scrollbars & Visual Overlays**:
+  - Horizontal list containers (like category filter pill bars) must explicitly hide default browser scrollbars using localized scrollbar-hiding directives.
+  - Right and left scroll boundaries must render dynamic scroll-fade indicators (gradient masks fading to the background color) toggled statefully relative to `scrollLeft` position checks, preventing fades from clipping boundaries when fully scrolled.
 
 ---
 
