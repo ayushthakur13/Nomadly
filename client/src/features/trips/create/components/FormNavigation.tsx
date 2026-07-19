@@ -7,6 +7,7 @@ interface FormNavigationProps {
   isSubmitting: boolean;
   coverProcessing: boolean;
   coverUploadLoading: boolean;
+  isNextDisabled?: boolean;
 }
 
 const FormNavigation = ({
@@ -16,6 +17,7 @@ const FormNavigation = ({
   isSubmitting,
   coverProcessing,
   coverUploadLoading,
+  isNextDisabled = false,
 }: FormNavigationProps) => {
   return (
     <div className="flex justify-between pt-6 border-t border-gray-200">
@@ -33,7 +35,8 @@ const FormNavigation = ({
         <button
           type="button"
           onClick={onNext}
-          className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+          disabled={isNextDisabled}
+          className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Continue
           <Icon name="chevronRight" size={20} />

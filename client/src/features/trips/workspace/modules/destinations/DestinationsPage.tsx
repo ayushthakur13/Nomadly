@@ -4,7 +4,7 @@ import DestinationFormModal from './components/DestinationFormModal';
 import DestinationList from './components/DestinationList';
 import ImageLightbox from './components/ImageLightbox';
 import { LocationPreview } from '../overview/components';
-import { ConfirmationModal, ErrorAlert, PageHeader } from '@/ui/common/';
+import { ConfirmationModal, ErrorAlert, PageHeader, FormAlert } from '@/ui/common/';
 import { Icon } from '@/ui/icon/';
 import { useDynamicForm } from '../../../_shared/hooks';
 import { useDestinations } from './hooks/useDestinations';
@@ -32,6 +32,29 @@ const DestinationsPage = () => {
     changeImage,
     removeImage,
   } = useDestinations();
+
+  const hasOutOfBoundsStops = useMemo(() => {
+    if (!selectedTrip || !destinations || destinations.length === 0) return false;
+    const tripStart = new Date(selectedTrip.startDate);
+    const tripEnd = new Date(selectedTrip.endDate);
+    tripStart.setHours(0, 0, 0, 0);
+    tripEnd.setHours(0, 0, 0, 0);
+
+    return destinations.some((dest) => {
+      if (!dest.arrivalDate && !dest.departureDate) return false;
+      if (dest.arrivalDate) {
+        const arr = new Date(dest.arrivalDate);
+        arr.setHours(0, 0, 0, 0);
+        if (arr < tripStart || arr > tripEnd) return true;
+      }
+      if (dest.departureDate) {
+        const dep = new Date(dest.departureDate);
+        dep.setHours(0, 0, 0, 0);
+        if (dep < tripStart || dep > tripEnd) return true;
+      }
+      return false;
+    });
+  }, [selectedTrip, destinations]);
 
   const { isOpen: modalOpen, item: editing, openCreate, openEdit, close: closeModal } = useDynamicForm();
   const [lightbox, setLightbox] = useState<Destination | null>(null);
@@ -156,6 +179,12 @@ const DestinationsPage = () => {
 
         <ErrorAlert error={error || actionError} />
 
+        <FormAlert
+          show={hasOutOfBoundsStops}
+          message="Some destination stops on this itinerary are scheduled outside the overall trip dates."
+          variant="warning"
+        />
+
         {loading && destinations.length === 0 && (
           <div className="bg-white border border-gray-200 rounded-xl p-6 text-gray-600 flex items-center gap-3">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600" />
@@ -218,6 +247,8 @@ const DestinationsPage = () => {
         onSubmit={handleSubmit}
         initial={editing}
         tripDestination={tripDestination}
+        tripStartDate={selectedTrip?.startDate}
+        tripEndDate={selectedTrip?.endDate}
       />
 
       <ConfirmationModal

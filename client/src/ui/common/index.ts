@@ -14,3 +14,4 @@ export { default as Sidebar } from './Sidebar';
 export { default as StatsPill } from './StatsPill';
 export { default as ThreeDotMenu } from './ThreeDotMenu';
 export { default as TripCard } from './TripCard';
+export { default as FormAlert } from './FormAlert';

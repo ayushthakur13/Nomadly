@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { LocationSearchInput } from '@/ui/common/';
+import { LocationSearchInput, FormAlert } from '@/ui/common/';
 import type { Destination, DestinationPayload } from '@/services/destinations.service';
 import { Icon } from '@/ui/icon/';
+import { isDateRangeInvalid } from '@/utils/dateValidation';
 
 const normalizeDateInput = (value?: string) => {
   if (!value) return undefined;
@@ -15,9 +16,19 @@ interface DestinationFormModalProps {
   onSubmit: (payload: DestinationPayload) => Promise<void>;
   initial?: Destination | null;
   tripDestination?: { name?: string; point?: { coordinates: [number, number] } };
+  tripStartDate?: string;
+  tripEndDate?: string;
 }
 
-const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestination }: DestinationFormModalProps) => {
+const DestinationFormModal = ({
+  open,
+  onClose,
+  onSubmit,
+  initial,
+  tripDestination,
+  tripStartDate,
+  tripEndDate,
+}: DestinationFormModalProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +38,29 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
 
   const locationValue = watch('location');
   const nameValue = watch('name');
+  const arrivalDate = watch('arrivalDate');
+  const departureDate = watch('departureDate');
+  const isDateInvalid = isDateRangeInvalid(arrivalDate, departureDate);
+
+  const isOutOfBounds = useMemo(() => {
+    if (!tripStartDate || !tripEndDate) return false;
+    const tripStart = new Date(tripStartDate);
+    const tripEnd = new Date(tripEndDate);
+    tripStart.setHours(0, 0, 0, 0);
+    tripEnd.setHours(0, 0, 0, 0);
+
+    if (arrivalDate) {
+      const arr = new Date(arrivalDate);
+      arr.setHours(0, 0, 0, 0);
+      if (arr < tripStart || arr > tripEnd) return true;
+    }
+    if (departureDate) {
+      const dep = new Date(departureDate);
+      dep.setHours(0, 0, 0, 0);
+      if (dep < tripStart || dep > tripEnd) return true;
+    }
+    return false;
+  }, [arrivalDate, departureDate, tripStartDate, tripEndDate]);
 
   // Calculate proximity from trip's main destination
   const proximity = tripDestination?.point?.coordinates ? {
@@ -140,6 +174,20 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
                 {...register("departureDate")}
               />
             </div>
+
+            <FormAlert
+              show={isDateInvalid}
+              message="Departure date must be after arrival date"
+              variant="error"
+              className="col-span-1 md:col-span-2"
+            />
+
+            <FormAlert
+              show={isOutOfBounds && !isDateInvalid}
+              message={`This stop falls outside the overall trip dates (${tripStartDate ? new Date(tripStartDate).toLocaleDateString() : ''} - ${tripEndDate ? new Date(tripEndDate).toLocaleDateString() : ''}).`}
+              variant="warning"
+              className="col-span-1 md:col-span-2"
+            />
           </div>
 
           <div>
@@ -154,7 +202,12 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
             />
           </div>
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
+          <FormAlert
+            show={!!error}
+            message={error || ''}
+            variant="error"
+            className="mb-2"
+          />
 
           <div className="flex gap-3 pt-2">
             <button
@@ -168,7 +221,7 @@ const DestinationFormModal = ({ open, onClose, onSubmit, initial, tripDestinatio
             <button
               type="submit"
               className="flex-1 rounded-lg bg-emerald-600 text-white py-2 font-semibold hover:bg-emerald-700 disabled:opacity-60"
-              disabled={submitting}
+              disabled={submitting || isDateInvalid}
             >
               {submitting ? 'Saving...' : initial ? 'Update stop' : 'Add stop'}
             </button>

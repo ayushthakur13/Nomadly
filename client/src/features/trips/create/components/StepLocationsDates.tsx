@@ -1,5 +1,6 @@
 import { Icon } from '@/ui/icon/';
-import { LocationSearchInput } from '@/ui/common/';
+import { LocationSearchInput, FormAlert } from '@/ui/common/';
+import { isDateRangeInvalid } from '@/utils/dateValidation';
 
 interface StepLocationsDatesProps {
   startDate: string;
@@ -24,6 +25,8 @@ const StepLocationsDates = ({
   onSelectSource,
   durationPreview,
 }: StepLocationsDatesProps) => {
+  const isDateInvalid = isDateRangeInvalid(startDate, endDate);
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <h2 className="text-2xl font-bold text-[#2E2E2E] mb-6 flex items-center gap-2">
@@ -67,9 +70,17 @@ const StepLocationsDates = ({
             onChange={onInputChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
           />
-          {errors.endDate && <p className="text-red-600 text-sm mt-1">{errors.endDate}</p>}
+          {errors.endDate && errors.endDate !== 'End date must be after start date' && (
+            <p className="text-red-600 text-sm mt-1">{errors.endDate}</p>
+          )}
         </div>
       </div>
+
+      <FormAlert
+        show={isDateInvalid}
+        message="End date must be after start date"
+        variant="error"
+      />
 
       {/* Duration preview */}
       {durationPreview && (

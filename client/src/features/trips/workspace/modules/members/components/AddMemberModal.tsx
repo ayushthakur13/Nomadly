@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Icon } from '@/ui/icon/';
+import { FormAlert } from '@/ui/common/';
 import type { AddMemberPayload } from '@/services/members.service';
 
 interface AddMemberModalProps {
@@ -93,9 +94,12 @@ export default function AddMemberModal({ isOpen, onClose, onSubmit, loading }: A
             {errors.emailOrUsername && (
               <p className="mt-2 text-sm text-red-600">{errors.emailOrUsername.message}</p>
             )}
-            {error && !errors.emailOrUsername && (
-              <p className="mt-2 text-sm text-red-600">{error}</p>
-            )}
+            <FormAlert
+              show={!!error && !errors.emailOrUsername}
+              message={error}
+              variant="error"
+              className="mt-2"
+            />
           </div>
 
           <div className="mb-4">

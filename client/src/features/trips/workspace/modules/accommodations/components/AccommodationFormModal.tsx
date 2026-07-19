@@ -5,6 +5,8 @@ import { Icon } from "@/ui/icon";
 import type { Accommodation, CreateAccommodationDTO } from "@shared/types";
 import { DEFAULT_ACCOMMODATION_FORM_VALUES } from "../utils/constants";
 import { toDateInputValue } from "../utils/formatting";
+import { isDateRangeInvalid } from "@/utils/dateValidation";
+import { FormAlert } from "@/ui/common/";
 
 interface AccommodationFormModalProps {
   open: boolean;
@@ -36,6 +38,9 @@ const AccommodationFormModal = ({
   });
 
   const destinationIdValue = watch("destinationId");
+  const checkIn = watch("checkIn");
+  const checkOut = watch("checkOut");
+  const isDateInvalid = isDateRangeInvalid(checkIn, checkOut);
 
   useEffect(() => {
     if (!open) return;
@@ -174,6 +179,13 @@ const AccommodationFormModal = ({
               />
             </div>
 
+            <FormAlert
+              show={isDateInvalid}
+              message="Check-out date must be after check-in date"
+              variant="error"
+              className="md:col-span-2"
+            />
+
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Price per night</label>
               <input
@@ -259,7 +271,12 @@ const AccommodationFormModal = ({
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          <FormAlert
+            show={!!error}
+            message={error || ''}
+            variant="error"
+            className="mb-2"
+          />
 
           <div className="flex gap-3 pt-2">
             <button
@@ -273,7 +290,7 @@ const AccommodationFormModal = ({
             <button
               type="submit"
               className="flex-1 rounded-lg bg-emerald-600 text-white py-2 font-semibold hover:bg-emerald-700 disabled:opacity-60"
-              disabled={submitting}
+              disabled={submitting || isDateInvalid}
             >
               {submitting ? "Saving..." : initial ? "Update stay" : "Add stay"}
             </button>

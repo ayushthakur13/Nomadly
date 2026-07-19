@@ -337,4 +337,39 @@ The previous consolidation merged Dashboard into Home and folded Explore into it
 - **Pros**: Home page now serves as a robust personal dashboard doubling as the full trip management view, and Explore has high discovery visibility again. Standardized visual conventions prevent UI style drift.
 - **Cons**: No dedicated lightweight dashboard view exists anymore as all personal trip features are now consolidated in Home.
 
+---
 
+## Client-Side Inline Date Validation in Edit Modal
+**Status:** Accepted
+
+**Context:**
+Setting a departure date after the return date (or vice versa) results in a backend validation error. Previously, the error toast displayed a generic "Validation error" because `extractApiError()` evaluated the general `message` field before checking the detailed `errors` list.
+
+**Decision:**
+1. Implement Option A (client-side validation): Calculate `isDateInvalid` dynamically when start or end dates are modified in `EditTripModal`. Show a clean, red inline alert block ("Return date must be after departure date") and disable the "Save changes" submit button.
+2. Note on Option B (future improvement): While `extractApiError()` currently returns the first matched general `message` block, changing this order (checking `errors` array first) is deferred to avoid potential cascading regressions in other feature modules where general message checks are preferred. Inline form validations are preferred for direct user feedback.
+
+**Consequences:**
+- **Pros**: Instant user feedback inside the form before hitting the API, preventing invalid requests.
+- **Cons**: Minor client-side date comparison overhead (negligible).
+
+---
+
+## Trip and Destination Stop Date Range Boundary Constraints
+**Status:** Accepted
+
+**Context:**
+Currently, the database and server-side service layers do not enforce that a destination stop's `arrivalDate` and `departureDate` lie within the overall trip's `startDate` and `endDate` boundaries. As a result:
+- Users can save destination stop dates outside the trip's range.
+- Users can update a trip's start/end dates to values that exclude existing scheduled stops.
+
+**Decision:**
+To balance data integrity with user flexibility, we implement Option C (Soft Validation / Client-Side Warnings) for now:
+1. **Client-Side Soft Validation**: Show a non-blocking amber warning `FormAlert` in the Destinations itinerary list page and the Destination Edit modal if stop dates fall outside the trip dates. This raises awareness to the user without hard-blocking changes.
+2. **Postponed Alternatives (A and B)**:
+   - **Option A (Strict Validation Hard Block)**: Rejected for now because if a user shifts a 14-day trip forward by 2 days, a hard validation block would force them to manually edit every single destination stop before saving the trip date edit, resulting in severe UX friction.
+   - **Option B (Date Shifting Auto-Sync)**: Pushing overall trip dates automatically calculates the day offset delta and updates all associated destination stops (and accommodation stays) in a database transaction. This is the ideal long-term solution, but deferred due to backend database update scope and complexity.
+
+**Consequences:**
+- **Pros**: High planning flexibility for users without submission blocks; clear warning cards guide users to align dates.
+- **Cons**: Minor database inconsistency is technically permitted where stop dates exist outside trip limits.

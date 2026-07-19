@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { isDateRangeInvalid } from '@/utils/dateValidation';
 
 export interface TripFormData {
   tripName: string;
@@ -52,10 +53,8 @@ export const useCreateTripForm = () => {
     } else if (step === 2) {
       if (!formData.startDate) newErrors.startDate = 'Start date is required';
       if (!formData.endDate) newErrors.endDate = 'End date is required';
-      if (formData.startDate && formData.endDate) {
-        const start = new Date(formData.startDate);
-        const end = new Date(formData.endDate);
-        if (end < start) newErrors.endDate = 'End date must be after start date';
+      if (isDateRangeInvalid(formData.startDate, formData.endDate)) {
+        newErrors.endDate = 'End date must be after start date';
       }
       if (!formData.destinationLocation?.name.trim()) {
         newErrors.destinationLocation = 'Destination is required';
@@ -91,7 +90,7 @@ export const useCreateTripForm = () => {
     if (!formData.startDate || !formData.endDate) return '';
     const start = new Date(formData.startDate);
     const end = new Date(formData.endDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return '';
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || isDateRangeInvalid(formData.startDate, formData.endDate)) return '';
     const diff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     return `${diff} day${diff > 1 ? 's' : ''} trip`;
   };

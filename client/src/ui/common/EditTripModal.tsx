@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 import { extractApiError } from '@/utils/errorHandling';
+import { isDateRangeInvalid } from '@/utils/dateValidation';
+import FormAlert from './FormAlert';
 import Icon from '../icon/Icon';
 import LocationSearchInput from './LocationSearchInput';
 
@@ -92,22 +94,24 @@ const EditTripModal = ({
     formData.startDate !== (trip?.startDate ? trip.startDate.split('T')[0] : '') ||
     formData.endDate !== (trip?.endDate ? trip.endDate.split('T')[0] : '');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const isDateInvalid = useMemo(() => {
+    return isDateRangeInvalid(formData.startDate, formData.endDate);
+  }, [formData.startDate, formData.endDate]);
 
-    if (name === 'category' && value === 'solo') {
-      const hasOtherMembers = trip?.members && trip.members.filter((m: any) => {
+  const isSoloInvalid = useMemo(() => {
+    if (formData.category !== 'solo') return false;
+    return !!(
+      trip?.members &&
+      trip.members.filter((m: any) => {
         const mId = m.userId?._id || m.userId;
         const cId = trip.createdBy?._id || trip.createdBy;
         return mId && cId && mId.toString() !== cId.toString();
-      }).length > 0;
+      }).length > 0
+    );
+  }, [formData.category, trip]);
 
-      if (hasOtherMembers) {
-        toast.error('There are other members in this trip. Please remove them first before changing the category to Solo.');
-        return;
-      }
-    }
-
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -161,10 +165,10 @@ const EditTripModal = ({
       updates.destinationLocation = destinationLocation;
     }
     if (formData.startDate !== (trip?.startDate ? trip.startDate.split('T')[0] : '')) {
-      updates.startDate = new Date(formData.startDate).toISOString();
+      updates.startDate = formData.startDate;
     }
     if (formData.endDate !== (trip?.endDate ? trip.endDate.split('T')[0] : '')) {
-      updates.endDate = new Date(formData.endDate).toISOString();
+      updates.endDate = formData.endDate;
     }
 
     try {
@@ -172,7 +176,7 @@ const EditTripModal = ({
       toast.success('Trip updated');
       onClose();
     } catch (error: any) {
-      const errorMsg = extractApiError(error, 'Failed to update trip');
+      const errorMsg = typeof error === 'string' ? error : extractApiError(error, 'Failed to update trip');
       toast.error(errorMsg);
     }
   };
@@ -280,6 +284,12 @@ const EditTripModal = ({
                     <option value="luxury">Luxury</option>
                     <option value="budget">Budget</option>
                   </select>
+                  <FormAlert
+                    show={isSoloInvalid}
+                    message="There are other members in this trip. Please remove them first before changing the category to Solo."
+                    variant="warning"
+                    className="mt-2"
+                  />
                 </div>
               </div>
             </div>
@@ -369,23 +379,18 @@ const EditTripModal = ({
                 </div>
               </div>
 
-              {/* Date warning - only show if dates changed */}
-              {dateChanged && !dateWarningDismissed && (
-                <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <Icon name="alertCircle" size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-blue-700">
-                      Changing dates won't affect existing tasks yet
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setDateWarningDismissed(true)}
-                    className="text-blue-600 hover:text-blue-700 ml-2 flex-shrink-0"
-                  >
-                    <Icon name="close" size={16} />
-                  </button>
-                </div>
-              )}
+              <FormAlert
+                show={isDateInvalid}
+                message="Return date must be after departure date"
+                variant="error"
+              />
+
+              <FormAlert
+                show={dateChanged && !dateWarningDismissed}
+                message="Changing dates won't affect existing tasks yet"
+                variant="info"
+                onDismiss={() => setDateWarningDismissed(true)}
+              />
             </div>
 
             {/* Section 4: Description - Separate collapsible section */}
@@ -427,7 +432,7 @@ const EditTripModal = ({
             </button>
             <button
               onClick={handleSave}
-              disabled={!isDirty || isLoading}
+              disabled={!isDirty || isLoading || isDateInvalid || isSoloInvalid}
               className="px-4 py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}

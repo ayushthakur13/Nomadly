@@ -6,6 +6,7 @@ import {
   useLocationsSelect,
 } from './hooks';
 import { CreateTripHeader, StepBasicInfo, StepLocationsDates, StepCoverPrivacy, FormNavigation } from './components';
+import { isDateRangeInvalid } from '@/utils/dateValidation';
 
 const CreateTripPage: FC = () => {
   // Compose hooks
@@ -136,6 +137,7 @@ const CreateTripPage: FC = () => {
             isSubmitting={loading}
             coverProcessing={coverProcessing}
             coverUploadLoading={coverUploadLoading}
+            isNextDisabled={form.currentStep === 2 && isDateRangeInvalid(form.formData.startDate, form.formData.endDate)}
           />
         </form>
       </div>

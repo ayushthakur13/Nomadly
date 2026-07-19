@@ -33,6 +33,11 @@ const TripCard = ({
     const today = new Date();
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
+    
+    today.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
     if (today < start) return "upcoming";
     if (today >= start && today <= end) return "ongoing";
     return "past";
