@@ -17,7 +17,7 @@ export const useNavigation = () => {
   const topNavItems: NavItem[] = useMemo(
     () => [
       { label: 'Home', path: '/home', icon: 'home' },
-      { label: 'My Trips', path: '/trips', icon: 'plane' },
+      { label: 'Explore', path: '/explore', icon: 'compass' },
       { label: 'AI Planner', icon: 'sparkles', badge: 'Coming soon', disabled: true },
       { label: 'Community', icon: 'users', badge: 'Soon', disabled: true },
     ],

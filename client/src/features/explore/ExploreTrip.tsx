@@ -165,8 +165,7 @@ export default function ExploreTrip() {
       return;
     }
 
-    const confirmClone = window.confirm(`Do you want to clone this trip?`);
-    if (!confirmClone) return;
+
 
     try {
       const response = await cloneTripAPI(tripId, {

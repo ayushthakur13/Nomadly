@@ -13,7 +13,7 @@ import { Explore, ExploreTrip } from './features/explore';
 import { LandingPage } from './features/landing'
 import { HomePage } from './features/home';
 import { ProfilePage, PublicProfilePage } from './features/profile'
-import { MyTripsPage, CreateTripPage, TripWorkspacePage } from './features/trips/';
+import { CreateTripPage, TripWorkspacePage } from './features/trips/';
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
   <>
@@ -124,18 +124,12 @@ function AppContent() {
 
         <Route
           path="/trips"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <MyTripsPage />
-              </AppLayout>
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/home" replace />}
         />
 
         <Route
           path="/trips/saved"
-          element={<Navigate to="/trips?tab=saved" replace />}
+          element={<Navigate to="/home?tab=saved" replace />}
         />
 
         <Route

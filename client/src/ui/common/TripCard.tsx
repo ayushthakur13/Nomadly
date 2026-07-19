@@ -1,6 +1,7 @@
 import defaultTripCardCover from "../../assets/illustrations/default-trip-cover.webp";
 import Icon from "@/ui/icon/Icon";
 import type { Trip } from "@/services/trips.service";
+import { formatDateRange } from "@/utils/formatDateRange";
 
 const CATEGORY_EMOJI: Record<string, string> = {
   adventure: "🗻",
@@ -40,18 +41,17 @@ const TripCard = ({
   const getStatusBadge = () => {
     const status = getTripStatus();
     const badges: any = {
-      upcoming: { bg: "bg-blue-100", text: "text-blue-700", label: "Upcoming" },
+      upcoming: { bg: "bg-blue-50/90 text-blue-700 border-blue-200/30", label: "Upcoming" },
       ongoing: {
-        bg: "bg-emerald-100",
-        text: "text-emerald-700",
+        bg: "bg-emerald-50/90 text-emerald-700 border-emerald-200/30",
         label: "Ongoing",
       },
-      past: { bg: "bg-gray-100", text: "text-gray-700", label: "Past" },
+      past: { bg: "bg-gray-50/90 text-gray-700 border-gray-200/30", label: "Past" },
     };
     const badge = badges[status];
     return (
       <span
-        className={`${badge.bg} ${badge.text} px-2.5 py-1 rounded-full text-xs font-medium`}
+        className={`${badge.bg} px-3 py-1 rounded-lg text-xs font-bold uppercase shadow-sm border backdrop-blur-sm`}
       >
         {badge.label}
       </span>
@@ -93,20 +93,7 @@ const TripCard = ({
     return diffDays;
   };
 
-  const formatDateRange = () => {
-    const start = new Date(trip.startDate);
-    const end = new Date(trip.endDate);
-    const startMonth = start.toLocaleDateString("en-US", { month: "short" });
-    const endMonth = end.toLocaleDateString("en-US", { month: "short" });
-    const startDay = start.getDate();
-    const endDay = end.getDate();
-    const year = start.getFullYear();
 
-    if (startMonth === endMonth) {
-      return `${startMonth} ${startDay}-${endDay}, ${year}`;
-    }
-    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
-  };
 
   const getMemberInfo = () => {
     const count = trip.membersCount || trip.members?.length || 1;
@@ -204,10 +191,10 @@ const TripCard = ({
               e.stopPropagation();
               onToggleSave();
             }}
-            className={`absolute bottom-3 right-3 p-2.5 rounded-full backdrop-blur-md shadow-lg hover:scale-110 transition-all duration-200 ${
+            className={`absolute bottom-3 right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 duration-200 ${
               isSaved
-                ? "bg-emerald-500 text-white"
-                : "bg-white/95 text-gray-700 hover:bg-white"
+                ? "bg-teal-600 text-white border-teal-600"
+                : "bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white"
             }`}
             aria-label={isSaved ? "Unsave trip" : "Save trip"}
             title={isSaved ? "Unsave" : "Save"}
@@ -246,7 +233,7 @@ const TripCard = ({
               {getLocationDisplay()}
             </p>
           </div>
-          <p className="text-xs text-gray-500">{formatDateRange()}</p>
+          <p className="text-xs text-gray-500">{formatDateRange(trip.startDate, trip.endDate)}</p>
         </div>
 
         {/* Key info grid */}

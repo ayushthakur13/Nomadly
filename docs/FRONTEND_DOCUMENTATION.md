@@ -124,7 +124,6 @@ createRoot(document.getElementById('root')).render(
 - `/explore` - Browse public trips
 - `/explore/trips/:tripId` - Trip details (public)
 - `/home` - Home page (protected)
-- `/trips` - User's trips (protected)
 - `/trips/new` - Create trip (protected)
 - `/trips/:tripId/*` - Trip workspace (protected)
 - `/profile` - Profile (protected)

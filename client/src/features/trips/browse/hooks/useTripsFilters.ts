@@ -37,7 +37,7 @@ export const useTripsFilters = () => {
   // Initialize tab from query param
   useEffect(() => {
     const tab = (searchParams.get('tab') || 'all').toLowerCase();
-    const allowed = ['all', 'ongoing', 'upcoming', 'past'];
+    const allowed = ['all', 'ongoing', 'upcoming', 'past', 'saved'];
     if (allowed.includes(tab)) setActiveTab(tab as TimelineTab);
   }, [searchParams]);
 

@@ -1,5 +1,6 @@
 import defaultTripCardCover from "@/assets/illustrations/default-trip-cover.webp";
 import { Icon } from "@/ui";
+import { formatDateRange } from "@/utils/formatDateRange";
 
 interface SavedTripCardProps {
   trip: {
@@ -35,21 +36,6 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 export default function SavedTripCard({ trip, onUnsave, onClone, onClick }: SavedTripCardProps) {
-  const formatDateRange = () => {
-    const start = new Date(trip.startDate);
-    const end = new Date(trip.endDate);
-    const startMonth = start.toLocaleDateString("en-US", { month: "short" });
-    const endMonth = end.toLocaleDateString("en-US", { month: "short" });
-    const startDay = start.getDate();
-    const endDay = end.getDate();
-    const year = start.getFullYear();
-
-    if (startMonth === endMonth) {
-      return `${startMonth} ${startDay}-${endDay}, ${year}`;
-    }
-    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
-  };
-
   const getTripDuration = () => {
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
@@ -81,7 +67,7 @@ export default function SavedTripCard({ trip, onUnsave, onClone, onClick }: Save
         <button
           type="button"
           onClick={(e) => onUnsave(e, trip._id)}
-          className="absolute top-3 right-3 p-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:scale-110 transition-all duration-200"
+          className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:scale-110 transition-all duration-200"
           title="Remove from bookmarks"
         >
           <Icon name="bookmark" size={16} className="text-white" />
@@ -116,7 +102,7 @@ export default function SavedTripCard({ trip, onUnsave, onClone, onClick }: Save
           <div className="flex items-center gap-2">
             <Icon name="calendar" size={14} className="text-emerald-500" />
             <span>
-              {formatDateRange()} • {duration} day{duration !== 1 ? "s" : ""}
+              {formatDateRange(trip.startDate, trip.endDate)} • {duration} day{duration !== 1 ? "s" : ""}
             </span>
           </div>
 

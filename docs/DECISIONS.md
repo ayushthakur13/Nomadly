@@ -293,7 +293,7 @@ Migrating all 13 route modules simultaneously. Rejected due to validation testin
 ---
 
 ## Navigation & Page Structure Compaction (3-page to 2-page Consolidation)
-**Status:** Accepted
+**Status:** Superseded by Home/My Trips Re-merge and Explore Restoration to Primary Navigation
 
 **Context:**
 The platform layout was fragmented across three primary destinations: Dashboard (which lacked a clear content identity), My Trips, and Explore (which felt isolated with low discoverability). There was also redundant sidebar navigation links. Additionally, visual styles were inconsistent: Dashboard/My Trips used a subtle/restrained visual token set, while Explore/Saved Trips carried bolder gradients and non-standard border radiuses.
@@ -312,5 +312,29 @@ The platform layout was fragmented across three primary destinations: Dashboard 
 **Consequences:**
 - **Pros**: Cleaner visual layout, standardized design tokens, reduced cognitive overhead, and consistent sidebar behavior.
 - **Cons**: Public exploration interface is no longer visible on the primary menu and is only accessible via search clicks or detail CTAs.
+
+---
+
+## Home/My Trips Re-merge and Explore Restoration to Primary Navigation
+**Status:** Accepted
+
+**Context:**
+The previous consolidation merged Dashboard into Home and folded Explore into it as an embedded highlights strip, keeping My Trips separate. In practice, this left the Home page nearly empty for new users with few trips (since it duplicated My Trips features) and made Explore hidden and undiscoverable. We are amending this layout to provide a richer experience for users with few trips, and restore primary discovery capabilities.
+
+**Decision:**
+1. Merge the full trips tabs section (all, ongoing, upcoming, past, saved) from `MyTripsPage` directly into the surviving `HomePage` (`/home`), serving as a single personal dashboard.
+2. Remove the "Explore highlights" strip (Trending Itineraries) from the `HomePage` layout, since Explore is restored to a primary navigation destination.
+3. Delete the standalone `MyTripsPage` and redirect `/trips` and `/trips/saved` to `/home` and `/home?tab=saved`.
+4. Restore `Explore` (`/explore`) to the main sidebar/navigation layout, changing primary destinations to: Home, Explore, AI Planner, and Community.
+5. Standardize per-tab empty states on the Home page to have premium visual weight (icon, custom copy, plan/explore buttons) matching the zero-trips state.
+6. Extract date-formatting into a shared `formatDateRange` utility and establish a unified overlay visual convention (shape, shadow, sizes) for card overlay badges and circular buttons in both `TripCard` and `ExploreGrid`.
+
+**Alternatives considered:**
+- Keeping the previous 3-page-flattened-to-2 structure: Rejected as it left Home empty and made Explore hidden.
+- A fully discovery-feed-first Home page: Rejected to maintain focus on the user's personal travel blueprints.
+
+**Consequences:**
+- **Pros**: Home page now serves as a robust personal dashboard doubling as the full trip management view, and Explore has high discovery visibility again. Standardized visual conventions prevent UI style drift.
+- **Cons**: No dedicated lightweight dashboard view exists anymore as all personal trip features are now consolidated in Home.
 
 

@@ -1,5 +1,6 @@
 import { Icon } from "@/ui";
 import defaultTripCardCover from "@/assets/illustrations/default-trip-cover.webp";
+import { formatDateRange } from "@/utils/formatDateRange";
 
 interface Trip {
   _id: string;
@@ -60,29 +61,29 @@ export default function ExploreGrid({
 
               {/* Quick Category Tag */}
               {trip.category && (
-                <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold uppercase px-3 py-1.5 rounded-lg shadow-sm border border-white/50">
+                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-bold uppercase px-3 py-1 rounded-lg shadow-sm border border-white/50">
                   {trip.category}
                 </span>
               )}
 
               {/* Floating Social Action Buttons */}
-              <div className="absolute top-4 right-4 flex flex-col gap-2">
+              <div className="absolute top-3 right-3 flex flex-col gap-2">
                 <button
                   onClick={(e) => handleLike(e, trip._id)}
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shadow-md ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md hover:scale-110 duration-200 ${
                     liked
-                      ? "bg-rose-500 text-white"
-                      : "bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white"
+                      ? "bg-rose-500 text-white border border-rose-500"
+                      : "bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white"
                   }`}
                 >
                   <Icon name="heart" size={16} className={liked ? "text-white" : "text-gray-700"} />
                 </button>
                 <button
                   onClick={(e) => handleSave(e, trip._id)}
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shadow-md ${
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md hover:scale-110 duration-200 ${
                     saved
-                      ? "bg-teal-600 text-white"
-                      : "bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white"
+                      ? "bg-teal-600 text-white border border-teal-600"
+                      : "bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white"
                   }`}
                 >
                   <Icon name="bookmark" size={16} className={saved ? "text-white" : "text-gray-700"} />
@@ -110,8 +111,7 @@ export default function ExploreGrid({
                 <div className="flex items-center gap-2.5">
                   <Icon name="calendar" size={16} className="text-emerald-500" />
                   <span className="text-xs">
-                    {new Date(trip.startDate).toLocaleDateString()} -{" "}
-                    {new Date(trip.endDate).toLocaleDateString()}
+                    {formatDateRange(trip.startDate, trip.endDate)}
                   </span>
                 </div>
               </div>

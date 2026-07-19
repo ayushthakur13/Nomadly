@@ -1,8 +1,6 @@
 # Nomadly
 
-> Project status: In Progress (actively developed). Many features are implemented; others are planned or partially available. See checklists below.
-
-Nomadly is a modern full-stack travel planning platform designed to simplify group travel. It centralizes trip organization, itineraries, task assignments, budgeting, and real-time collaboration. Built with TypeScript, React, Express, and MongoDB, the project is designed for robust group travel management.
+Nomadly is a modern collaborative full-stack travel planning platform designed to simplify group travel. It centralizes trip organization, itineraries, task assignments, budgeting, and real-time collaboration. Built with TypeScript, React, Express, and MongoDB, the project is designed for robust group travel management.
 
 ---
 
@@ -114,7 +112,7 @@ Future enhancements and planned features:
 
 ## Project Structure
 
-### Server
+### Server (Modular Architecture)
 ```bash
 src/
 ├── config/               # Configuration files (database, external services)
@@ -144,15 +142,11 @@ src/
 ```bash
 src/
 ├── assets/               # Static assets (icons, images, logos, illustrations)
+├── constants/            # Centralized constants (toastMessages, etc.)
 ├── ui/                   # Reusable UI components organized by domain
-│   ├── auth/             # Google login, protected routes
 │   ├── common/           # Shared components (navbar, sidebar, modals, footer)
 │   ├── icon/             # Icon registry and component
-│   ├── landing/          # Landing page sections
-│   ├── layout/           # Main layout wrapper
-│   ├── profile/          # User profile components
-│   └── trips/            # Trip-related UI components
-├── constants/            # Centralized constants (toastMessages, etc.)
+│   └── layout/           # Main layout wrapper
 ├── features/             # Feature-specific modules with domain logic
 │   ├── auth/             # Authentication flows, routes, and state
 │   ├── explore/          # Public trip feed
@@ -173,6 +167,7 @@ src/
 ├── store/                # Redux Toolkit root store configuration
 ├── styles/               # Global styles and animations
 ├── utils/                # Utility functions (errorHandling, auth, debounce)
+├── App.tsx               # Root component and routing
 └── main.tsx              # React app entry point
 ```
 
@@ -199,6 +194,7 @@ auth/
 ├── auth.service.ts     // Business logic and database operations
 ├── auth.middleware.ts  // Request validation and error handling
 ├── auth.routes.ts      // Route definitions
+├── auth.schema.ts      // Request validation and schema validation
 ├── auth.types.ts       // TypeScript types and interfaces
 ├── utils/              // Auth-specific utilities (JWT, CSRF)
 └── index.ts            // Module barrel export

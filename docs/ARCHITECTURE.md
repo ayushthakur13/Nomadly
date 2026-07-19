@@ -116,6 +116,21 @@ State lives in one of two places based on usage:
 
 ---
 
+## 7.1. Shared Formatting & Card Overlay Conventions
+
+To prevent visual drift across trip card layouts, all card components (e.g., `TripCard`, `ExploreGrid`, `SavedTripCard`) must follow these rules:
+
+* **Date Range Formatting**: All components displaying date ranges must import and delegate formatting to the shared utility `client/src/utils/formatDateRange.ts`. Direct, inline formatting using `.toLocaleDateString()` with no arguments is prohibited to avoid local default variations.
+* **Overlay Badges (Top-Left on Cover Image)**:
+  - Class structure: `absolute top-3 left-3 px-3 py-1 rounded-lg text-xs font-bold uppercase shadow-sm border backdrop-blur-sm`
+  - Solid backgrounds must use theme configurations with light transparency (e.g., `bg-blue-50/90 text-blue-700 border-blue-200/30` or `bg-white/90 text-gray-800 border-white/50`).
+* **Circular Overlay Buttons (Top-Right / Bottom-Right on Cover Image)**:
+  - Class structure: `w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 duration-200`
+  - Inactive states must use a glassmorphic background: `bg-white/80 backdrop-blur-sm text-gray-700 border border-white/20 hover:bg-white`.
+  - Active states must use solid themed colors: `bg-teal-600 text-white border-teal-600` (for saved/bookmarked) or `bg-rose-500 text-white border-rose-500` (for liked).
+
+---
+
 ## 8. Request Validation & Security Strategy
 
 * **Schema-Based Request Validation**:
