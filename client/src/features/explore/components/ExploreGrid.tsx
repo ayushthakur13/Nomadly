@@ -47,7 +47,7 @@ export default function ExploreGrid({
           <div
             key={trip._id}
             onClick={() => onCardClick(trip._id)}
-            className="bg-white rounded-2xl shadow-sm border border-gray-200/80 hover:border-emerald-500/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden group flex flex-col h-full text-left"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-emerald-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden group flex flex-col h-full text-left"
           >
             {/* Card Cover Image */}
             <div className="relative h-56 overflow-hidden bg-gray-100">
@@ -60,7 +60,7 @@ export default function ExploreGrid({
 
               {/* Quick Category Tag */}
               {trip.category && (
-                <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-black uppercase px-3 py-1.5 rounded-lg shadow-sm border border-white/50">
+                <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold uppercase px-3 py-1.5 rounded-lg shadow-sm border border-white/50">
                   {trip.category}
                 </span>
               )}
@@ -92,7 +92,7 @@ export default function ExploreGrid({
 
             {/* Card Content */}
             <div className="p-6 flex flex-col flex-grow">
-              <h3 className="text-xl font-black text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-1 mb-2">
+              <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-1 mb-2">
                 {trip.tripName}
               </h3>
               <p className="text-gray-500 text-xs line-clamp-2 mb-4 leading-relaxed">
@@ -134,7 +134,7 @@ export default function ExploreGrid({
                     </div>
                   )}
                   <div className="text-left">
-                    <p className="text-xs font-black text-gray-800 group-hover/creator:text-emerald-600 transition-colors">
+                    <p className="text-xs font-semibold text-gray-800 group-hover/creator:text-emerald-600 transition-colors">
                       {trip.createdBy.name || trip.createdBy.username}
                     </p>
                     <p className="text-[10px] text-gray-400">@{trip.createdBy.username}</p>

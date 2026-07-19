@@ -14,7 +14,7 @@ export const useAuthRedirect = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(AUTH_ROUTES.DASHBOARD, { replace: true });
+      navigate(AUTH_ROUTES.HOME, { replace: true });
     }
   }, [isAuthenticated, navigate]);
 

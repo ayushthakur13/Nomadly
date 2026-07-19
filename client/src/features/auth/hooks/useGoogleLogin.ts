@@ -16,7 +16,7 @@ export const useGoogleLogin = () => {
   const loginWithGoogle = async (credentials: GoogleLoginCredentials) => {
     try {
       await dispatch(googleLoginAsync(credentials)).unwrap();
-      navigate(AUTH_ROUTES.DASHBOARD, { replace: true });
+      navigate(AUTH_ROUTES.HOME, { replace: true });
     } catch (error) {
       // Error is handled by the Redux thunk and stored in state
       throw error;

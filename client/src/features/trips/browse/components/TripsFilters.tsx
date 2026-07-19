@@ -5,7 +5,7 @@ interface TripsFiltersProps {
   onTabChange: (tab: string) => void;
   onCategoryChange: (value: string) => void;
   onSortChange: (value: string) => void;
-  counts: { all?: number; ongoing?: number; upcoming?: number; past?: number };
+  counts: { all?: number; ongoing?: number; upcoming?: number; past?: number; saved?: number };
 }
 
 const TripsFilters = ({
@@ -35,6 +35,7 @@ const TripsFilters = ({
     { id: 'ongoing', label: 'Ongoing' },
     { id: 'upcoming', label: 'Upcoming' },
     { id: 'past', label: 'Past' },
+    { id: 'saved', label: 'Saved' },
   ];
 
   return (
@@ -58,39 +59,41 @@ const TripsFilters = ({
       </div>
 
       {/* Sort + Category Filters */}
-      <div className="hidden sm:flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Filter
-          </label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white text-gray-700"
-          >
-            <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
+      {activeTab !== 'saved' && (
+        <div className="hidden sm:flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Filter
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => onCategoryChange(e.target.value)}
+              className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white text-gray-700"
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Sort
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => onSortChange(e.target.value)}
+              className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white text-gray-700"
+            >
+              <option value="startDate">Start Date</option>
+              <option value="createdAt">Date Created</option>
+              <option value="tripName">Trip Name</option>
+            </select>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Sort
-          </label>
-          <select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="text-sm px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white text-gray-700"
-          >
-            <option value="startDate">Start Date</option>
-            <option value="createdAt">Date Created</option>
-            <option value="tripName">Trip Name</option>
-          </select>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 // Workspace hooks
-export { useTripWorkspaceData } from './useTripDashboardData';
+export { useTripWorkspaceData } from './useTripWorkspaceData';
 export { useTripStatus } from './useTripStatus';
 export { useTripPermissions } from './useTripPermissions';
 export { useTripDateRange } from './useTripDateRange';

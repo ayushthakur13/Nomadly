@@ -205,7 +205,7 @@ export default function Explore() {
         )}
 
         {!loading && trips.length === 0 && (
-          <div className="text-center bg-white rounded-3xl border border-gray-200 p-16 shadow-sm">
+          <div className="text-center bg-white rounded-xl border border-gray-200 p-16 shadow-sm">
             <div className="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl">
               🗺️
             </div>

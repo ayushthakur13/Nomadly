@@ -16,7 +16,7 @@ export const useSignup = () => {
   const signup = async (credentials: SignupCredentials) => {
     try {
       await dispatch(signupAsync(credentials)).unwrap();
-      navigate(AUTH_ROUTES.DASHBOARD, { replace: true });
+      navigate(AUTH_ROUTES.HOME, { replace: true });
     } catch (error) {
       // Error is handled by the Redux thunk and stored in state
       throw error;

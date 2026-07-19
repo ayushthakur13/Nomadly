@@ -31,7 +31,7 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
 
   // Mobile title: Nomadly or mapped page title
   const mobileTitle = (() => {
-    if (path.startsWith('/dashboard')) return 'Dashboard';
+    if (path.startsWith('/home')) return 'Home';
     if (path.startsWith('/trips/new')) return 'New Trip';
     if (path.startsWith('/trips')) return 'Trips';
     if (path.startsWith('/profile')) return 'Profile';
@@ -60,8 +60,8 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
         }`}>
           <button
             type="button"
-            onClick={() => navigate('/dashboard')}
-            aria-label="Go to dashboard"
+            onClick={() => navigate('/home')}
+            aria-label="Go to home"
             className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
           >
             <img 
@@ -72,10 +72,10 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
           </button>
           {!isSidebarCollapsed && (
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/home')}
               className="text-2xl font-bold text-gray-900 flex-1 text-left"
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-              aria-label="Go to dashboard"
+              aria-label="Go to home"
             >
               Nomadly
             </button>

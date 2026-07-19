@@ -1,7 +1,7 @@
-import { useEffect, type ReactNode, useState, useMemo } from "react";
+import { type ReactNode, useState, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleSidebar, setSidebarCollapsed } from "../../store/uiSlice";
+import { toggleSidebar } from "../../store/uiSlice";
 import AppNavbar from "../common/AppNavbar";
 import Sidebar from "../common/Sidebar";
 import MobileSidebar from "../common/MobileSidebar";
@@ -23,23 +23,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     const parts = location.pathname.split("/");
     return parts[1] === "trips" && parts[2] && parts[2] !== "new";
   }, [location.pathname]);
-
-  // Establish default collapse behavior
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-    const isCreateTrip = location.pathname.startsWith("/trips/new");
-
-    if (isCreateTrip || isTripWorkspace) {
-      dispatch(setSidebarCollapsed(true));
-      return;
-    }
-
-    if (!hasUserPreference) {
-      dispatch(setSidebarCollapsed(!isDesktop));
-    }
-  }, [location.pathname, hasUserPreference, isTripWorkspace, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-hidden">

@@ -42,7 +42,8 @@ src/
 ├── constants/       # Centralized constants (toastMessages, etc.)
 ├── features/        # Feature-specific modules with domain logic
 │   ├── auth/        # Auth flows, routes, and state
-│   ├── dashboard/   # Main dashboard page
+│   ├── explore/     # Public trip feed
+│   ├── home/        # User home page
 │   ├── invitations/ # Trip invitation handling
 │   ├── landing/     # Landing page feature
 │   ├── profile/     # User profile management
@@ -55,7 +56,6 @@ src/
 │           ├── modules/ # Feature modules (overview, tasks, budget, members, etc.)
 │           └── shell/   # Layout shell (header, sidebar)
 ├── hooks/           # Custom React hooks (global utilities)
-├── pages/           # Page-level components (routing destinations)
 ├── services/        # API services (axios interceptors, API clients)
 ├── store/           # Redux Toolkit root store configuration
 ├── styles/          # Global styles (animations, base CSS)

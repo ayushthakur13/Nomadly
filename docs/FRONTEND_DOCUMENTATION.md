@@ -6,7 +6,7 @@ High-level frontend architecture overview. For detailed feature documentation, s
 
 - **[Auth Feature](client/src/features/auth/README.md)** - Registration, login, OAuth, protected routes
 - **[Trips Feature](client/src/features/trips/README.md)** - Trip browsing, creation, management, workspace
-- **[Dashboard Feature](client/src/features/dashboard/README.md)** - User dashboard and trip overview
+- **[Home Feature](client/src/features/home/)** - User home page and trip overview
 - **[Profile Feature](client/src/features/profile/README.md)** - User profile management
 - **[Landing Feature](client/src/features/landing/README.md)** - Public landing page
 - **[Invitations Feature](client/src/features/invitations/README.md)** - Trip invitations
@@ -54,14 +54,13 @@ client/src/
 ├── vite-env.d.ts          # Vite environment types
 ├── features/              # Feature modules (feature-driven architecture)
 │   ├── auth/              # Authentication & routes
-│   ├── dashboard/         # Dashboard page
-│   ├── trips/             # Trip management
+│   ├── explore/           # Public trip feed
+│   ├── home/              # Home page
+│   ├── trips/             # Trip management & workspace
 │   ├── profile/           # User profile
 │   ├── landing/           # Landing page
 │   ├── invitations/       # Trip invitations
 │   └── <feature>/         # New features follow same pattern
-├── pages/                 # Standalone pages
-│   └── explore/           # Trip exploration pages
 ├── services/              # API clients & external services
 ├── store/                 # Redux store configuration
 ├── hooks/                 # Reusable React hooks
@@ -124,7 +123,7 @@ createRoot(document.getElementById('root')).render(
 - `/auth/*` - Auth pages (login, signup)
 - `/explore` - Browse public trips
 - `/explore/trips/:tripId` - Trip details (public)
-- `/dashboard` - Dashboard (protected)
+- `/home` - Home page (protected)
 - `/trips` - User's trips (protected)
 - `/trips/new` - Create trip (protected)
 - `/trips/:tripId/*` - Trip workspace (protected)

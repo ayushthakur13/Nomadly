@@ -290,4 +290,27 @@ Migrating all 13 route modules simultaneously. Rejected due to validation testin
 * **Pros**: Limits risk in the first migration step, allowing thorough coverage of core paths.
 * **Cons**: Temporary inconsistency where some route parameters rely on manual service/controller checks instead of uniform schema validations.
 
+---
+
+## Navigation & Page Structure Compaction (3-page to 2-page Consolidation)
+**Status:** Accepted
+
+**Context:**
+The platform layout was fragmented across three primary destinations: Dashboard (which lacked a clear content identity), My Trips, and Explore (which felt isolated with low discoverability). There was also redundant sidebar navigation links. Additionally, visual styles were inconsistent: Dashboard/My Trips used a subtle/restrained visual token set, while Explore/Saved Trips carried bolder gradients and non-standard border radiuses.
+
+**Decision:**
+1. Consolidate Dashboard and Explore highlights into a single Home destination (routed to `/home`).
+2. Move Saved Trips out of a standalone page and integrate them directly as a tab inside My Trips page, retrieving bookmarked public itineraries via `fetchSavedTripsAPI` and showing read-only bookmarks actions (unsave, clone).
+3. Update primary menu options to exactly: Home, My Trips, AI Planner, and Community. Keep `/explore` and `/explore/trips/:tripId` as functional routes reachable only via highlights/bookmark CTA entrypoints.
+4. Standardize explore cards and empty states to standard `rounded-xl`, `font-semibold` / `font-bold` headings, and default shadows.
+5. Fix the sidebar collapse bug in `AppLayout.tsx` by removing the forced route-based collapse trigger entirely, making the sidebar state purely user-driven.
+
+**Alternatives considered:**
+- Full discovery-feed-as-home approach: Rejected to keep user's active/upcoming trip priorities front and center.
+- Retaining 3 separate pages: Rejected due to menu bloat and low discoverability of bookmarked vs owned trips.
+
+**Consequences:**
+- **Pros**: Cleaner visual layout, standardized design tokens, reduced cognitive overhead, and consistent sidebar behavior.
+- **Cons**: Public exploration interface is no longer visible on the primary menu and is only accessible via search clicks or detail CTAs.
+
 

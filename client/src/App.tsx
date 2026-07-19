@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import type { ReactNode } from 'react';
@@ -11,9 +11,9 @@ import { getCsrfToken } from './services/csrf';
 import { PublicNavbar, AppLayout } from '@/ui/';
 import { Explore, ExploreTrip } from './features/explore';
 import { LandingPage } from './features/landing'
-import { DashboardPage } from './features/dashboard';
+import { HomePage } from './features/home';
 import { ProfilePage, PublicProfilePage } from './features/profile'
-import { MyTripsPage, CreateTripPage, TripWorkspacePage, SavedTripsPage } from './features/trips/';
+import { MyTripsPage, CreateTripPage, TripWorkspacePage } from './features/trips/';
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
   <>
@@ -112,11 +112,11 @@ function AppContent() {
         />
 
         <Route
-          path="/dashboard"
+          path="/home"
           element={
             <ProtectedRoute>
               <AppLayout>
-                <DashboardPage />
+                <HomePage />
               </AppLayout>
             </ProtectedRoute>
           }
@@ -135,13 +135,7 @@ function AppContent() {
 
         <Route
           path="/trips/saved"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <SavedTripsPage />
-              </AppLayout>
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/trips?tab=saved" replace />}
         />
 
         <Route

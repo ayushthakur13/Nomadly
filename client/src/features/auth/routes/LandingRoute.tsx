@@ -11,7 +11,7 @@ const LandingRoute = ({ children }: LandingRouteProps) => {
   const { isAuthenticated } = useAuth();
   
   if (isAuthenticated) {
-    return <Navigate to={AUTH_ROUTES.DASHBOARD} replace />;
+    return <Navigate to={AUTH_ROUTES.HOME} replace />;
   }
   
   return <>{children}</>;
