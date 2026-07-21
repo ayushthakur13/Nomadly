@@ -69,6 +69,7 @@ import {
   Backpack,
   Gem,
   TrendingUp,
+  Users2,
 } from "lucide-react";
 
 
@@ -147,6 +148,7 @@ const ICONS: Record<string, LucideIcon> = {
   backpack: Backpack,
   gem: Gem,
   trendingUp: TrendingUp,
+  users2: Users2,
 };
 
 type IconName = keyof typeof ICONS;

@@ -1,19 +1,24 @@
+import { useState } from "react";
 import { Icon } from "@/ui";
+import { formatDateRange } from "../../../utils/formatDateRange";
+import type { Destination, Accommodation, Memory } from "@shared/types";
+import type { PopulatedTrip, PublicTask, PublicBudgetSummary } from "../ExploreTrip";
+import { MemoryLightbox } from "@/features/trips/workspace/modules/memories/components/MemoryLightbox";
 
 interface PanelProps {
-  trip: any;
-  destinations: any[];
-  accommodations: any[];
-  memories: any[];
-  tasks: any[];
-  budget: any;
+  trip: PopulatedTrip;
+  destinations: Destination[];
+  accommodations: Accommodation[];
+  memories: Memory[];
+  tasks: PublicTask[];
+  budget: PublicBudgetSummary | null;
 }
 
 export function OverviewPanel({ trip, destinations, accommodations, memories }: Omit<PanelProps, "tasks" | "budget">) {
   return (
     <div className="space-y-6 text-left">
       <div>
-        <h3 className="text-xl font-black text-gray-900 mb-2">Trip Overview</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">Trip Overview</h3>
         <p className="text-gray-600 leading-relaxed text-sm">
           Welcome to the public travel blueprint of this trip. This plan has been shared as a public resource for other travellers. You can inspect the scheduled stops, stays, tasks, and budgets below, or copy this plan directly into your own workspace using the **Clone Plan** button above.
         </p>
@@ -22,17 +27,17 @@ export function OverviewPanel({ trip, destinations, accommodations, memories }: 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 pt-4 border-t">
         <div className="bg-gray-50 rounded-2xl p-5 border">
           <span className="text-2xl">📍</span>
-          <h4 className="font-extrabold text-gray-900 mt-2">Destinations</h4>
+          <h4 className="font-semibold text-gray-900 mt-2">Destinations</h4>
           <p className="text-sm text-gray-500 mt-1">{destinations.length} stops mapped out.</p>
         </div>
         <div className="bg-gray-50 rounded-2xl p-5 border">
           <span className="text-2xl">🏨</span>
-          <h4 className="font-extrabold text-gray-900 mt-2">Places to Stay</h4>
+          <h4 className="font-semibold text-gray-900 mt-2">Places to Stay</h4>
           <p className="text-sm text-gray-500 mt-1">{accommodations.length} lodges & stays.</p>
         </div>
         <div className="bg-gray-50 rounded-2xl p-5 border">
           <span className="text-2xl">📸</span>
-          <h4 className="font-extrabold text-gray-900 mt-2">Memories</h4>
+          <h4 className="font-semibold text-gray-900 mt-2">Memories</h4>
           <p className="text-sm text-gray-500 mt-1">
             {trip.memoriesPublic
               ? `${memories.length} public photos shared.`
@@ -47,7 +52,7 @@ export function OverviewPanel({ trip, destinations, accommodations, memories }: 
 export function ItineraryPanel({ destinations }: Pick<PanelProps, "destinations">) {
   return (
     <div className="space-y-8 text-left">
-      <h3 className="text-xl font-black text-gray-900">Stop-by-Stop Itinerary</h3>
+      <h3 className="text-xl font-semibold text-gray-900">Stop-by-Stop Itinerary</h3>
       {destinations.length === 0 ? (
         <p className="text-gray-500 text-sm">No destinations have been mapped out for this trip yet.</p>
       ) : (
@@ -60,15 +65,16 @@ export function ItineraryPanel({ destinations }: Pick<PanelProps, "destinations"
               <div className="bg-gray-50 rounded-2xl border p-5">
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
                   <div>
-                    <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">
+                    <span className="text-xs font-semibold text-emerald-600 uppercase tracking-widest">
                       Stop #{idx + 1}
                     </span>
-                    <h4 className="text-lg font-black text-gray-900">{dest.name}</h4>
+                    <h4 className="text-lg font-semibold text-gray-900">{dest.name}</h4>
                   </div>
                   {(dest.arrivalDate || dest.departureDate) && (
-                    <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-md border border-emerald-100">
-                      {dest.arrivalDate ? new Date(dest.arrivalDate).toLocaleDateString() : "—"} to{" "}
-                      {dest.departureDate ? new Date(dest.departureDate).toLocaleDateString() : "—"}
+                    <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-emerald-100">
+                      {dest.arrivalDate && dest.departureDate
+                        ? formatDateRange(dest.arrivalDate, dest.departureDate)
+                        : formatDateRange(dest.arrivalDate || dest.departureDate || "")}
                     </span>
                   )}
                 </div>
@@ -103,7 +109,7 @@ export function ItineraryPanel({ destinations }: Pick<PanelProps, "destinations"
 export function StaysPanel({ accommodations }: Pick<PanelProps, "accommodations">) {
   return (
     <div className="space-y-6 text-left">
-      <h3 className="text-xl font-black text-gray-900">Places to Stay</h3>
+      <h3 className="text-xl font-semibold text-gray-900">Places to Stay</h3>
       {accommodations.length === 0 ? (
         <p className="text-gray-500 text-sm">No accommodations have been registered for this trip yet.</p>
       ) : (
@@ -111,9 +117,9 @@ export function StaysPanel({ accommodations }: Pick<PanelProps, "accommodations"
           {accommodations.map(stay => (
             <div key={stay._id} className="bg-gray-50 rounded-2xl border p-5 flex flex-col h-full">
               <div className="flex justify-between items-start gap-2 mb-3">
-                <h4 className="text-lg font-black text-gray-900 line-clamp-1">{stay.name}</h4>
+                <h4 className="text-lg font-semibold text-gray-900 line-clamp-1">{stay.name}</h4>
                 {stay.pricePerNight !== undefined && (
-                  <span className="text-emerald-700 font-extrabold text-sm whitespace-nowrap">
+                  <span className="text-emerald-700 font-semibold text-sm whitespace-nowrap">
                     ${stay.pricePerNight}/night
                   </span>
                 )}
@@ -128,15 +134,15 @@ export function StaysPanel({ accommodations }: Pick<PanelProps, "accommodations"
 
               <div className="mt-auto pt-4 border-t border-gray-200/60 grid grid-cols-2 gap-4 text-xs text-gray-600">
                 <div>
-                  <p className="font-bold text-gray-400 uppercase tracking-wider">Check In</p>
-                  <p className="font-extrabold text-gray-800 mt-0.5">
-                    {stay.checkIn ? new Date(stay.checkIn).toLocaleDateString() : "—"}
+                  <p className="font-medium text-gray-400 uppercase tracking-wider">Check In</p>
+                  <p className="font-semibold text-gray-800 mt-0.5">
+                    {stay.checkIn ? formatDateRange(stay.checkIn) : "—"}
                   </p>
                 </div>
                 <div>
-                  <p className="font-bold text-gray-400 uppercase tracking-wider">Check Out</p>
-                  <p className="font-extrabold text-gray-800 mt-0.5">
-                    {stay.checkOut ? new Date(stay.checkOut).toLocaleDateString() : "—"}
+                  <p className="font-medium text-gray-400 uppercase tracking-wider">Check Out</p>
+                  <p className="font-semibold text-gray-800 mt-0.5">
+                    {stay.checkOut ? formatDateRange(stay.checkOut) : "—"}
                   </p>
                 </div>
               </div>
@@ -146,7 +152,7 @@ export function StaysPanel({ accommodations }: Pick<PanelProps, "accommodations"
                   href={stay.bookingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 block text-center py-2 bg-white text-emerald-600 border border-emerald-500/20 hover:bg-emerald-50 rounded-xl text-xs font-bold transition-all"
+                  className="mt-4 block text-center py-2 bg-white text-emerald-600 border border-emerald-500/20 hover:bg-emerald-50 rounded-xl text-xs font-semibold transition-all"
                 >
                   View Booking Page
                 </a>
@@ -160,13 +166,15 @@ export function StaysPanel({ accommodations }: Pick<PanelProps, "accommodations"
 }
 
 export function MemoriesPanel({ trip, memories }: Pick<PanelProps, "trip" | "memories">) {
+  const [activeLightboxIndex, setActiveLightboxIndex] = useState<number | null>(null);
+
   return (
     <div className="space-y-6 text-left">
-      <h3 className="text-xl font-black text-gray-900">Memories Gallery</h3>
+      <h3 className="text-xl font-semibold text-gray-900">Memories Gallery</h3>
       {!trip.memoriesPublic ? (
         <div className="text-center py-12 bg-gray-50 rounded-2xl border">
           <span className="text-4xl">🔒</span>
-          <h4 className="text-lg font-bold text-gray-800 mt-3">Private Gallery</h4>
+          <h4 className="text-lg font-semibold text-gray-800 mt-3">Private Gallery</h4>
           <p className="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
             The author has chosen to keep the memories gallery of this trip private.
           </p>
@@ -174,24 +182,39 @@ export function MemoriesPanel({ trip, memories }: Pick<PanelProps, "trip" | "mem
       ) : memories.length === 0 ? (
         <p className="text-gray-500 text-sm">No public memories have been shared for this trip yet.</p>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {memories.map(memo => (
-            <div key={memo._id} className="group relative rounded-2xl overflow-hidden border shadow-sm">
-              <div className="aspect-square bg-gray-100">
-                <img
-                  src={memo.url}
-                  alt={memo.caption || "Trip Memory"}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              {memo.caption && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                  <p className="text-white text-xs line-clamp-2">{memo.caption}</p>
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {memories.map((memo, index) => (
+              <div
+                key={memo._id}
+                onClick={() => setActiveLightboxIndex(index)}
+                className="group relative rounded-2xl overflow-hidden border shadow-sm cursor-pointer"
+              >
+                <div className="aspect-square bg-gray-100">
+                  <img
+                    src={memo.url}
+                    alt={memo.caption || "Trip Memory"}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+                {memo.caption && (
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
+                    <p className="text-white text-xs line-clamp-2">{memo.caption}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {activeLightboxIndex !== null && (
+            <MemoryLightbox
+              memories={memories as any}
+              activeIndex={activeLightboxIndex}
+              onClose={() => setActiveLightboxIndex(null)}
+              onChangeIndex={setActiveLightboxIndex}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -200,7 +223,7 @@ export function MemoriesPanel({ trip, memories }: Pick<PanelProps, "trip" | "mem
 export function TasksPanel({ tasks }: Pick<PanelProps, "tasks">) {
   return (
     <div className="space-y-6 text-left">
-      <h3 className="text-xl font-black text-gray-900">Task List Checklist</h3>
+      <h3 className="text-xl font-semibold text-gray-900">Task List Checklist</h3>
       <p className="text-xs text-gray-500 leading-normal">
         This is a public, read-only checklist of tasks. Task assignment info has been removed for privacy.
       </p>
@@ -221,7 +244,7 @@ export function TasksPanel({ tasks }: Pick<PanelProps, "tasks">) {
               />
               <div>
                 <h4
-                  className={`font-bold text-sm ${
+                  className={`font-semibold text-sm ${
                     task.isCompleted ? "line-through text-gray-400" : "text-gray-800"
                   }`}
                 >
@@ -232,7 +255,7 @@ export function TasksPanel({ tasks }: Pick<PanelProps, "tasks">) {
                 )}
                 {task.dueDate && (
                   <span className="inline-block text-[10px] bg-white border px-2 py-0.5 rounded text-gray-500 mt-2">
-                    Due {new Date(task.dueDate).toLocaleDateString()}
+                    Due {formatDateRange(task.dueDate)}
                   </span>
                 )}
               </div>
@@ -247,7 +270,7 @@ export function TasksPanel({ tasks }: Pick<PanelProps, "tasks">) {
 export function BudgetPanel({ budget }: Pick<PanelProps, "budget">) {
   return (
     <div className="space-y-6 text-left">
-      <h3 className="text-xl font-black text-gray-900">Budget & Financial Totals</h3>
+      <h3 className="text-xl font-semibold text-gray-900">Budget & Financial Totals</h3>
       <p className="text-xs text-gray-500 leading-normal">
         This shows the public aggregate overview of the trip budget. Individual expenses and contributors are hidden for privacy.
       </p>
@@ -258,14 +281,14 @@ export function BudgetPanel({ budget }: Pick<PanelProps, "budget">) {
           {/* Totals Cards */}
           <div className="grid sm:grid-cols-2 gap-6">
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
-              <p className="text-xs text-emerald-700 font-bold uppercase tracking-wider">Planned Budget</p>
-              <p className="text-3xl font-black text-emerald-800 mt-1">
+              <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider">Planned Budget</p>
+              <p className="text-3xl font-semibold text-emerald-800 mt-1">
                 {budget.totalPlanned} {budget.baseCurrency}
               </p>
             </div>
             <div className="bg-rose-50 border border-rose-100 rounded-2xl p-5">
-              <p className="text-xs text-rose-700 font-bold uppercase tracking-wider">Total Spent</p>
-              <p className="text-3xl font-black text-rose-800 mt-1">
+              <p className="text-xs text-rose-700 font-medium uppercase tracking-wider">Total Spent</p>
+              <p className="text-3xl font-semibold text-rose-800 mt-1">
                 {budget.totalSpent} {budget.baseCurrency}
               </p>
             </div>
@@ -274,7 +297,7 @@ export function BudgetPanel({ budget }: Pick<PanelProps, "budget">) {
           {/* Category spending Breakdown */}
           {budget.categoryBreakdown && budget.categoryBreakdown.length > 0 && (
             <div className="border-t pt-6">
-              <h4 className="font-extrabold text-gray-900 mb-4">Spending by Category</h4>
+              <h4 className="font-semibold text-gray-900 mb-4">Spending by Category</h4>
               <div className="space-y-4">
                 {budget.categoryBreakdown.map((cat: any) => {
                   const percentage = budget.totalSpent
@@ -283,7 +306,7 @@ export function BudgetPanel({ budget }: Pick<PanelProps, "budget">) {
 
                   return (
                     <div key={cat.category} className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                      <div className="flex justify-between text-xs font-semibold text-gray-700">
                         <span>{cat.category}</span>
                         <span>
                           {cat.amount} {budget.baseCurrency} ({percentage}%)

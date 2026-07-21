@@ -1,5 +1,7 @@
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNavigation, type NavItem } from '@/hooks/useNavigation';
+import { useLogout } from '@/features/auth';
 import Icon from '../icon/Icon';
 
 interface SidebarProps {
@@ -10,7 +12,20 @@ interface SidebarProps {
 
 const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
   const navigate = useNavigate();
-  const { topNavItems, bottomNavItems, isActive, displayName, user } = useNavigation();
+  const { topNavItems, isActive, displayName, user } = useNavigation();
+  const { performLogout } = useLogout();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleNav = (item: NavItem) => {
     if (item.disabled || !item.path) return;
@@ -19,9 +34,8 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
 
   return (
     <aside
-      className={`fixed top-16 bottom-0 left-0 bg-gray-50 border-r border-gray-200 shadow-sm transition-all duration-200 flex flex-col overflow-hidden ${
-        collapsed ? "w-16" : "w-64"
-      } ${className}`}
+      className={`fixed top-16 bottom-0 left-0 bg-gray-50 border-r border-gray-200 shadow-sm transition-all duration-200 flex flex-col z-30 ${collapsed ? "w-16" : "w-64"
+        } ${className}`}
     >
       <div className="flex h-full flex-col">
         {/* Content: top links + gap + bottom links */}
@@ -36,25 +50,24 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
                       <button
                         onClick={() => handleNav(item)}
                         disabled={item.disabled}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
-                          active
+                        className={`w-full flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-sm ${collapsed ? "gap-0" : "gap-3"
+                          } ${active
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
                             : "text-gray-700 hover:bg-gray-100"
-                        } ${
-                          item.disabled ? "opacity-60 cursor-not-allowed" : ""
-                        }`}
+                          } ${item.disabled ? "opacity-60 cursor-not-allowed" : ""
+                          }`}
                         title={collapsed ? item.label : undefined}
                       >
                         <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
                           <Icon name={item.icon} size={20} />
                         </span>
-                        {!collapsed && (
-                          <span className="flex-1 text-left font-medium truncate">
-                            {item.label}
-                          </span>
-                        )}
-                        {!collapsed && item.badge && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                        <span className={`flex-1 text-left font-medium truncate transition-all duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden pointer-events-none" : "opacity-100 w-auto"
+                          }`}>
+                          {item.label}
+                        </span>
+                        {item.badge && (
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200 transition-all duration-200 ${collapsed ? "opacity-0 scale-0 w-0 overflow-hidden p-0 border-0 pointer-events-none" : "opacity-100 scale-100 w-auto"
+                            }`}>
                             {item.badge}
                           </span>
                         )}
@@ -77,40 +90,17 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
               </button>
             </div>
           </div>
-          </div>
+        </div>
 
-          {/* Bottom Navigation + Account */}
-          <div className="px-2 py-3 space-y-1 flex-shrink-0 border-t border-gray-100">
-            {bottomNavItems.map((item) => {
-              const active = isActive(item.path);
-              return (
-                <button
-                  key={item.label}
-                  onClick={() => handleNav(item)}
-                  disabled={item.disabled}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
-                    active
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                      : "text-gray-700 hover:bg-gray-100"
-                  } ${item.disabled ? "opacity-60 cursor-not-allowed" : ""}`}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
-                    <Icon name={item.icon} size={20} />
-                  </span>
-                  {!collapsed && (
-                    <span className="flex-1 text-left font-medium truncate">
-                      {item.label}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-
+        {/* Bottom Navigation + Account */}
+        <div className="px-2 py-3 space-y-1 flex-shrink-0 border-t border-gray-100">
+          <div ref={profileRef} className="relative w-full">
             {/* Profile Button */}
             <button
-              onClick={() => navigate("/profile")}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              type="button"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className={`w-full flex items-center px-3 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 ${collapsed ? "gap-0" : "gap-3"
+                }`}
               title={collapsed ? "Profile" : undefined}
             >
               <div
@@ -127,20 +117,80 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
                   </span>
                 )}
               </div>
-              {!collapsed && (
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {displayName}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    {user?.email || "Traveler"}
+              <div className={`min-w-0 flex-1 text-left transition-all duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden pointer-events-none" : "opacity-100 w-auto"
+                }`}>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {displayName}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.email || "Traveler"}
+                </p>
+              </div>
+            </button>
+
+            {/* Profile Menu Popover */}
+            {showProfileMenu && (
+              <div
+                className={`absolute z-[9999] bg-white border border-gray-200/80 rounded-2xl p-1.5 shadow-xl shadow-gray-200/50 min-w-[200px] transition-all duration-150 ${
+                  collapsed 
+                    ? "left-16 bottom-2" 
+                    : "left-2 right-2 bottom-14"
+                }`}
+              >
+                {/* User Info Header */}
+                <div className="px-3 py-1.5 text-left">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">
+                    {user?.name || displayName || "Account"}
                   </p>
                 </div>
-              )}
-            </button>
+                <div className="border-b border-gray-100 my-1" />
+                
+                {/* View Profile Link */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate("/profile");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <Icon name="user" size={16} className="text-gray-500" />
+                  <span>View Profile</span>
+                </button>
+                
+                {/* Settings Link */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate("/profile");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                >
+                  <Icon name="settings" size={16} className="text-gray-500" />
+                  <span>Settings</span>
+                </button>
+                
+                <div className="border-b border-gray-100 my-1" />
+                
+                {/* Log Out */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    performLogout();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50/50 transition-colors text-left"
+                >
+                  <Icon name="logout" size={16} className="text-red-500" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
-      </aside>
+      </div>
+    </aside>
   );
 };
 

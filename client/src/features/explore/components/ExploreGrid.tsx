@@ -8,7 +8,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   business: "briefcase",
   family: "smile",
   solo: "user",
-  couple: "heart",
+  couple: "users2",
   friends: "users",
   backpacking: "backpack",
   luxury: "gem",

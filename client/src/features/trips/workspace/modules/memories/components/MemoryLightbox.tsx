@@ -68,7 +68,7 @@ export const MemoryLightbox = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 select-none">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 select-none">
       {/* Click outside target */}
       <div className="absolute inset-0 cursor-default" onClick={onClose} />
 

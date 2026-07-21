@@ -43,7 +43,7 @@ src/
 ├── features/        # Feature-specific modules with domain logic
 │   ├── auth/        # Auth flows, routes, and state
 │   ├── explore/     # Public trip feed
-│   ├── home/        # User home page
+│   ├── home/        # Trips dashboard listing page
 │   ├── invitations/ # Trip invitation handling
 │   ├── landing/     # Landing page feature
 │   ├── profile/     # User profile management

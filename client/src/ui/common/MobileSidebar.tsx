@@ -8,7 +8,7 @@ interface MobileSidebarProps {
 
 const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
   const navigate = useNavigate();
-  const { topNavItems, bottomNavItems, isActive, displayName, user } = useNavigation();
+  const { topNavItems, isActive, displayName, user } = useNavigation();
 
   const handleNav = (item: NavItem) => {
     if (item.disabled || !item.path) return;
@@ -65,28 +65,7 @@ const MobileSidebar = ({ onClose }: MobileSidebarProps) => {
         </nav>
 
         {/* Bottom Navigation + Account */}
-        <div className="mt-auto px-2 py-3 space-y-1">
-          {bottomNavItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.label}
-                onClick={() => handleNav(item)}
-                disabled={item.disabled}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm ${
-                  active
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-                    : 'text-gray-700 hover:bg-gray-50'
-                } ${item.disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-              >
-                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-gray-600">
-                  <Icon name={item.icon} size={20} />
-                </span>
-                <span className="flex-1 text-left font-medium truncate">{item.label}</span>
-              </button>
-            );
-          })}
-          
+        <div className="mt-auto px-2 py-3 space-y-1 border-t border-gray-200">
           {/* Profile Button */}
           <button
             onClick={() => {

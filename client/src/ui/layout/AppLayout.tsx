@@ -13,7 +13,7 @@ interface AppLayoutProps {
 const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { sidebarCollapsed: collapsed, hasUserPreference } = useSelector(
+  const { sidebarCollapsed: collapsed } = useSelector(
     (state: any) => state.ui
   );
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,13 +54,13 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         {/* Main Content */}
         <main
           className={`flex-1 min-w-0 bg-gray-50 transition-all duration-200 ${
-            collapsed ? "md:ml-20" : "md:ml-64"
+            collapsed ? "md:ml-16" : "md:ml-64"
           } ${
             isTripWorkspace
               ? "overflow-hidden"
               : "min-h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8 py-6"
           }`}
-          style={{ ["--sidebar-width" as any]: collapsed ? "5rem" : "16rem" }}
+          style={{ ["--sidebar-width" as any]: collapsed ? "4rem" : "16rem" }}
         >
           {children}
         </main>

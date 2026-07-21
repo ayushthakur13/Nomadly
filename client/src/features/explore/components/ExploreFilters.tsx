@@ -20,7 +20,7 @@ export default function ExploreFilters({
     { value: "business", label: "Business", icon: "briefcase" as const },
     { value: "family", label: "Family", icon: "smile" as const },
     { value: "solo", label: "Solo", icon: "user" as const },
-    { value: "couple", label: "Couple", icon: "heart" as const },
+    { value: "couple", label: "Couple", icon: "users2" as const },
     { value: "friends", label: "Friends", icon: "users" as const },
     { value: "backpacking", label: "Backpacking", icon: "backpack" as const },
     { value: "luxury", label: "Luxury", icon: "gem" as const },

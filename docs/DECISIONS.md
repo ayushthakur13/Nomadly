@@ -355,6 +355,25 @@ Setting a departure date after the return date (or vice versa) results in a back
 
 ---
 
+## Deployment: esbuild in Dependencies
+**Status:** Accepted
+
+**Context:**
+- In the server package.json the build script directly invokes esbuild, not as part of a dev command or through a bundler like Webpack. This makes esbuild a runtime dependency of the build process itself.
+- esbuild must remain in dependencies rather than devDependencies so it is available during production builds where devDependencies are omitted.
+
+**Decision:**
+1. Kept in dependencies, not devDependencies, because the deploy model installs and builds in the same environment.
+
+**Alternatives considered:**
+1. Installing esbuild as a devDependency: Rejected because the deploy model installs and builds in the same environment
+2. Using Vite's build system: Rejected because Vite is not suitable for production builds
+
+**Consequences:**
+1. Build time can be up to 20-30% slower than expected in some environments, but the build can't silently break based on install flags.
+
+---
+
 ## Trip and Destination Stop Date Range Boundary Constraints
 **Status:** Accepted
 
@@ -373,3 +392,43 @@ To balance data integrity with user flexibility, we implement Option C (Soft Val
 **Consequences:**
 - **Pros**: High planning flexibility for users without submission blocks; clear warning cards guide users to align dates.
 - **Cons**: Minor database inconsistency is technically permitted where stop dates exist outside trip limits.
+
+---
+
+## Decoupled Memories Visibility Settings & Conditional Tabs
+**Status:** Accepted
+
+**Context:**
+- Previously, memories (photos) were automatically made public whenever a trip was published. The user requested memories to stay private by default even for public trips, with a settings toggle in the workspace so owners can choose to publish their memories.
+- If memories are private, the Explore trip details view should not render the Memories tab. Additionally, unauthenticated guest users should still be able to interact with public memories in full screen (read-only mode) via a photo lightbox, matching the authenticated workspace gallery feature.
+
+**Decision:**
+1. **Private by Default**: Initialized `memoriesPublic: false` for all trips.
+2. **Visibility Settings Toggle**: Built a Settings card toggle inside the workspace Memories module that updates the trip's `memoriesPublic` visibility settings via the Redux `updateTrip` thunk.
+3. **Conditional Tabs**: Conditioned the rendering of the memories tab list in the Explore details view to only show when the trip is public and the creator has explicitly allowed public memories visibility.
+4. **Guest Lightbox**: Integrated `MemoryLightbox` into the Explore memories panel, enabling guests to click images and view them in full screen (read-only mode).
+5. **Populated Creator Patch**: Corrected backend `isTripCreator` member utility to properly validate populated createdBy objects to enable logged-in owners to see their own private memories on public detail pages.
+
+**Consequences:**
+- **Pros**: Granular privacy control over trip media assets; clean user interface for public template views.
+- **Cons**: None.
+
+---
+
+## Sidebar Account Popover & Dashboard Relocation to /trips
+**Status:** Accepted
+
+**Context:**
+- The bottom settings navigation button was a redundant placeholder item.
+- Toggling/collapsing the sidebar caused shaky vertical shifts and visual layout gaps on certain navigation items.
+- Navigating to `/home` (dashboard) felt disconnected from personal workspaces (`/trips/:tripId`) where no sidebar navigation item remained active.
+
+**Decision:**
+1. **Consolidated Settings & Logout**: Removed the bottom Settings list item and added an absolute-positioned floating popover menu triggered by the Profile card button (supporting user details, View Profile, Settings, and Log out actions, dismissible on click-outside).
+2. **Layering Context**: Set `z-30` stack index on the outer sidebar wrapper so the floating menu floats on top of all page relative/sticky content elements.
+3. **Dashboard Route Relocation**: Shifted the dashboard route from `/home` to `/trips`. Added a redirect mapping `/home` to `/trips` for backward compatibility.
+4. **Simplified Active State Highlights**: Shifted active highlight path of the "My Trips" button to `/trips` and simplified the `isActive` matching rule to a standard prefix check, which automatically keeps the icon active for dashboard, creation, and trip workspace pages.
+
+**Consequences:**
+- **Pros**: Standard RESTful URL structure; visual spacing gaps resolved; smooth, hardware-accelerated collapse transitions; intuitive workspace visual context.
+- **Cons**: None.

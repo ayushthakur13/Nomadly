@@ -123,7 +123,7 @@ function AppContent() {
         />
 
         <Route
-          path="/home"
+          path="/trips"
           element={
             <ProtectedRoute>
               <AppLayout>
@@ -134,13 +134,13 @@ function AppContent() {
         />
 
         <Route
-          path="/trips"
-          element={<Navigate to="/home" replace />}
+          path="/home"
+          element={<Navigate to="/trips" replace />}
         />
 
         <Route
           path="/trips/saved"
-          element={<Navigate to="/home?tab=saved" replace />}
+          element={<Navigate to="/trips?tab=saved" replace />}
         />
 
         <Route

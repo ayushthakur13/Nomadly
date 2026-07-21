@@ -186,9 +186,9 @@ Modules in Nomadly are classified under two stability tiers:
 
 | Tier | Scrutiny Level | Change Requirements | Modules |
 | :--- | :--- | :--- | :--- |
-| **STABLE** | High | Architectural changes require a formal ADR entry in DECISIONS.md before execution. | `auth`, `users`, `invitations`, `trips/core`, `trips/budget`, `trips/chat`, `trips/tasks`, `trips/accommodations` |
+| **STABLE** | High | Architectural changes require a formal ADR entry in DECISIONS.md before execution. | `auth`, `users`, `invitations`, `trips/core`, `trips/destinations` `trips/budget`, `trips/chat`, `trips/tasks`, `trips/accommodations` |
 | **STABLE (Navigation)** | High | Requires visual verification across views and a formal ADR entry for routing/layout adjustments. | `app-shell/navigation` (AppLayout, Sidebar, MobileSidebar, useNavigation, uiSlice) |
-| **EXPERIMENTAL** | Low | Fast prototyping is allowed. ADR only required when promoting to STABLE. | `explore`, `trips/memories`, `maps` |
+| **EXPERIMENTAL** | Low | Fast prototyping is allowed. ADR only required when promoting to STABLE. | `explore`, `trips/members`, `trips/memories`, `maps` |
 
 ---
 

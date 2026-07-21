@@ -27,7 +27,7 @@ export const AUTH_ENDPOINTS = {
 export const AUTH_ROUTES = {
   LOGIN: '/auth/login',
   SIGNUP: '/auth/signup',
-  HOME: '/home',
+  HOME: '/trips',
 } as const;
 
 /**

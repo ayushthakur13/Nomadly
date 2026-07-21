@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useMemories } from './hooks/useMemories';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -8,6 +8,8 @@ import { MemoryLightbox } from './components/MemoryLightbox';
 import { Icon } from '@/ui/icon';
 import { PageHeader, ConfirmationModal, ErrorAlert } from '@/ui/common';
 import { useAsyncAction } from '@/hooks/useAsyncAction';
+import { updateTrip } from '@/features/trips/store/tripsThunks';
+import type { AppDispatch } from '@/store';
 
 export const MemoriesPage = () => {
   const { user } = useSelector((state: any) => state.auth);
@@ -17,6 +19,24 @@ export const MemoriesPage = () => {
   const currentUserId = user?._id;
 
   const isTripOwner = Boolean(tripOwnerId && currentUserId && tripOwnerId.toString() === currentUserId.toString());
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { execute: toggleMemoriesPrivacy, isLoading: isToggling } = useAsyncAction({
+    showToast: true,
+    errorMessage: 'Failed to update memories visibility'
+  });
+
+  const handleToggleMemoriesPrivacy = async () => {
+    if (!trip) return;
+    const nextState = !trip.memoriesPublic;
+    await toggleMemoriesPrivacy(async () => {
+      await dispatch(updateTrip({
+        tripId: trip._id,
+        updates: { memoriesPublic: nextState }
+      })).unwrap();
+      toast.success(nextState ? 'Memories are now public' : 'Memories are now private');
+    });
+  };
 
   const {
     memories,
@@ -84,7 +104,7 @@ export const MemoriesPage = () => {
 
   const showEmpty = !loading && memories.length === 0;
 
-  const isBusy = isUploading || actionLoading || isDeleteLoading || isUploadLoading;
+  const isBusy = isUploading || actionLoading || isDeleteLoading || isUploadLoading || isToggling;
   const loaderText = isUploading 
     ? 'Uploading...' 
     : isDeleteLoading 
@@ -111,6 +131,36 @@ export const MemoriesPage = () => {
             ),
           }}
         />
+
+        {/* Memories visibility settings card */}
+        {trip?.isPublic && isTripOwner && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+                <Icon name={trip.memoriesPublic ? "eye" : "eyeOff"} size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Share memories publicly</h3>
+                <p className="text-xs text-gray-500">
+                  Allow visitors on the Explore page to view these photos and memories.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleToggleMemoriesPrivacy}
+              disabled={isBusy}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                trip.memoriesPublic ? 'bg-emerald-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  trip.memoriesPublic ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        )}
 
         <ErrorAlert error={error || actionError} />
 

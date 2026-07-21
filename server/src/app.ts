@@ -52,8 +52,9 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
-app.use('/api/trips', tripRouter);
 app.use('/api/explore', exploreRouter);
+
+// Specific sub-resource routers must be mounted BEFORE the wildcard core tripRouter
 app.use('/api/trips/:tripId/destinations', destinationRouter);
 app.use('/api/destinations', destinationItemRouter);
 app.use('/api/trips/:tripId/members', memberRouter);
@@ -68,6 +69,9 @@ app.use('/api/accommodations', accommodationItemRouter);
 app.use('/api/trips/:tripId/memories', memoryRouter);
 app.use('/api/memories', memoryItemRouter);
 app.use('/api/trips/:tripId/chat', chatRouter);
+
+// Core tripRouter must be mounted AFTER more specific sub-routers
+app.use('/api/trips', tripRouter);
 
 
 

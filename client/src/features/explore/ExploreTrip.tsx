@@ -27,22 +27,48 @@ import {
   TasksPanel,
   BudgetPanel
 } from "./components/ExploreTripPanels";
+import type { Trip, Destination, Accommodation, Memory } from "@shared/types";
+import type { RootState } from "../../store";
 
-type TabId = "overview" | "itinerary" | "stays" | "memories" | "tasks" | "budget";
+export type TabId = "overview" | "destinations" | "stays" | "memories" | "tasks" | "budget";
+
+export interface PublicTask {
+  _id: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+  isCompleted: boolean;
+}
+
+export interface PublicBudgetSummary {
+  totalPlanned: number;
+  totalSpent: number;
+  baseCurrency: string;
+  categoryBreakdown: { category: string; amount: number }[];
+}
+
+export interface PopulatedTrip extends Omit<Trip, "createdBy"> {
+  createdBy: {
+    _id: string;
+    username: string;
+    name?: string;
+    profilePicUrl?: string | null;
+  };
+}
 
 export default function ExploreTrip() {
-  const { tripId } = useParams();
+  const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
-  const [trip, setTrip] = useState<any>(null);
-  const [destinations, setDestinations] = useState<any[]>([]);
-  const [accommodations, setAccommodations] = useState<any[]>([]);
-  const [memories, setMemories] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [budget, setBudget] = useState<any>(null);
-  const [socialStatus, setSocialStatus] = useState({ liked: false, saved: false });
+  const [trip, setTrip] = useState<PopulatedTrip | null>(null);
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [tasks, setTasks] = useState<PublicTask[]>([]);
+  const [budget, setBudget] = useState<PublicBudgetSummary | null>(null);
+  const [socialStatus, setSocialStatus] = useState<{ liked: boolean; saved: boolean }>({ liked: false, saved: false });
   const [activeTab, setActiveTab] = useState<TabId>("overview");
 
-  const { isAuthenticated } = useSelector((state: any) => state.auth);
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const { execute: loadTripDetails, isLoading: loading, error } = useAsyncAction({
     showToast: false,
@@ -55,7 +81,7 @@ export default function ExploreTrip() {
     loadTripDetails(async () => {
       // 1. Fetch Trip details
       const tripData = await fetchTripByIdAPI(tripId);
-      setTrip(tripData);
+      setTrip(tripData as any as PopulatedTrip);
 
       // 2. Fetch Destinations (public)
       try {
@@ -120,12 +146,12 @@ export default function ExploreTrip() {
     try {
       if (socialStatus.liked) {
         const newCount = await unlikeTripAPI(tripId);
-        setTrip((prev: any) => ({ ...prev, likeCount: newCount }));
+        setTrip((prev: PopulatedTrip | null) => prev ? { ...prev, likeCount: newCount } : null);
         setSocialStatus(prev => ({ ...prev, liked: false }));
         toast.success("Removed like");
       } else {
         const newCount = await likeTripAPI(tripId);
-        setTrip((prev: any) => ({ ...prev, likeCount: newCount }));
+        setTrip((prev: PopulatedTrip | null) => prev ? { ...prev, likeCount: newCount } : null);
         setSocialStatus(prev => ({ ...prev, liked: true }));
         toast.success("Trip liked!");
       }
@@ -158,14 +184,12 @@ export default function ExploreTrip() {
   };
 
   const handleClone = async () => {
-    if (!tripId) return;
+    if (!tripId || !trip) return;
     if (!isAuthenticated) {
       toast.error("Please login to clone trips");
       navigate("/auth/login");
       return;
     }
-
-
 
     try {
       const response = await cloneTripAPI(tripId, {
@@ -214,15 +238,15 @@ export default function ExploreTrip() {
 
   const tabs: { id: TabId; label: string; icon: string }[] = [
     { id: "overview", label: "Overview", icon: "fileText" },
-    { id: "itinerary", label: `Itinerary (${destinations.length})`, icon: "mapPin" },
+    { id: "destinations", label: `Destinations (${destinations.length})`, icon: "mapPin" },
     { id: "stays", label: `Stays (${accommodations.length})`, icon: "bed" },
-    { id: "memories", label: `Memories (${memories.length})`, icon: "image" },
-    { id: "tasks", label: `Tasks Checklist (${tasks.length})`, icon: "tasks" },
-    { id: "budget", label: "Budget Summary", icon: "dollarSign" }
+    { id: "budget", label: "Budget", icon: "dollarSign" },
+    { id: "tasks", label: `Tasks (${tasks.length})`, icon: "tasks" },
+    ...(trip.memoriesPublic ? [{ id: "memories" as TabId, label: `Memories (${memories.length})`, icon: "image" }] : [])
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-between [main_&]:-mx-4 sm:[main_&]:-mx-6 lg:[main_&]:-mx-8 [main_&]:-mt-6 [main_&]:-mb-6">
       <div>
         <ExploreTripHero
           trip={trip}
@@ -246,11 +270,10 @@ export default function ExploreTrip() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-300 focus:outline-none ${
-                    active
+                  className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-300 focus:outline-none ${active
                       ? "border-emerald-600 text-emerald-600"
                       : "border-transparent text-gray-500 hover:text-gray-800"
-                  }`}
+                    }`}
                 >
                   <Icon name={tab.icon} size={16} />
                   {tab.label}
@@ -259,7 +282,7 @@ export default function ExploreTrip() {
             })}
           </div>
 
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
             {activeTab === "overview" && (
               <OverviewPanel
                 trip={trip}
@@ -268,7 +291,7 @@ export default function ExploreTrip() {
                 memories={memories}
               />
             )}
-            {activeTab === "itinerary" && <ItineraryPanel destinations={destinations} />}
+            {activeTab === "destinations" && <ItineraryPanel destinations={destinations} />}
             {activeTab === "stays" && <StaysPanel accommodations={accommodations} />}
             {activeTab === "memories" && <MemoriesPanel trip={trip} memories={memories} />}
             {activeTab === "tasks" && <TasksPanel tasks={tasks} />}
@@ -276,7 +299,7 @@ export default function ExploreTrip() {
           </div>
         </div>
       </div>
-      <Footer />
+      {!isAuthenticated && <Footer />}
     </div>
   );
 }

@@ -150,7 +150,7 @@ src/
 ├── features/             # Feature-specific modules with domain logic
 │   ├── auth/             # Authentication flows, routes, and state
 │   ├── explore/          # Public trip feed
-│   ├── home/             # User home page
+│   ├── home/             # Trips dashboard list page
 │   ├── invitations/      # Trip invitation handling
 │   ├── landing/          # Landing page feature
 │   ├── profile/          # User profile management

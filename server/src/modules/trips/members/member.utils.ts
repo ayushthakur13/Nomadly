@@ -34,7 +34,10 @@ export function canEditTrip(trip: ITrip, userId: Types.ObjectId | string): boole
 }
 
 export function isTripCreator(trip: ITrip, userId: Types.ObjectId | string): boolean {
-  return (trip.createdBy as any).toString() === userId.toString();
+  const creatorId = (trip.createdBy && typeof trip.createdBy === 'object' && (trip.createdBy as any)._id)
+    ? (trip.createdBy as any)._id
+    : trip.createdBy;
+  return Boolean(creatorId && creatorId.toString() === userId.toString());
 }
 
 export function addMemberToTrip(

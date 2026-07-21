@@ -6,7 +6,7 @@ High-level frontend architecture overview. For detailed feature documentation, s
 
 - **[Auth Feature](client/src/features/auth/README.md)** - Registration, login, OAuth, protected routes
 - **[Trips Feature](client/src/features/trips/README.md)** - Trip browsing, creation, management, workspace
-- **[Home Feature](client/src/features/home/)** - User home page and trip overview
+- **[Home Feature](client/src/features/home/)** - User Trips dashboard listing and overview
 - **[Profile Feature](client/src/features/profile/README.md)** - User profile management
 - **[Landing Feature](client/src/features/landing/README.md)** - Public landing page
 - **[Invitations Feature](client/src/features/invitations/README.md)** - Trip invitations
@@ -123,7 +123,8 @@ createRoot(document.getElementById('root')).render(
 - `/auth/*` - Auth pages (login, signup)
 - `/explore` - Browse public trips
 - `/explore/trips/:tripId` - Trip details (public)
-- `/home` - Home page (protected)
+- `/trips` - Dashboard / My Trips list (protected)
+- `/home` - Redirects to /trips
 - `/trips/new` - Create trip (protected)
 - `/trips/:tripId/*` - Trip workspace (protected)
 - `/profile` - Profile (protected)

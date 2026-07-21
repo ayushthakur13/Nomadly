@@ -71,6 +71,13 @@ api.interceptors.response.use(
       /^\/auth\/(login|register|refresh|google|logout)/.test(p);
 
     if (status === 401 && !originalRequest._retry && !isAuthPath(originalRequest.url)) {
+      const csrf = getCsrfToken();
+      if (!csrf) {
+        clearAccessToken();
+        clearCsrfToken();
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           pendingQueue.push({ resolve, reject });
@@ -87,11 +94,10 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const csrf = getCsrfToken();
         const res = await api.post(
           "/auth/refresh",
           {},
-          { headers: { "x-csrf-token": csrf || "" } }
+          { headers: { "x-csrf-token": csrf } }
         );
         const newToken = res.data?.data?.accessToken as string | undefined;
         setAccessToken(newToken || null);
