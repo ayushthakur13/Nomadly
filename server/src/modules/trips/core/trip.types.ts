@@ -59,8 +59,10 @@ export interface InviteMemberDTO {
 export interface CloneTripOptions {
   includeMembers?: boolean;
   includeDestinations?: boolean;
+  includeAccommodations?: boolean;
   includeTasks?: boolean;
   includeBudget?: boolean;
+  budgetCloneMode?: 'TEMPLATE' | 'PLANNING' | 'FULL_HISTORY';
   newTripName?: string;
   newStartDate?: Date;
 }

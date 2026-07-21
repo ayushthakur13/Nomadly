@@ -355,6 +355,34 @@ class TaskService {
       isCompleted: t.completions && t.completions.length > 0
     }));
   }
+
+  /**
+   * Clone all tasks of a trip to a new trip
+   * Resets assignments and completions since the cloned trip is a new workspace
+   */
+  async cloneTasks(
+    originalTripId: string,
+    newTripId: string,
+    userId: string
+  ): Promise<void> {
+    const originalTasks = await Task.find({ tripId: new Types.ObjectId(originalTripId) }).lean();
+
+    for (const task of originalTasks) {
+      const clonedTask = new Task({
+        ...task,
+        _id: new Types.ObjectId(),
+        tripId: new Types.ObjectId(newTripId),
+        createdBy: new Types.ObjectId(userId),
+        assignedTo: [], // Clear assignment since members are not copied by default
+        completions: [], // Clear completions
+        isArchived: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      await clonedTask.save();
+    }
+  }
 }
 
 export default new TaskService();

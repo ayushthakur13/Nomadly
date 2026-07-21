@@ -217,6 +217,38 @@ class AccommodationService {
     const allowMemberStayEdits = Boolean(trip?.stayPermissions?.allowMemberStayEdits);
     return isMember && allowMemberStayEdits;
   }
+
+  /**
+   * Clone all accommodations of a trip to a new trip
+   * Maps original destination IDs to the cloned destination IDs to preserve relational integrity
+   */
+  async cloneAccommodations(
+    originalTripId: string,
+    newTripId: string,
+    userId: string,
+    destinationIdMap: Map<string, Types.ObjectId>
+  ): Promise<void> {
+    const originalAccommodations = await Accommodation.find({ tripId: new Types.ObjectId(originalTripId) }).lean();
+
+    for (const acc of originalAccommodations) {
+      let newDestinationId: Types.ObjectId | undefined = undefined;
+      if (acc.destinationId && destinationIdMap.has(acc.destinationId.toString())) {
+        newDestinationId = destinationIdMap.get(acc.destinationId.toString());
+      }
+
+      const clonedAcc = new Accommodation({
+        ...acc,
+        _id: new Types.ObjectId(),
+        tripId: new Types.ObjectId(newTripId),
+        createdBy: new Types.ObjectId(userId),
+        destinationId: newDestinationId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      await clonedAcc.save();
+    }
+  }
 }
 
 export default new AccommodationService();

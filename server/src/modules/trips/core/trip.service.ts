@@ -12,6 +12,9 @@ import { isTripCreator, isTripMember } from '../members/member.utils';
 import memoryService from '../memories/memory.service';
 import chatService from '../chat/chat.service';
 import accommodationService from '../accommodations/accommodation.service';
+import destinationService from '../destinations/destination.service';
+import budgetService from '../budget/budget.service';
+import taskService from '../tasks/task.service';
 
 class TripService {
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
@@ -446,12 +449,13 @@ class TripService {
       throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'This trip is private', 403);
     }
 
-    const { newTripName, newStartDate, includeBudget = true } = options;
+    const { newTripName, newStartDate, includeBudget = true, budgetCloneMode = 'PLANNING' } = options;
     const slug = await tripUtils.generateUniqueSlug(newTripName || `${originalTrip.tripName} (Copy)`);
 
     const clonedData: any = {
       ...originalTrip,
       _id: undefined,
+      destinations: [], // Initialize destinations to empty, will populate after deep copying
       tripName: newTripName || `${originalTrip.tripName} (Copy)`,
       slug,
       startDate: newStartDate || new Date(),
@@ -460,6 +464,8 @@ class TripService {
         : new Date(Date.now() + (originalTrip.endDate.getTime() - originalTrip.startDate.getTime())),
       isPublic: false,
       createdBy: new Types.ObjectId(userId),
+      coverImageUrl: originalTrip.coverImageUrl,
+      coverImagePublicId: null, // Clear publicId to prevent Cloudinary deletion conflicts
       members: [{ userId: new Types.ObjectId(userId), role: 'creator' as const, joinedAt: new Date() }],
       engagement: {
         likes: 0,
@@ -482,6 +488,50 @@ class TripService {
 
     const clonedTrip = new Trip(clonedData);
     await clonedTrip.save();
+
+    // 1. Clone destinations if includeDestinations is not false
+    let destinationIdMap = new Map<string, Types.ObjectId>();
+    if (options.includeDestinations !== false) {
+      destinationIdMap = await destinationService.cloneDestinations(
+        tripId,
+        clonedTrip._id.toString()
+      );
+      
+      // Update destinations array references on cloned trip
+      clonedTrip.destinations = Array.from(destinationIdMap.values());
+      await clonedTrip.save();
+
+      // 2. Clone accommodations if includeAccommodations is not false
+      if (options.includeAccommodations !== false) {
+        await accommodationService.cloneAccommodations(
+          tripId,
+          clonedTrip._id.toString(),
+          userId,
+          destinationIdMap
+        );
+      }
+    }
+
+    // 3. Clone tasks if includeTasks is not false
+    if (options.includeTasks !== false) {
+      await taskService.cloneTasks(
+        tripId,
+        clonedTrip._id.toString(),
+        userId
+      );
+    }
+
+    // 4. Clone budget if includeBudget is true
+    if (includeBudget) {
+      await budgetService.cloneBudget(
+        tripId,
+        clonedTrip._id.toString(),
+        userId,
+        budgetCloneMode
+      ).catch((err) => {
+        console.error(`[TripService] Failed to clone budget for trip ${clonedTrip._id}:`, err);
+      });
+    }
 
     await Trip.findByIdAndUpdate(tripId, { $inc: { 'engagement.clones': 1 } });
     await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': 1 } });

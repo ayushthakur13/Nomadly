@@ -405,6 +405,40 @@ class DestinationService {
       return null;
     }
   }
+
+  /**
+   * Clone all destinations of a trip to a new trip
+   * Returns a map mapping original destination ID to new cloned destination ID
+   */
+  async cloneDestinations(
+    originalTripId: string,
+    newTripId: string
+  ): Promise<Map<string, Types.ObjectId>> {
+    const originalDestinations = await Destination.find({ tripId: new Types.ObjectId(originalTripId) })
+      .sort({ order: 1 })
+      .lean();
+
+    const destinationIdMap = new Map<string, Types.ObjectId>();
+
+    for (const dest of originalDestinations) {
+      const originalId = dest._id.toString();
+      const newId = new Types.ObjectId();
+      destinationIdMap.set(originalId, newId);
+
+      const clonedDest = new Destination({
+        ...dest,
+        _id: newId,
+        tripId: new Types.ObjectId(newTripId),
+        imagePublicId: null, // Clear publicId to prevent Cloudinary deletion conflicts
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      await clonedDest.save();
+    }
+
+    return destinationIdMap;
+  }
 }
 
 export default new DestinationService();

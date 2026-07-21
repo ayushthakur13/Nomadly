@@ -577,17 +577,41 @@ class BudgetService {
       throw new TripError(TRIP_ERRORS.BUDGET_ALREADY_EXISTS, 'Budget already exists for the new trip', 400);
     }
 
-    // Transform members: cloning user becomes creator, others become members
-    const clonedMembers: IBudgetMember[] = originalBudget.members.map(member => {
-      const isCloner = member.userId.toString() === cloningUserId;
-      return {
-        userId: member.userId,
-        plannedContribution: mode === 'TEMPLATE' ? 0 : FinancialUtils.normalizeMoney(member.plannedContribution),
-        role: isCloner ? 'creator' : 'member',
+    // Fetch new trip to align budget members
+    const newTrip = await Trip.findById(newTripId).lean();
+    const newTripMemberIds = new Set<string>(
+      newTrip ? newTrip.members.map(m => m.userId.toString()) : [cloningUserId]
+    );
+
+    // Transform members: filter out members who are not in the new trip.
+    // Cloning user becomes the creator.
+    const clonedMembers: IBudgetMember[] = originalBudget.members
+      .filter(member => newTripMemberIds.has(member.userId.toString()))
+      .map(member => {
+        const isCloner = member.userId.toString() === cloningUserId;
+        return {
+          userId: member.userId,
+          plannedContribution: mode === 'TEMPLATE' ? 0 : FinancialUtils.normalizeMoney(member.plannedContribution),
+          role: isCloner ? 'creator' : 'member',
+          joinedAt: new Date(),
+          isPastMember: false,
+        } as IBudgetMember;
+      });
+
+    // Ensure cloner is present in the budget members list
+    if (!clonedMembers.some(m => m.userId.toString() === cloningUserId)) {
+      clonedMembers.unshift({
+        userId: new Types.ObjectId(cloningUserId),
+        plannedContribution: mode === 'TEMPLATE' 
+          ? 0 
+          : (originalBudget.baseBudgetAmount && clonedMembers.length === 0
+            ? FinancialUtils.normalizeMoney(originalBudget.baseBudgetAmount)
+            : 0),
+        role: 'creator',
         joinedAt: new Date(),
         isPastMember: false,
-      } as IBudgetMember;
-    });
+      } as IBudgetMember);
+    }
 
     // Ensure exactly one creator
     const creatorCount = clonedMembers.filter(m => m.role === 'creator').length;
