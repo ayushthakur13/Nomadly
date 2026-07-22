@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { ConfirmationModal, ErrorAlert, PageHeader } from "@/ui/common";
+import { ConfirmationModal, ErrorAlert, FormAlert, PageHeader } from "@/ui/common";
 import { Icon } from "@/ui/icon";
 import type { Accommodation, CreateAccommodationDTO, UpdateAccommodationDTO, Destination } from "@shared/types";
 import { useAuth } from "@/features/auth/hooks";
@@ -11,6 +10,7 @@ import { useAccommodations } from "./hooks/useAccommodations";
 import AccommodationList from "./components/AccommodationList";
 import AccommodationFormModal from "./components/AccommodationFormModal";
 import { getStayTimelineInsights } from "./utils/formatting";
+import { isDateRangeOutOfBounds } from "@/utils/dateValidation";
 
 const AccommodationsPage = () => {
   const dispatch = useDispatch<any>();
@@ -87,6 +87,13 @@ const AccommodationsPage = () => {
         departureDate: item.departureDate,
       }));
   }, [selectedTrip?.destinations]);
+
+  const hasOutOfBoundsStays = useMemo(() => {
+    if (!selectedTrip || !accommodations || accommodations.length === 0) return false;
+    return accommodations.some((acc) =>
+      isDateRangeOutOfBounds(acc.checkIn, acc.checkOut, selectedTrip.startDate, selectedTrip.endDate)
+    );
+  }, [selectedTrip, accommodations]);
 
   const openCreate = () => {
     setEditing(null);
@@ -206,6 +213,12 @@ const AccommodationsPage = () => {
 
       <ErrorAlert error={error || actionError} />
 
+      <FormAlert
+        show={hasOutOfBoundsStays}
+        message="Some stays on this itinerary are scheduled outside the overall trip dates."
+        variant="warning"
+      />
+
       {stayInsights.length > 0 && (
         <div className="space-y-2">
           {stayInsights.map((insight, index) => (
@@ -265,6 +278,8 @@ const AccommodationsPage = () => {
         initial={editing}
         submitting={actionLoading}
         destinationSuggestions={destinationSuggestions}
+        tripStartDate={selectedTrip?.startDate}
+        tripEndDate={selectedTrip?.endDate}
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
       />

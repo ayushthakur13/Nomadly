@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { fetchTripByIdAPI, cloneTripAPI } from "../../services/trips.service";
+import { extractApiError, type ApiError } from "../../utils/errorHandling";
 import { fetchDestinations } from "../../services/destinations.service";
 import { fetchAccommodations } from "../../services/accommodations.service";
 import { fetchMemories } from "../../services/memories.service";
@@ -18,7 +19,7 @@ import { useAsyncAction } from "../../hooks/useAsyncAction";
 import Footer from "../../ui/common/Footer";
 import toast from "react-hot-toast";
 import { Icon } from "@/ui";
-import ExploreTripHero from "./components/ExploreTripHero";
+import TripPreviewHero from "./components/TripPreviewHero";
 import {
   OverviewPanel,
   ItineraryPanel,
@@ -26,11 +27,9 @@ import {
   MemoriesPanel,
   TasksPanel,
   BudgetPanel
-} from "./components/ExploreTripPanels";
+} from "./components/TripPreviewPanels";
 import type { Trip, Destination, Accommodation, Memory } from "@shared/types";
 import type { RootState } from "../../store";
-
-export type TabId = "overview" | "destinations" | "stays" | "memories" | "tasks" | "budget";
 
 export interface PublicTask {
   _id: string;
@@ -56,7 +55,7 @@ export interface PopulatedTrip extends Omit<Trip, "createdBy"> {
   };
 }
 
-export default function ExploreTrip() {
+export default function TripPreviewPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const [trip, setTrip] = useState<PopulatedTrip | null>(null);
@@ -66,7 +65,7 @@ export default function ExploreTrip() {
   const [tasks, setTasks] = useState<PublicTask[]>([]);
   const [budget, setBudget] = useState<PublicBudgetSummary | null>(null);
   const [socialStatus, setSocialStatus] = useState<{ liked: boolean; saved: boolean }>({ liked: false, saved: false });
-  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const [isCloning, setIsCloning] = useState(false);
 
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
@@ -135,6 +134,8 @@ export default function ExploreTrip() {
     });
   }, [tripId, isAuthenticated, loadTripDetails]);
 
+
+
   const handleLike = async () => {
     if (!tripId) return;
     if (!isAuthenticated) {
@@ -192,14 +193,28 @@ export default function ExploreTrip() {
     }
 
     try {
+      setIsCloning(true);
       const response = await cloneTripAPI(tripId, {
         newTripName: `${trip.tripName} (Clone)`,
         includeBudget: true
       });
       toast.success("Trip cloned successfully!");
       navigate(`/trips/${response.data.trip._id}`);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to clone trip");
+    } catch (err) {
+      toast.error(extractApiError(err as ApiError, "Failed to clone trip"));
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const offset = el.offsetTop - 130; // Account for sticky main nav + jump nav
+      window.scrollTo({
+        top: offset,
+        behavior: "smooth"
+      });
     }
   };
 
@@ -236,67 +251,57 @@ export default function ExploreTrip() {
     (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)
   ) || 1;
 
-  const tabs: { id: TabId; label: string; icon: string }[] = [
-    { id: "overview", label: "Overview", icon: "fileText" },
-    { id: "destinations", label: `Destinations (${destinations.length})`, icon: "mapPin" },
-    { id: "stays", label: `Stays (${accommodations.length})`, icon: "bed" },
-    { id: "budget", label: "Budget", icon: "dollarSign" },
-    { id: "tasks", label: `Tasks (${tasks.length})`, icon: "tasks" },
-    ...(trip.memoriesPublic ? [{ id: "memories" as TabId, label: `Memories (${memories.length})`, icon: "image" }] : [])
-  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between [main_&]:-mx-4 sm:[main_&]:-mx-6 lg:[main_&]:-mx-8 [main_&]:-mt-6 [main_&]:-mb-6">
       <div>
-        <ExploreTripHero
+        <TripPreviewHero
           trip={trip}
           socialStatus={socialStatus}
           durationDays={durationDays}
           handleLike={handleLike}
           handleSave={handleSave}
           handleClone={handleClone}
+          isCloning={isCloning}
           handleShare={() => {
             navigator.clipboard.writeText(window.location.href);
             toast.success("Link copied to clipboard!");
           }}
           onAuthorClick={() => navigate(`/profile/${trip.createdBy.username}`)}
+          destinations={destinations}
+          accommodations={accommodations}
+          tasks={tasks}
+          budget={budget}
+          memories={memories}
+          onSectionClick={scrollToSection}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex border-b border-gray-200 overflow-x-auto no-scrollbar gap-6 mb-8">
-            {tabs.map(tab => {
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 whitespace-nowrap transition-all duration-300 focus:outline-none ${active
-                      ? "border-emerald-600 text-emerald-600"
-                      : "border-transparent text-gray-500 hover:text-gray-800"
-                    }`}
-                >
-                  <Icon name={tab.icon} size={16} />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Vertical Sections List */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
 
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm">
-            {activeTab === "overview" && (
-              <OverviewPanel
-                trip={trip}
-                destinations={destinations}
-                accommodations={accommodations}
-                memories={memories}
-              />
-            )}
-            {activeTab === "destinations" && <ItineraryPanel destinations={destinations} />}
-            {activeTab === "stays" && <StaysPanel accommodations={accommodations} />}
-            {activeTab === "memories" && <MemoriesPanel trip={trip} memories={memories} />}
-            {activeTab === "tasks" && <TasksPanel tasks={tasks} />}
-            {activeTab === "budget" && <BudgetPanel budget={budget} />}
-          </div>
+          <section id="destinations" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm scroll-mt-24">
+            <ItineraryPanel destinations={destinations} />
+          </section>
+
+          <section id="stays" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm scroll-mt-24">
+            <StaysPanel accommodations={accommodations} />
+          </section>
+
+          <section id="budget" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm scroll-mt-24">
+            <BudgetPanel budget={budget} />
+          </section>
+
+          <section id="tasks" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm scroll-mt-24">
+            <TasksPanel tasks={tasks} />
+          </section>
+
+          {trip.memoriesPublic && (
+            <section id="memories" className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 shadow-sm scroll-mt-24">
+              <MemoriesPanel trip={trip} memories={memories} />
+            </section>
+          )}
+
         </div>
       </div>
       {!isAuthenticated && <Footer />}

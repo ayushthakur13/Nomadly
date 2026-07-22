@@ -432,3 +432,26 @@ To balance data integrity with user flexibility, we implement Option C (Soft Val
 **Consequences:**
 - **Pros**: Standard RESTful URL structure; visual spacing gaps resolved; smooth, hardware-accelerated collapse transitions; intuitive workspace visual context.
 - **Cons**: None.
+
+---
+
+## Trip Preview Page Redesign, Relative Date Cloning & DRY Map/Validation Utilities
+**Status:** Accepted
+
+**Context:**
+- The explore read-only trip detail view (`ExploreTrip.tsx`) used tab panels, had duplicated Mapbox URL building logic, and rendered raw currency strings instead of localized symbols.
+- Cloning a trip blueprint copied fixed travel dates without shifting timeline pacing to the cloner's new calendar, failed to remove the original blueprint from the cloner's saved/bookmarked list, and failed to preserve `baseBudgetAmount`.
+- Clone buttons lacked disabled loading spinners, causing multiple accidental duplicate clone API submissions.
+- Date boundary out-of-bounds validation logic was duplicated across multiple form modals and list pages.
+
+**Decision:**
+1. **Single-Page Scrollable Trip Preview Page**: Renamed `ExploreTrip` to `TripPreviewPage`. Replaced tab panels with a continuous vertical scrolling layout featuring a 3-column Hero split (Cover, Metadata, Mapbox Preview) and interactive Itinerary Summary jump-cards.
+2. **Relative Date Shifting & Automatic Unsave**: Calculated `dateOffsetMs` during cloning to dynamically shift destination stop dates, stay check-in/out dates, and task due dates relative to the new trip start date. Triggered `SavedTrip.deleteOne` upon successful cloning.
+3. **Base Budget Target Preservation**: Preserved `baseBudgetAmount` as the target trip limit while resetting individual member contributions to ₹0. Updated `syncTripBudgetSummary` to fall back to `baseBudgetAmount` when member contributions are uncommitted.
+4. **Shared Mapbox Static Map Hook (`useMapboxStatic`)**: Created a shared hook in `features/trips/_shared/hooks` encapsulating origin (`s`), intermediate stops (`1..99`), and destination (`d`) marker pin overlays for 100% DRY map rendering.
+5. **Clone Button Disabled Loading State & Spinner**: Added loading spinner state and button disabling across all clone triggers (`TripPreviewHero`, `ExploreGrid`, `SavedTripCard`).
+6. **DRY Date Validation Helpers**: Added `isDateOutOfBounds` and `isDateRangeOutOfBounds` to `src/utils/dateValidation.ts` and refactored destination and accommodation modules to use them for soft warning alerts.
+
+**Consequences:**
+- **Pros**: Outstanding user experience for exploring public itineraries; 100% DRY Mapbox and date validation utilities; robust timeline and budget cloning logic.
+- **Cons**: None.

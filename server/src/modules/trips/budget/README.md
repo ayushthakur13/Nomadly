@@ -104,9 +104,9 @@ cloneBudget(originalTripId, newTripId, userId, mode) → void
 
 | Mode | What is copied |
 |---|---|
-| `TEMPLATE` | Structure + members, contributions reset to 0 |
-| `PLANNING` | Structure + members + contributions, no expenses |
-| `FULL_HISTORY` | Complete duplicate including all expenses |
+| `TEMPLATE` | Structure + base budget target, member contributions reset to 0 |
+| `PLANNING` | Structure + base budget target, member contributions reset to 0 (uncommitted), no expenses |
+| `FULL_HISTORY` | Complete duplicate including all expenses and history |
 
 ---
 

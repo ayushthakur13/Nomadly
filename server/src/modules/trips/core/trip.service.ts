@@ -15,6 +15,7 @@ import accommodationService from '../accommodations/accommodation.service';
 import destinationService from '../destinations/destination.service';
 import budgetService from '../budget/budget.service';
 import taskService from '../tasks/task.service';
+import SavedTrip from '../../explore/save.model';
 
 class TripService {
   async createTrip(userId: string, data: CreateTripDTO): Promise<ITrip> {
@@ -489,12 +490,24 @@ class TripService {
     const clonedTrip = new Trip(clonedData);
     await clonedTrip.save();
 
+    // Calculate date offset for relative date shifting
+    const originalStartDate = originalTrip.startDate instanceof Date
+      ? originalTrip.startDate
+      : new Date(originalTrip.startDate);
+
+    const clonedStartDate = clonedTrip.startDate instanceof Date
+      ? clonedTrip.startDate
+      : new Date(clonedTrip.startDate);
+
+    const dateOffsetMs = clonedStartDate.getTime() - originalStartDate.getTime();
+
     // 1. Clone destinations if includeDestinations is not false
     let destinationIdMap = new Map<string, Types.ObjectId>();
     if (options.includeDestinations !== false) {
       destinationIdMap = await destinationService.cloneDestinations(
         tripId,
-        clonedTrip._id.toString()
+        clonedTrip._id.toString(),
+        dateOffsetMs
       );
       
       // Update destinations array references on cloned trip
@@ -507,7 +520,8 @@ class TripService {
           tripId,
           clonedTrip._id.toString(),
           userId,
-          destinationIdMap
+          destinationIdMap,
+          dateOffsetMs
         );
       }
     }
@@ -517,7 +531,8 @@ class TripService {
       await taskService.cloneTasks(
         tripId,
         clonedTrip._id.toString(),
-        userId
+        userId,
+        dateOffsetMs
       );
     }
 
@@ -535,6 +550,12 @@ class TripService {
 
     await Trip.findByIdAndUpdate(tripId, { $inc: { 'engagement.clones': 1 } });
     await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': 1 } });
+
+    // Automatically unsave the cloned trip for this user
+    await SavedTrip.deleteOne({
+      userId: new Types.ObjectId(userId),
+      tripId: new Types.ObjectId(tripId)
+    });
 
     return clonedTrip;
   }

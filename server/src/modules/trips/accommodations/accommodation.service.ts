@@ -226,7 +226,8 @@ class AccommodationService {
     originalTripId: string,
     newTripId: string,
     userId: string,
-    destinationIdMap: Map<string, Types.ObjectId>
+    destinationIdMap: Map<string, Types.ObjectId>,
+    dateOffsetMs?: number
   ): Promise<void> {
     const originalAccommodations = await Accommodation.find({ tripId: new Types.ObjectId(originalTripId) }).lean();
 
@@ -242,6 +243,12 @@ class AccommodationService {
         tripId: new Types.ObjectId(newTripId),
         createdBy: new Types.ObjectId(userId),
         destinationId: newDestinationId,
+        checkIn: acc.checkIn && typeof dateOffsetMs === 'number'
+          ? new Date(new Date(acc.checkIn).getTime() + dateOffsetMs)
+          : acc.checkIn,
+        checkOut: acc.checkOut && typeof dateOffsetMs === 'number'
+          ? new Date(new Date(acc.checkOut).getTime() + dateOffsetMs)
+          : acc.checkOut,
         createdAt: new Date(),
         updatedAt: new Date()
       });

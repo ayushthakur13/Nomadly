@@ -8,6 +8,7 @@ import destinationService from '../destinations/destination.service';
 import accommodationService from '../accommodations/accommodation.service';
 import budgetService from '../budget/budget.service';
 import taskService from '../tasks/task.service';
+import SavedTrip from '../../explore/save.model';
 import { TripError, TRIP_ERRORS } from './trip.errors';
 
 vi.mock('./trip.model', () => {
@@ -32,6 +33,14 @@ vi.mock('../../users/user.model', () => {
   return {
     default: {
       findByIdAndUpdate: vi.fn()
+    }
+  };
+});
+
+vi.mock('../../explore/save.model', () => {
+  return {
+    default: {
+      deleteOne: vi.fn().mockResolvedValue({ deletedCount: 1 })
     }
   };
 });
@@ -130,14 +139,15 @@ describe('TripService - cloneTrip', () => {
     });
 
     expect(Trip).toHaveBeenCalled();
-    expect(destinationService.cloneDestinations).toHaveBeenCalledWith(tripId, result._id.toString());
+    expect(destinationService.cloneDestinations).toHaveBeenCalledWith(tripId, result._id.toString(), expect.any(Number));
     expect(accommodationService.cloneAccommodations).toHaveBeenCalledWith(
       tripId,
       result._id.toString(),
       userId,
-      destMap
+      destMap,
+      expect.any(Number)
     );
-    expect(taskService.cloneTasks).toHaveBeenCalledWith(tripId, result._id.toString(), userId);
+    expect(taskService.cloneTasks).toHaveBeenCalledWith(tripId, result._id.toString(), userId, expect.any(Number));
     expect(budgetService.cloneBudget).toHaveBeenCalledWith(
       tripId,
       result._id.toString(),
@@ -146,5 +156,9 @@ describe('TripService - cloneTrip', () => {
     );
     expect(Trip.findByIdAndUpdate).toHaveBeenCalledWith(tripId, { $inc: { 'engagement.clones': 1 } });
     expect(User.findByIdAndUpdate).toHaveBeenCalledWith(userId, { $inc: { 'stats.tripsCount': 1 } });
+    expect(SavedTrip.deleteOne).toHaveBeenCalledWith({
+      userId: new Types.ObjectId(userId),
+      tripId: new Types.ObjectId(tripId)
+    });
   });
 });

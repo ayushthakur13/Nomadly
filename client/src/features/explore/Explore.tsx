@@ -10,6 +10,7 @@ import {
   fetchTripSocialStatusAPI
 } from "../../services/explore.service";
 import { cloneTripAPI } from "../../services/trips.service";
+import { extractApiError, type ApiError } from "../../utils/errorHandling";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import Footer from "../../ui/common/Footer";
 import toast from "react-hot-toast";
@@ -42,6 +43,7 @@ export default function Explore() {
   const [sortBy, setSortBy] = useState<"recent" | "most-liked">("recent");
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [socialStatus, setSocialStatus] = useState<Record<string, { liked: boolean; saved: boolean }>>({});
+  const [cloningTripId, setCloningTripId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state: any) => state.auth);
@@ -207,14 +209,17 @@ export default function Explore() {
 
 
     try {
+      setCloningTripId(tripId);
       const response = await cloneTripAPI(tripId, {
         newTripName: `${tripName} (Clone)`,
         includeBudget: true
       });
       toast.success("Trip cloned successfully!");
       navigate(`/trips/${response.data.trip._id}`);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to clone trip");
+    } catch (err) {
+      toast.error(extractApiError(err as ApiError, "Failed to clone trip"));
+    } finally {
+      setCloningTripId(null);
     }
   };
 
@@ -281,6 +286,7 @@ export default function Explore() {
             handleLike={handleLike}
             handleSave={handleSave}
             handleClone={handleClone}
+            cloningTripId={cloningTripId}
             onCardClick={(id) => navigate(`/explore/trips/${id}`)}
             onCreatorClick={(e, username) => {
               e.stopPropagation();

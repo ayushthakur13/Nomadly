@@ -20,6 +20,7 @@ interface SavedTripCardProps {
   onUnsave: (e: React.MouseEvent, tripId: string) => void;
   onClone: (e: React.MouseEvent, tripId: string, tripName: string) => void;
   onClick: () => void;
+  isCloning?: boolean;
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -35,7 +36,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
   budget: "💰",
 };
 
-export default function SavedTripCard({ trip, onUnsave, onClone, onClick }: SavedTripCardProps) {
+export default function SavedTripCard({ trip, onUnsave, onClone, onClick, isCloning = false }: SavedTripCardProps) {
   const getTripDuration = () => {
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
@@ -112,10 +113,20 @@ export default function SavedTripCard({ trip, onUnsave, onClone, onClick }: Save
             </span>
             <button
               onClick={(e) => onClone(e, trip._id, trip.tripName)}
-              className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white rounded-lg text-emerald-600 transition-all flex items-center gap-1 text-[10px] font-bold"
+              disabled={isCloning}
+              className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-emerald-600 transition-all flex items-center gap-1 text-[10px] font-bold"
               title="Clone itinerary"
             >
-              <Icon name="copy" size={12} /> Clone
+              {isCloning ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                  <span>Cloning...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name="copy" size={12} /> Clone
+                </>
+              )}
             </button>
           </div>
         </div>

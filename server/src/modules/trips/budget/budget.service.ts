@@ -510,10 +510,11 @@ class BudgetService {
    * to production to guarantee full consistency.
    */
   private async syncTripBudgetSummary(tripId: string): Promise<void> {
-    // Re-query budget fresh so totalPlanned always reflects committed DB state.
+    // Re-query budget fresh so totalPlanned always reflects committed DB state or base budget target.
     const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    const membersTotal = budget ? budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0) : 0;
     const totalPlanned = FinancialUtils.normalizeMoney(
-      budget ? budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0) : 0
+      membersTotal > 0 ? membersTotal : (budget?.baseBudgetAmount || 0)
     );
 
     const totalSpentAgg = await Expense.aggregate([
@@ -583,15 +584,24 @@ class BudgetService {
       newTrip ? newTrip.members.map(m => m.userId.toString()) : [cloningUserId]
     );
 
+    // Calculate target base budget amount
+    const originalTotalPlanned = originalBudget.members
+      ? originalBudget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0)
+      : 0;
+
+    const baseBudgetTarget = originalBudget.baseBudgetAmount !== null && originalBudget.baseBudgetAmount !== undefined && originalBudget.baseBudgetAmount > 0
+      ? originalBudget.baseBudgetAmount
+      : originalTotalPlanned;
+
     // Transform members: filter out members who are not in the new trip.
-    // Cloning user becomes the creator.
+    // Cloning user becomes the creator with 0 individual contribution (using base budget as target).
     const clonedMembers: IBudgetMember[] = originalBudget.members
       .filter(member => newTripMemberIds.has(member.userId.toString()))
       .map(member => {
         const isCloner = member.userId.toString() === cloningUserId;
         return {
           userId: member.userId,
-          plannedContribution: mode === 'TEMPLATE' ? 0 : FinancialUtils.normalizeMoney(member.plannedContribution),
+          plannedContribution: 0,
           role: isCloner ? 'creator' : 'member',
           joinedAt: new Date(),
           isPastMember: false,
@@ -602,11 +612,7 @@ class BudgetService {
     if (!clonedMembers.some(m => m.userId.toString() === cloningUserId)) {
       clonedMembers.unshift({
         userId: new Types.ObjectId(cloningUserId),
-        plannedContribution: mode === 'TEMPLATE' 
-          ? 0 
-          : (originalBudget.baseBudgetAmount && clonedMembers.length === 0
-            ? FinancialUtils.normalizeMoney(originalBudget.baseBudgetAmount)
-            : 0),
+        plannedContribution: 0,
         role: 'creator',
         joinedAt: new Date(),
         isPastMember: false,
@@ -630,6 +636,7 @@ class BudgetService {
     const clonedBudget = new TripBudget({
       tripId: new Types.ObjectId(newTripId),
       baseCurrency: originalBudget.baseCurrency,
+      baseBudgetAmount: baseBudgetTarget > 0 ? FinancialUtils.normalizeMoney(baseBudgetTarget) : null,
       createdBy: new Types.ObjectId(cloningUserId),
       members: clonedMembers,
       rules: originalBudget.rules ? { ...originalBudget.rules } : {}

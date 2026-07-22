@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { LocationSearchInput, FormAlert } from '@/ui/common/';
 import type { Destination, DestinationPayload } from '@/services/destinations.service';
 import { Icon } from '@/ui/icon/';
-import { isDateRangeInvalid } from '@/utils/dateValidation';
+import { isDateRangeInvalid, isDateRangeOutOfBounds } from '@/utils/dateValidation';
 
 const normalizeDateInput = (value?: string) => {
   if (!value) return undefined;
@@ -42,25 +42,10 @@ const DestinationFormModal = ({
   const departureDate = watch('departureDate');
   const isDateInvalid = isDateRangeInvalid(arrivalDate, departureDate);
 
-  const isOutOfBounds = useMemo(() => {
-    if (!tripStartDate || !tripEndDate) return false;
-    const tripStart = new Date(tripStartDate);
-    const tripEnd = new Date(tripEndDate);
-    tripStart.setHours(0, 0, 0, 0);
-    tripEnd.setHours(0, 0, 0, 0);
-
-    if (arrivalDate) {
-      const arr = new Date(arrivalDate);
-      arr.setHours(0, 0, 0, 0);
-      if (arr < tripStart || arr > tripEnd) return true;
-    }
-    if (departureDate) {
-      const dep = new Date(departureDate);
-      dep.setHours(0, 0, 0, 0);
-      if (dep < tripStart || dep > tripEnd) return true;
-    }
-    return false;
-  }, [arrivalDate, departureDate, tripStartDate, tripEndDate]);
+  const isOutOfBounds = useMemo(
+    () => isDateRangeOutOfBounds(arrivalDate, departureDate, tripStartDate, tripEndDate),
+    [arrivalDate, departureDate, tripStartDate, tripEndDate]
+  );
 
   // Calculate proximity from trip's main destination
   const proximity = tripDestination?.point?.coordinates ? {

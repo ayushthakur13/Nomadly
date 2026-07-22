@@ -412,7 +412,8 @@ class DestinationService {
    */
   async cloneDestinations(
     originalTripId: string,
-    newTripId: string
+    newTripId: string,
+    dateOffsetMs?: number
   ): Promise<Map<string, Types.ObjectId>> {
     const originalDestinations = await Destination.find({ tripId: new Types.ObjectId(originalTripId) })
       .sort({ order: 1 })
@@ -429,6 +430,12 @@ class DestinationService {
         ...dest,
         _id: newId,
         tripId: new Types.ObjectId(newTripId),
+        arrivalDate: dest.arrivalDate && typeof dateOffsetMs === 'number'
+          ? new Date(new Date(dest.arrivalDate).getTime() + dateOffsetMs)
+          : dest.arrivalDate,
+        departureDate: dest.departureDate && typeof dateOffsetMs === 'number'
+          ? new Date(new Date(dest.departureDate).getTime() + dateOffsetMs)
+          : dest.departureDate,
         imagePublicId: null, // Clear publicId to prevent Cloudinary deletion conflicts
         createdAt: new Date(),
         updatedAt: new Date()

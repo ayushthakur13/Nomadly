@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Icon } from "@/ui";
 import { formatDateRange } from "../../../utils/formatDateRange";
 import type { Destination, Accommodation, Memory } from "@shared/types";
-import type { PopulatedTrip, PublicTask, PublicBudgetSummary } from "../ExploreTrip";
+import type { PopulatedTrip, PublicTask, PublicBudgetSummary } from "../TripPreviewPage";
 import { MemoryLightbox } from "@/features/trips/workspace/modules/memories/components/MemoryLightbox";
+import { formatCurrency } from "../../trips/workspace/modules/budget/utils/formatting";
 
 interface PanelProps {
   trip: PopulatedTrip;
@@ -51,12 +52,12 @@ export function OverviewPanel({ trip, destinations, accommodations, memories }: 
 
 export function ItineraryPanel({ destinations }: Pick<PanelProps, "destinations">) {
   return (
-    <div className="space-y-8 text-left">
+    <div className="space-y-6 text-left">
       <h3 className="text-xl font-semibold text-gray-900">Stop-by-Stop Itinerary</h3>
       {destinations.length === 0 ? (
         <p className="text-gray-500 text-sm">No destinations have been mapped out for this trip yet.</p>
       ) : (
-        <div className="relative border-l border-emerald-500/30 pl-6 ml-4 space-y-8">
+        <div className="relative border-l border-emerald-500/30 pl-6 ml-4 space-y-6">
           {destinations.map((dest, idx) => (
             <div key={dest._id} className="relative">
               {/* Timeline dot */}
@@ -120,7 +121,7 @@ export function StaysPanel({ accommodations }: Pick<PanelProps, "accommodations"
                 <h4 className="text-lg font-semibold text-gray-900 line-clamp-1">{stay.name}</h4>
                 {stay.pricePerNight !== undefined && (
                   <span className="text-emerald-700 font-semibold text-sm whitespace-nowrap">
-                    ${stay.pricePerNight}/night
+                    {formatCurrency(stay.pricePerNight)}/night
                   </span>
                 )}
               </div>
@@ -244,19 +245,13 @@ export function TasksPanel({ tasks }: Pick<PanelProps, "tasks">) {
               />
               <div>
                 <h4
-                  className={`font-semibold text-sm ${
-                    task.isCompleted ? "line-through text-gray-400" : "text-gray-800"
-                  }`}
+                  className={`font-semibold text-sm ${task.isCompleted ? "line-through text-gray-400" : "text-gray-800"
+                    }`}
                 >
                   {task.title}
                 </h4>
                 {task.description && (
                   <p className="text-xs text-gray-500 mt-1">{task.description}</p>
-                )}
-                {task.dueDate && (
-                  <span className="inline-block text-[10px] bg-white border px-2 py-0.5 rounded text-gray-500 mt-2">
-                    Due {formatDateRange(task.dueDate)}
-                  </span>
                 )}
               </div>
             </div>
@@ -283,13 +278,13 @@ export function BudgetPanel({ budget }: Pick<PanelProps, "budget">) {
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
               <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider">Planned Budget</p>
               <p className="text-3xl font-semibold text-emerald-800 mt-1">
-                {budget.totalPlanned} {budget.baseCurrency}
+                {formatCurrency(budget.totalPlanned, budget.baseCurrency)}
               </p>
             </div>
             <div className="bg-rose-50 border border-rose-100 rounded-2xl p-5">
               <p className="text-xs text-rose-700 font-medium uppercase tracking-wider">Total Spent</p>
               <p className="text-3xl font-semibold text-rose-800 mt-1">
-                {budget.totalSpent} {budget.baseCurrency}
+                {formatCurrency(budget.totalSpent, budget.baseCurrency)}
               </p>
             </div>
           </div>
@@ -309,7 +304,7 @@ export function BudgetPanel({ budget }: Pick<PanelProps, "budget">) {
                       <div className="flex justify-between text-xs font-semibold text-gray-700">
                         <span>{cat.category}</span>
                         <span>
-                          {cat.amount} {budget.baseCurrency} ({percentage}%)
+                          {formatCurrency(cat.amount, budget.baseCurrency)} ({percentage}%)
                         </span>
                       </div>
                       <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">

@@ -40,6 +40,7 @@ interface ExploreGridProps {
   handleClone: (e: React.MouseEvent, tripId: string, tripName: string) => void;
   onCardClick: (tripId: string) => void;
   onCreatorClick: (e: React.MouseEvent, username: string) => void;
+  cloningTripId?: string | null;
 }
 
 export default function ExploreGrid({
@@ -50,6 +51,7 @@ export default function ExploreGrid({
   handleClone,
   onCardClick,
   onCreatorClick,
+  cloningTripId,
 }: ExploreGridProps) {
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -169,11 +171,22 @@ export default function ExploreGrid({
 
                   <button
                     onClick={(e) => handleClone(e, trip._id, trip.tripName)}
-                    className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg transition-all"
-                    title="Clone to your trips"
+                    disabled={cloningTripId === trip._id}
+                    className="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                    title="Clone itinerary"
                     aria-label="Clone trip blueprint to your trips"
                   >
-                    <Icon name="copy" size={14} />
+                    {cloningTripId === trip._id ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                        <span>Cloning...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="copy" size={13} />
+                        <span>Clone</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

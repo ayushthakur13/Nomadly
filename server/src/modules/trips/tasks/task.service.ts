@@ -363,7 +363,8 @@ class TaskService {
   async cloneTasks(
     originalTripId: string,
     newTripId: string,
-    userId: string
+    userId: string,
+    dateOffsetMs?: number
   ): Promise<void> {
     const originalTasks = await Task.find({ tripId: new Types.ObjectId(originalTripId) }).lean();
 
@@ -375,6 +376,9 @@ class TaskService {
         createdBy: new Types.ObjectId(userId),
         assignedTo: [], // Clear assignment since members are not copied by default
         completions: [], // Clear completions
+        dueDate: task.dueDate && typeof dateOffsetMs === 'number'
+          ? new Date(new Date(task.dueDate).getTime() + dateOffsetMs)
+          : task.dueDate,
         isArchived: false,
         createdAt: new Date(),
         updatedAt: new Date()

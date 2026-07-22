@@ -35,7 +35,7 @@ const LocationPreview = ({
   onAddStops,
   onEditLocation,
 }: LocationPreviewProps) => {
-  const { state, mapUrl, coordinates } = useLocationPreviewLogic(destinationLocation, stops);
+  const { state, mapUrl, coordinates } = useLocationPreviewLogic(destinationLocation, stops, sourceLocation);
 
   // STATE 1: Static Map Available (Ideal)
   if (state === 'with-coordinates' && coordinates) {

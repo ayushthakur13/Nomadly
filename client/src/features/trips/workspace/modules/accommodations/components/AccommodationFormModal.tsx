@@ -5,7 +5,7 @@ import { Icon } from "@/ui/icon";
 import type { Accommodation, CreateAccommodationDTO } from "@shared/types";
 import { DEFAULT_ACCOMMODATION_FORM_VALUES } from "../utils/constants";
 import { toDateInputValue } from "../utils/formatting";
-import { isDateRangeInvalid } from "@/utils/dateValidation";
+import { isDateRangeInvalid, isDateRangeOutOfBounds } from "@/utils/dateValidation";
 import { FormAlert } from "@/ui/common/";
 
 interface AccommodationFormModalProps {
@@ -19,6 +19,8 @@ interface AccommodationFormModalProps {
     arrivalDate?: string;
     departureDate?: string;
   }>;
+  tripStartDate?: string;
+  tripEndDate?: string;
   onClose: () => void;
   onSubmit: (payload: CreateAccommodationDTO) => Promise<void>;
 }
@@ -28,6 +30,8 @@ const AccommodationFormModal = ({
   initial,
   submitting = false,
   destinationSuggestions = [],
+  tripStartDate,
+  tripEndDate,
   onClose,
   onSubmit,
 }: AccommodationFormModalProps) => {
@@ -41,6 +45,11 @@ const AccommodationFormModal = ({
   const checkIn = watch("checkIn");
   const checkOut = watch("checkOut");
   const isDateInvalid = isDateRangeInvalid(checkIn, checkOut);
+
+  const isOutOfBounds = useMemo(
+    () => isDateRangeOutOfBounds(checkIn, checkOut, tripStartDate, tripEndDate),
+    [checkIn, checkOut, tripStartDate, tripEndDate]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -183,6 +192,13 @@ const AccommodationFormModal = ({
               show={isDateInvalid}
               message="Check-out date must be after check-in date"
               variant="error"
+              className="md:col-span-2"
+            />
+
+            <FormAlert
+              show={isOutOfBounds && !isDateInvalid}
+              message={`This stay falls outside the overall trip dates (${tripStartDate ? new Date(tripStartDate).toLocaleDateString() : ''} - ${tripEndDate ? new Date(tripEndDate).toLocaleDateString() : ''}).`}
+              variant="warning"
               className="md:col-span-2"
             />
 

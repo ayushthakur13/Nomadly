@@ -66,6 +66,7 @@ const HomePage = () => {
   // Local state for saved trips
   const [savedTrips, setSavedTrips] = useState<ExploreTrip[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
+  const [cloningTripId, setCloningTripId] = useState<string | null>(null);
 
   // Local state for zero-trips curated explore feed
   const [exploreTrips, setExploreTrips] = useState<ExploreTrip[]>([]);
@@ -209,6 +210,7 @@ const HomePage = () => {
 
 
     try {
+      setCloningTripId(tripId);
       const response = await cloneTripAPI(tripId, {
         newTripName: `${tripName} (Clone)`,
         includeBudget: true
@@ -217,6 +219,8 @@ const HomePage = () => {
       navigate(`/trips/${response.data.trip._id}`);
     } catch (err) {
       toast.error(extractApiError(err as ApiError, 'Failed to clone trip'));
+    } finally {
+      setCloningTripId(null);
     }
   };
 
@@ -392,6 +396,7 @@ const HomePage = () => {
                   handleLike={handleLike}
                   handleSave={handleSave}
                   handleClone={handleClone}
+                  cloningTripId={cloningTripId}
                   onCardClick={(id) => navigate(`/explore/trips/${id}`)}
                   onCreatorClick={(e, username) => {
                     e.stopPropagation();
@@ -497,6 +502,7 @@ const HomePage = () => {
                       trip={trip}
                       onUnsave={handleUnsave}
                       onClone={handleClone}
+                      isCloning={cloningTripId === trip._id}
                       onClick={() => navigate(`/explore/trips/${trip._id}`)}
                     />
                   ))}

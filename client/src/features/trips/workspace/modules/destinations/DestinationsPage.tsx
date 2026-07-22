@@ -10,6 +10,7 @@ import { useDynamicForm } from '../../../_shared/hooks';
 import { useDestinations } from './hooks/useDestinations';
 import type { Destination } from '@/services/destinations.service';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { isDateRangeOutOfBounds } from '@/utils/dateValidation';
 import toast from 'react-hot-toast';
 
 const DestinationsPage = () => {
@@ -35,25 +36,9 @@ const DestinationsPage = () => {
 
   const hasOutOfBoundsStops = useMemo(() => {
     if (!selectedTrip || !destinations || destinations.length === 0) return false;
-    const tripStart = new Date(selectedTrip.startDate);
-    const tripEnd = new Date(selectedTrip.endDate);
-    tripStart.setHours(0, 0, 0, 0);
-    tripEnd.setHours(0, 0, 0, 0);
-
-    return destinations.some((dest) => {
-      if (!dest.arrivalDate && !dest.departureDate) return false;
-      if (dest.arrivalDate) {
-        const arr = new Date(dest.arrivalDate);
-        arr.setHours(0, 0, 0, 0);
-        if (arr < tripStart || arr > tripEnd) return true;
-      }
-      if (dest.departureDate) {
-        const dep = new Date(dest.departureDate);
-        dep.setHours(0, 0, 0, 0);
-        if (dep < tripStart || dep > tripEnd) return true;
-      }
-      return false;
-    });
+    return destinations.some((dest) =>
+      isDateRangeOutOfBounds(dest.arrivalDate, dest.departureDate, selectedTrip.startDate, selectedTrip.endDate)
+    );
   }, [selectedTrip, destinations]);
 
   const { isOpen: modalOpen, item: editing, openCreate, openEdit, close: closeModal } = useDynamicForm();
