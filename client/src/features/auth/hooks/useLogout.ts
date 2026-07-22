@@ -1,7 +1,7 @@
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../store/authSlice';
-import { secureLogout } from '../utils/auth';
+import { logoutAPI } from '../../../services/auth.service';
 import { AUTH_ROUTES } from '../constants/authConstants';
 import type { AppDispatch } from '../../../store';
 
@@ -15,8 +15,8 @@ export const useLogout = () => {
 
   const performLogout = async () => {
     try {
-      // First attempt secure logout on server
-      await secureLogout();
+      // Attempt secure logout on server via auth.service
+      await logoutAPI();
     } catch (error) {
       // Log error but continue with client-side logout
       console.error('Secure logout failed:', error);
@@ -27,5 +27,5 @@ export const useLogout = () => {
     }
   };
 
-  return { performLogout };
+  return { performLogout, logout: performLogout };
 };

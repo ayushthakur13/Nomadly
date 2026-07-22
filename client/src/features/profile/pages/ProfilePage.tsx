@@ -9,8 +9,7 @@ import {
   updateProfileStart,
   updateProfileSuccess,
   updateProfileFailure,
-  logout,
-  secureLogout
+  useLogout,
 } from "@/features/auth";
 import {
   fetchCurrentUserAPI,
@@ -34,6 +33,7 @@ interface ProfileFormData {
 export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { performLogout } = useLogout();
   const { user, loading } = useSelector((state: any) => state.auth);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -193,13 +193,6 @@ export default function Profile() {
     },
     errorMessage: "Failed to update password"
   });
-  const { execute: performLogout, isLoading: loggingOut } = useAsyncAction({
-    showToast: false,
-    onSuccess: () => {
-      dispatch(logout());
-      navigate('/', { replace: true });
-    }
-  });
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -242,9 +235,7 @@ export default function Profile() {
   const bioValue = watch("bio") || "";
 
   const handleLogout = async () => {
-    await performLogout(async () => {
-      await secureLogout();
-    });
+    await performLogout();
   };
 
   return (

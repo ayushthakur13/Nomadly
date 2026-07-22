@@ -66,9 +66,8 @@ State lives in one of two places based on usage:
 * **Access Token Injection**: The Axios request interceptor injects the Bearer token automatically. The Axios instance subscribes to Redux changes to ensure access tokens stay synchronized.
 * **Token Rotation (CSRF + Refresh)**: The Axios response interceptor catches 401s, halts the request queue, fetches a new token from `/auth/refresh` (transmitting the CSRF header), and replays pending requests.
 * **Request Wrappers**:
-  * API routes must be defined in Service files (`*.service.ts`) located in client/src/services.
-  * Direct inline `api.post(...)` or `axios.get(...)` calls inside React components are forbidden.
-  * **Auth Exception**: Authentication-related requests (login, register, logout, google auth) are managed directly within the Redux Thunks (`client/src/features/auth/store/authThunks.ts`) and auth utils (`client/src/features/auth/utils/auth.ts`) which serve as the state-bound service layer for authentication.
+  * All API routes across all domains (including authentication via `client/src/services/auth.service.ts`) must be defined in Service files (`*.service.ts`) located in `client/src/services/`.
+  * Direct inline `api.post(...)` or `axios.get(...)` calls inside React components or Redux thunks are strictly forbidden. Thunks and custom hooks must delegate all HTTP operations to the central service layer.
 * **Response Normalization**: Service wrappers must normalize raw Axios response structures, extracting and returning only relevant data fields or entities.
 * **Error Propagation**: Service functions must catch connection failures and throw formatted error strings utilizing the `extractApiError(error as ApiError, fallback)` utility.
 

@@ -6,8 +6,8 @@ import { useEffect } from 'react';
 import store from './store';
 import { AuthPage, ProtectedRoute, LandingRoute, PublicRoute } from './features/auth';
 import { loginSuccess, setInitialized } from './features/auth/store/authSlice';
-import api, { setAccessToken, initializeTokenSync } from './services/api';
-import { getCsrfToken } from './services/csrf';
+import { initializeTokenSync } from './services/api';
+import { refreshSessionAPI } from './services/auth.service';
 import { PublicNavbar, AppLayout } from '@/ui/';
 import { Explore, TripPreviewPage } from './features/explore';
 import { LandingPage } from './features/landing'
@@ -48,16 +48,7 @@ function AppContent() {
   useEffect(() => {
     (async () => {
       try {
-        const csrf = getCsrfToken();
-        if (!csrf) {
-          dispatch(setInitialized());
-          return;
-        }
-        const { data } = await api.post('/auth/refresh', {}, {
-          headers: { 'x-csrf-token': csrf },
-        });
-        const { accessToken, user } = data.data;
-        setAccessToken(accessToken);
+        const { accessToken, user } = await refreshSessionAPI();
         dispatch(loginSuccess({ token: accessToken, user }));
       } catch {
         dispatch(setInitialized());

@@ -68,9 +68,6 @@ export {
 } from './store/authSlice';
 export { default as authReducer } from './store/authSlice';
 
-// Auth utils
-export { secureLogout } from './utils/auth';
-
 // Auth hooks
 export {
   useAuth,
@@ -80,5 +77,3 @@ export {
   useLogout,
   useAuthRedirect,
 } from './hooks';
-
-

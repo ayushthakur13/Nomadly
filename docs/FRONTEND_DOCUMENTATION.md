@@ -296,8 +296,12 @@ Each domain has a dedicated service file:
 **[chat.service.ts](client/src/services/chat.service.ts)**
 - Real-time chat message history loading
 
-**[memories.service.ts](client/src/services/memories.service.ts)**
-- Photo memories uploading, downloading, and deletion (images-only)
+**[auth.service.ts](client/src/services/auth.service.ts)**
+- `loginAPI(credentials)` - Authenticate user credentials
+- `signupAPI(credentials)` - Register new user account
+- `googleLoginAPI(credentials)` - Authenticate via Google OAuth ID Token
+- `refreshSessionAPI()` - Refresh access token via CSRF header + refresh cookie
+- `logoutAPI()` - Invalidate session server-side and clear client tokens
 
 **Response Normalization**:
 

@@ -148,21 +148,20 @@ String message checking. String matching is prone to typos and lacks compiler ch
 
 ---
 
-## Known Deferred Refactoring: Missing Auth Client Service Wrapper
-**Status:** Accepted (Deferred)
+## Auth Client Service Wrapper Standardization
+**Status:** Completed ✅ (Supersedes Deferred Pass)
 
 **Context:**
-Unlike all other client modules, the `auth` module does not have a separate API service class wrapper in the `services/` directory. Instead, the axios endpoint calls are inlined directly within `client/src/features/auth/store/authThunks.ts`.
+Originally, unlike all other client modules, the `auth` module lacked a dedicated API service wrapper in `client/src/services/`. Instead, Axios calls were inlined inside `authThunks.ts`, `auth.ts` utils, and `App.tsx`.
 
 **Decision:**
-Accept the current inlined implementation as a known deferred technical debt. Standardize it into a dedicated `auth.service.ts` file in the services directory when convenient during future auth/profile updates.
-
-**Alternatives considered:**
-Refactoring immediately. While low risk, immediate refactoring was deferred to prioritize core feature cleaning and alignment.
+1. Created `client/src/services/auth.service.ts` encapsulating `loginAPI`, `signupAPI`, `googleLoginAPI`, `refreshSessionAPI`, and `logoutAPI`.
+2. Refactored `authThunks.ts`, `useLogout.ts`, and `App.tsx` to delegate all HTTP traffic to `auth.service.ts`.
+3. Deleted redundant `client/src/features/auth/utils/auth.ts` file and unified logout logic around `useLogout()` hook.
 
 **Consequences:**
-* **Pros**: Prevents scope creep.
-* **Cons**: Keeps a small inconsistency in API request layering active in the frontend.
+* **Pros**: 100% architectural consistency across all client domains; standardized API naming (`loginAPI`, `logoutAPI`); centralized error handling via `extractApiError`.
+* **Cons**: None.
 
 ---
 
