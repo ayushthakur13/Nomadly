@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import authMiddleware from '../../shared/middlewares/auth.middleware';
+import { authMiddleware, validate } from '@shared/middlewares';
 import invitationController from './invitation.controller';
+import { createInvitationSchema } from './invitation.schema';
 
 const router = Router();
 
@@ -8,7 +9,7 @@ const router = Router();
 router.use(authMiddleware);
 
 // POST /api/invitations - Create invitation
-router.post('/', invitationController.createInvitation);
+router.post('/', validate(createInvitationSchema), invitationController.createInvitation);
 
 // GET /api/invitations - Get invitations with filters
 router.get('/', invitationController.getInvitations);

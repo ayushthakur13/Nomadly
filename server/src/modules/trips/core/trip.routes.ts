@@ -2,7 +2,7 @@ import express from 'express';
 import tripController from './trip.controller';
 import { uploadTripCover, authMiddleware, optionalAuthMiddleware, locationSearchRateLimiter, validate } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
-import { createTripSchema, updateTripSchema } from './trip.schema';
+import { createTripSchema, updateTripSchema, cloneTripSchema } from './trip.schema';
 
 const router = express.Router();
 
@@ -23,6 +23,6 @@ router.delete('/:tripId/cover', asyncHandler(tripController.deleteTripCover.bind
 router.patch('/:tripId/publish', asyncHandler(tripController.publishTrip.bind(tripController)));
 router.patch('/:tripId/unpublish', asyncHandler(tripController.unpublishTrip.bind(tripController)));
 
-router.post('/:tripId/clone', asyncHandler(tripController.cloneTrip.bind(tripController)));
+router.post('/:tripId/clone', validate(cloneTripSchema), asyncHandler(tripController.cloneTrip.bind(tripController)));
 
 export default router;

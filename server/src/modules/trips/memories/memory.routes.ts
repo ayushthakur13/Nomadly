@@ -1,7 +1,8 @@
 import express from 'express';
 import memoryController from './memory.controller';
-import { authMiddleware, optionalAuthMiddleware, uploadMemory } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware, uploadMemory, validate } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
+import { updateMemorySchema } from './memory.schema';
 
 const router = express.Router({ mergeParams: true });
 
@@ -26,6 +27,7 @@ memoryItemRouter.use(authMiddleware);
 
 memoryItemRouter.patch(
   '/:memoryId',
+  validate(updateMemorySchema),
   asyncHandler(memoryController.updateCaption.bind(memoryController))
 );
 

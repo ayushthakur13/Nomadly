@@ -1,7 +1,8 @@
 import express from "express";
 import accommodationController from "./accommodation.controller";
-import { authMiddleware, optionalAuthMiddleware } from "@shared/middlewares";
+import { authMiddleware, optionalAuthMiddleware, validate } from "@shared/middlewares";
 import { asyncHandler } from "@shared/utils";
+import { createAccommodationSchema, updateAccommodationSchema } from "./accommodation.schema";
 
 const router = express.Router({ mergeParams: true });
 
@@ -9,13 +10,14 @@ router.get("/", optionalAuthMiddleware, asyncHandler(accommodationController.get
 
 router.use(authMiddleware);
 
-router.post("/", asyncHandler(accommodationController.createAccommodation.bind(accommodationController)));
+router.post("/", validate(createAccommodationSchema), asyncHandler(accommodationController.createAccommodation.bind(accommodationController)));
 
 export const accommodationItemRouter = express.Router();
 accommodationItemRouter.use(authMiddleware);
 
 accommodationItemRouter.patch(
   "/:accommodationId",
+  validate(updateAccommodationSchema),
   asyncHandler(accommodationController.updateAccommodation.bind(accommodationController))
 );
 

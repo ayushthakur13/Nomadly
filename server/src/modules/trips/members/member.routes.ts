@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { authMiddleware } from '@shared/middlewares';
+import { authMiddleware, validate } from '@shared/middlewares';
 import memberController from './member.controller';
+import { addMemberSchema, updateMemberRoleSchema } from './member.schema';
 
 const router = Router({ mergeParams: true }); // Enable access to parent route params
 
@@ -11,13 +12,13 @@ router.use(authMiddleware);
 router.get('/', memberController.getTripMembers);
 
 // POST /api/trips/:tripId/members - Add a member (creator only)
-router.post('/', memberController.addMember);
+router.post('/', validate(addMemberSchema), memberController.addMember);
 
 // DELETE /api/trips/:tripId/members/:userId - Remove a member (creator only)
 router.delete('/:userId', memberController.removeMember);
 
 // PATCH /api/trips/:tripId/members/:userId/role - Update member role (creator only)
-router.patch('/:userId/role', memberController.updateMemberRole);
+router.patch('/:userId/role', validate(updateMemberRoleSchema), memberController.updateMemberRole);
 
 // POST /api/trips/:tripId/members/leave - Leave a trip (self-removal)
 router.post('/leave', memberController.leaveTrip);

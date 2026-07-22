@@ -264,31 +264,19 @@ Standard string-based error checking. Rejected because simple text matching is p
 
 ---
 
-## Deferred Request Validation Migration (First Pass)
-**Status:** Tracked (Deferred)
+## Request Validation Migration (Fully Completed)
+**Status:** Completed ✅ (Supersedes First Pass Deferral)
 
 **Context:**
-As part of the initial implementation of Zod schema-based request validation (defined in the Request Validation Contract), we migrated the primary high-risk, frequently modified modules (`auth`, `users`, `trips/core`, and `trips/budget`). The remaining modules have their validation migration deferred to a future pass.
+Originally, Zod schema-based request validation was applied to primary core modules (`auth`, `users`, `trips/core`, and `trips/budget`). The remaining write endpoints were deferred. In the final pass, Zod schemas were created and attached to all remaining write endpoints across all feature modules.
 
 **Decision:**
-Defer request validation schema attachment for the following modules:
-1. `explore` routes (`server/src/modules/explore/explore.routes.ts`)
-2. `invitations` routes (`server/src/modules/invitations/invitation.routes.ts`)
-3. `trips/accommodations` routes (`server/src/modules/trips/accommodations/accommodation.routes.ts`)
-4. `trips/chat` routes (`server/src/modules/trips/chat/chat.routes.ts`)
-5. `trips/destinations` routes (`server/src/modules/trips/destinations/destination.routes.ts`)
-6. `trips/members` routes (`server/src/modules/trips/members/member.routes.ts`)
-7. `trips/memories` routes (`server/src/modules/trips/memories/memory.routes.ts`)
-8. `trips/tasks` routes (`server/src/modules/trips/tasks/task.routes.ts`)
-
-These files will be updated in a subsequent pass to apply schema validations natively at the router boundary.
-
-**Alternatives considered:**
-Migrating all 13 route modules simultaneously. Rejected due to validation testing scope, ensuring we validate stability on primary components first.
+1. Created dedicated Zod schema files (`destination.schema.ts`, `accommodation.schema.ts`, `task.schema.ts`, `member.schema.ts`, `invitation.schema.ts`, and `cloneTripSchema`).
+2. Attached `validate(schema)` middleware to all `POST`, `PATCH`, and `PUT` write entrypoints across `destinations`, `accommodations`, `tasks`, `members`, `invitations`, and `trips/core`.
 
 **Consequences:**
-* **Pros**: Limits risk in the first migration step, allowing thorough coverage of core paths.
-* **Cons**: Temporary inconsistency where some route parameters rely on manual service/controller checks instead of uniform schema validations.
+* **Pros**: 100% end-to-end payload boundary validation across all write API routes; standardized 400 Bad Request error responses; full TypeScript DTO alignment.
+* **Cons**: None.
 
 ---
 
@@ -451,7 +439,8 @@ To balance data integrity with user flexibility, we implement Option C (Soft Val
 4. **Shared Mapbox Static Map Hook (`useMapboxStatic`)**: Created a shared hook in `features/trips/_shared/hooks` encapsulating origin (`s`), intermediate stops (`1..99`), and destination (`d`) marker pin overlays for 100% DRY map rendering.
 5. **Clone Button Disabled Loading State & Spinner**: Added loading spinner state and button disabling across all clone triggers (`TripPreviewHero`, `ExploreGrid`, `SavedTripCard`).
 6. **DRY Date Validation Helpers**: Added `isDateOutOfBounds` and `isDateRangeOutOfBounds` to `src/utils/dateValidation.ts` and refactored destination and accommodation modules to use them for soft warning alerts.
+7. **Complete Zod Schema Validation Across All Modules**: Created and attached Zod schemas (`destination.schema.ts`, `accommodation.schema.ts`, `task.schema.ts`, `member.schema.ts`, `invitation.schema.ts`, `cloneTripSchema`) to all remaining POST/PATCH/PUT write entrypoints via `validate()` middleware.
 
 **Consequences:**
-- **Pros**: Outstanding user experience for exploring public itineraries; 100% DRY Mapbox and date validation utilities; robust timeline and budget cloning logic.
+- **Pros**: Outstanding user experience for exploring public itineraries; 100% DRY Mapbox and date validation utilities; robust timeline and budget cloning logic; end-to-end Zod request boundary validation across all write API routes.
 - **Cons**: None.

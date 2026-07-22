@@ -1,7 +1,8 @@
 import express from 'express';
 import taskController from './task.controllers';
-import { authMiddleware, optionalAuthMiddleware } from '@shared/middlewares';
+import { authMiddleware, optionalAuthMiddleware, validate } from '@shared/middlewares';
 import { asyncHandler } from '@shared/utils';
+import { createTaskSchema, updateTaskSchema } from './task.schema';
 
 const router = express.Router({ mergeParams: true });
 
@@ -22,6 +23,7 @@ router.get(
 
 router.post(
   '/',
+  validate(createTaskSchema),
   asyncHandler(taskController.createTask.bind(taskController))
 );
 
@@ -31,6 +33,7 @@ taskItemRouter.use(authMiddleware);
 
 taskItemRouter.patch(
   '/:taskId',
+  validate(updateTaskSchema),
   asyncHandler(taskController.updateTask.bind(taskController))
 );
 

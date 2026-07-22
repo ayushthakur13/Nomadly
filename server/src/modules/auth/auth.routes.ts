@@ -1,14 +1,14 @@
 import express from 'express';
 import ctrl from './auth.controller';
 import { authMiddleware, authRateLimiter, validate, csrfProtection } from '@shared/middlewares';
-import { registerSchema, loginSchema } from './auth.schema';
+import { registerSchema, loginSchema, googleAuthSchema } from './auth.schema';
 
 const router = express.Router();
 
 // Public
 router.post('/register', authRateLimiter, validate(registerSchema), ctrl.register);
 router.post('/login', authRateLimiter, validate(loginSchema), ctrl.login);
-router.post('/google', authRateLimiter, ctrl.google);
+router.post('/google', authRateLimiter, validate(googleAuthSchema), ctrl.google);
 router.post('/refresh', authRateLimiter, csrfProtection, ctrl.refresh);
 
 // Protected
