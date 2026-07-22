@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
 import Trip, { ITrip } from '../core/trip.model';
 import User from '../../users/user.model';
-import { 
-  isTripCreator, 
-  isTripMember, 
+import {
+  isTripCreator,
+  isTripMember,
   getMemberRole,
   addMemberToTrip as addMemberUtil,
   removeMemberFromTrip as removeMemberUtil,
@@ -29,7 +29,7 @@ class MemberService {
     if (!trip) throw new Error('Trip not found');
 
     const userObjectId = new Types.ObjectId(userId);
-    
+
     // Check if user exists
     const user = await User.findById(userObjectId);
     if (!user) throw new Error('User not found');
@@ -40,11 +40,17 @@ class MemberService {
     }
 
     const invitedByObjectId = invitedBy ? new Types.ObjectId(invitedBy) : undefined;
-    
+
     // Use utility to add member
     addMemberUtil(trip, userObjectId, 'member', invitedByObjectId);
-    
+
     await trip.save();
+
+    // Sync member into budget if a budget exists for this trip
+    await budgetService.addMemberToBudget(tripId, userObjectId).catch((err) => {
+      console.error('[MemberService] addMemberToBudget failed silently:', err);
+    });
+
     return trip;
   }
 
@@ -81,7 +87,7 @@ class MemberService {
 
     // Use utility to remove member
     removeMemberUtil(trip, userObjectId);
-    
+
     await trip.save();
 
     // Cascade delete memories uploaded by the removed user
@@ -127,7 +133,7 @@ class MemberService {
 
     // Use utility to update role
     updateMemberRoleUtil(trip, userObjectId, newRole);
-    
+
     await trip.save();
     return trip;
   }
@@ -233,7 +239,17 @@ class MemberService {
     await memoryService.deleteUserMemoriesInTrip(tripId.toString(), userId.toString()).catch((err) => {
       console.error(`Failed to cascade delete user ${userId} memories in trip ${tripId} upon leaving:`, err);
     });
-    
+
+    // Cascade: mark budget member as past
+    await budgetService.markMemberAsPast(tripId, userId).catch((err) => {
+      console.error(`Failed to mark budget member ${userId} as past in trip ${tripId} upon leaving:`, err);
+    });
+
+    // Cascade: unassign user from tasks
+    await taskService.unassignUserFromTasks(tripId, userId).catch((err) => {
+      console.error(`Failed to unassign user ${userId} from tasks in trip ${tripId} upon leaving:`, err);
+    });
+
     return trip;
 
   }

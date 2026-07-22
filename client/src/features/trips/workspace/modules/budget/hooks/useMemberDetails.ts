@@ -7,7 +7,7 @@ import { fetchTripMembers, type TripMember } from '@/services/members.service';
  * Handles member data enrichment (names, profiles, etc.) with memoized lookups
  * Reduces prop drilling and duplication across budget components
  */
-export function useMemberDetails() {
+export function useMemberDetails(snapshot?: any) {
   const { tripId } = useParams<{ tripId: string }>();
   const [membersWithDetails, setMembersWithDetails] = useState<Map<string, TripMember>>(
     new Map()
@@ -45,16 +45,21 @@ export function useMemberDetails() {
 
   /**
    * Get member name by userId with fallback chain
-   * Priority: name → username → ID slice
+   * Priority: name → username → snapshot budget member → ID slice
    */
   const getMemberName = useCallback(
     (userId: string): string => {
       const member = membersWithDetails.get(userId);
       if (member?.name) return member.name;
       if (member?.username) return member.username;
+
+      const budgetMember = snapshot?.budget?.members?.find((m: any) => m.userId === userId);
+      if (budgetMember?.name) return budgetMember.name;
+      if (budgetMember?.username) return budgetMember.username;
+
       return userId.slice(0, 8).toUpperCase();
     },
-    [membersWithDetails]
+    [membersWithDetails, snapshot]
   );
 
   return {

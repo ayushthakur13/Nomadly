@@ -64,7 +64,9 @@ Financial planning and expense tracking for Nomadly trips. Covers the full stack
 - All monetary values normalized to 2 decimal places at persistence boundary (`FinancialUtils.normalizeMoney()`)
 - Sum of custom splits must equal expense amount (±0.01 tolerance)
 - **Contribution update**: upward edits always allowed; downward edits blocked only if `newPlanned < spent && newPlanned < currentPlanned` *(see [Edge Cases](#edge-cases--fixes))*
-- Past members (`isPastMember: true`) cannot write
+- **Past members (`isPastMember: true`)**: cannot create/edit expenses or leave trip active roster. Historical `plannedContribution` and split records are preserved in DB for audit integrity.
+- **Creator contribution authority**: trip creator can edit any member's planned contribution (including past members) to rebalance budgets or match spent figures.
+- **Member join & equal split freezing**: joining a trip automatically syncs the user into `TripBudget.members` and freezes pre-existing `equal` expenses to `custom` splits to prevent retroactive historical charges.
 - `paidBy`, `createdBy`, `tripId`, and `splitMethod` are immutable after expense creation
 
 ---
@@ -339,6 +341,23 @@ const spentPct = member.planned > 0
 
 // Guard: member.planned > 0  →  member.planned > 0 || member.spent > 0
 ```
+
+### Member Departure Cascade (`leaveTrip`)
+
+**Scenario**: Member voluntarily leaves a trip via `leaveTrip()` or is removed by creator (`removeMemberFromTrip()`).
+
+**Behavior & Fix**:
+1. `member.service.ts` triggers `budgetService.markMemberAsPast(tripId, userId)` and `taskService.unassignUserFromTasks(tripId, userId)`.
+2. Sets `isPastMember = true` in MongoDB while preserving historical `plannedContribution` and split records.
+3. `computeSummary()` and `syncTripBudgetSummary()` sum `plannedContribution` across all members (active + past) so **Total Committed** target pool remains accurate.
+
+### Snapshot User Details Population
+
+**Scenario**: Past members removed from `Trip.members` (active roster) caused frontend name lookups to fail and render raw ObjectId slices (`"669FB8C4"`).
+
+**Fix** (`budget.service.ts` & `useMemberDetails.ts`):
+1. `buildSnapshot()` queries the `User` collection for all member ObjectIDs in `budget.members` and attaches `name`, `username`, and `profilePicUrl` directly onto every member in `BudgetSnapshot`.
+2. `useMemberDetails()` checks `snapshot.budget.members` as a fallback, guaranteeing 100% name resolution across all components.
 
 ---
 

@@ -305,31 +305,25 @@ const BudgetMembers = ({ snapshot, getMemberName, membersWithDetails }: BudgetMe
                       )}
                     </div>
 
-                    {entry.isPastMember ? (
-                      <p className="text-xs text-gray-400">
-                        {formatCurrency(entry.originalPlanned, currency)}
-                        <span className="ml-1 text-gray-300">— locked</span>
-                      </p>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="0"
-                          value={entry.newPlanned}
-                          onChange={(e) => handleBulkEntryChange(entry.userId, e.target.value)}
-                          disabled={actionLoading}
-                          className={`w-full px-2.5 py-1 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 ${
-                            wouldDeepen
-                              ? 'border-amber-300 focus:ring-amber-200'
-                              : 'border-gray-200 focus:ring-emerald-300'
-                          }`}
-                          placeholder="Planned amount"
-                        />
-                        <span className="text-xs text-gray-400 shrink-0">
-                          was {formatCurrency(entry.originalPlanned, currency)}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        value={entry.newPlanned}
+                        onChange={(e) => handleBulkEntryChange(entry.userId, e.target.value)}
+                        disabled={actionLoading}
+                        className={`w-full px-2.5 py-1 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 ${
+                          wouldDeepen
+                            ? 'border-amber-300 focus:ring-amber-200'
+                            : 'border-gray-200 focus:ring-emerald-300'
+                        }`}
+                        placeholder="Planned amount"
+                      />
+                      <span className="text-xs text-gray-400 shrink-0">
+                        was {formatCurrency(entry.originalPlanned, currency)}
+                        {entry.isPastMember && <span className="ml-1 text-amber-600 font-medium">(Past)</span>}
+                      </span>
+                    </div>
 
                     {wouldDeepen && (
                       <p className="text-[11px] text-amber-600 mt-0.5 flex items-center gap-1">
@@ -435,11 +429,13 @@ const BudgetMembers = ({ snapshot, getMemberName, membersWithDetails }: BudgetMe
               ? 'bg-amber-400'
               : 'bg-emerald-400';
 
+          const isPastMember = Boolean(budget?.members.find((bm) => bm.userId === member.userId)?.isPastMember);
+
           return (
-            <div key={member.userId} className="py-4 first:pt-1 last:pb-1">
+            <div key={member.userId} className={`py-4 first:pt-1 last:pb-1 ${isPastMember ? 'opacity-70' : ''}`}>
               {/* ── Row header: avatar + name + remaining badge + edit trigger ── */}
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 h-9 w-9 rounded-full overflow-hidden border border-gray-200">
+                <div className={`flex-shrink-0 h-9 w-9 rounded-full overflow-hidden border border-gray-200 ${isPastMember ? 'opacity-60' : ''}`}>
                   {memberDetail?.profilePicUrl ? (
                     <img
                       src={memberDetail.profilePicUrl}
@@ -455,7 +451,14 @@ const BudgetMembers = ({ snapshot, getMemberName, membersWithDetails }: BudgetMe
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p className={`text-sm font-semibold truncate ${isPastMember ? 'text-gray-500' : 'text-gray-900'}`}>{name}</p>
+                      {isPastMember && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-medium shrink-0">
+                          Past member
+                        </span>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-2 shrink-0">
                       <span
@@ -482,22 +485,24 @@ const BudgetMembers = ({ snapshot, getMemberName, membersWithDetails }: BudgetMe
                   </div>
 
                   {!isEditing && (
-                    <div className="flex items-center gap-1.5 mt-1.5">
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 text-[11px] font-medium">
                         <span className="text-gray-400">Planned</span>
                         <span className="text-gray-700">{formatCurrency(member.planned, currency)}</span>
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-[11px] font-medium">
-                        <span className="text-rose-400">Spent</span>
-                        <span className="text-rose-600">{formatCurrency(member.spent, currency)}</span>
-                      </span>
+                      {member.spent > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-[11px] font-medium">
+                          <span className="text-rose-400">Spent</span>
+                          <span className="text-rose-600">{formatCurrency(member.spent, currency)}</span>
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* ── Progress bar (view mode) ── */}
-              {!isEditing && (member.planned > 0 || member.spent > 0) && (
+              {/* ── Progress bar (view mode, active members only) ── */}
+              {!isEditing && !isPastMember && (member.planned > 0 || member.spent > 0) && (
                 <div className="mt-2.5 ml-12">
                   <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div

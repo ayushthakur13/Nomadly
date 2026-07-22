@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   fetchBudgetSnapshot,
@@ -21,36 +21,26 @@ import type {
 } from '@shared/types';
 import { extractApiError, type ApiError } from '@/utils/errorHandling';
 
-/**
- * Helper to wrap async budget actions with consistent error handling
- */
-function createBudgetAction(
-  apiCall: () => Promise<BudgetSnapshot>,
-  errorMessage: string,
-  setActionLoading: (value: boolean) => void,
-  setError: (value: string | null) => void,
-  setSnapshot: (value: BudgetSnapshot) => void,
-  onSuccess?: () => void
-) {
-  return async (): Promise<BudgetSnapshot> => {
-    setActionLoading(true);
-    setError(null);
-    try {
-      const newSnapshot = await apiCall();
-      setSnapshot(newSnapshot);
-      onSuccess?.();
-      return newSnapshot;
-    } catch (err) {
-      const message = extractApiError(err as ApiError, errorMessage);
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
+interface BudgetContextType {
+  snapshot: BudgetSnapshot | null;
+  loading: boolean;
+  actionLoading: boolean;
+  error: string | null;
+  budgetNotFound: boolean;
+  createBudget: (payload: CreateBudgetDTO) => Promise<BudgetSnapshot>;
+  updateBaseBudget: (payload: UpdateBudgetDTO) => Promise<BudgetSnapshot>;
+  createExpense: (payload: CreateExpenseDTO) => Promise<BudgetSnapshot>;
+  updateExpense: (expenseId: string, payload: UpdateExpenseDTO) => Promise<BudgetSnapshot>;
+  deleteExpense: (expenseId: string) => Promise<BudgetSnapshot>;
+  updateMemberContribution: (userId: string, payload: UpdateBudgetMemberDTO) => Promise<BudgetSnapshot>;
+  bulkUpdateMemberContributions: (payload: BulkUpdateBudgetMembersDTO) => Promise<BudgetSnapshot>;
+  clearError: () => void;
+  reload: () => Promise<void>;
 }
 
-export function useBudget() {
+const BudgetContext = createContext<BudgetContextType | null>(null);
+
+export const BudgetProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { tripId } = useParams<{ tripId: string }>();
 
   const [snapshot, setSnapshot] = useState<BudgetSnapshot | null>(null);
@@ -70,7 +60,6 @@ export function useBudget() {
       setBudgetNotFound(false);
     } catch (err) {
       const errorMessage = extractApiError(err as ApiError, 'Failed to load budget');
-      // Check if it's a 404 (budget not found) vs other errors
       if (errorMessage.includes('Budget not found') || errorMessage.includes('not found')) {
         setBudgetNotFound(true);
         setError(null);
@@ -87,119 +76,122 @@ export function useBudget() {
     load();
   }, [load]);
 
-  const createBudget = useCallback(
-    async (payload: CreateBudgetDTO): Promise<BudgetSnapshot> => {
-      if (!tripId) throw new Error('Trip ID is required');
-      return createBudgetAction(
-        () => apiCreateBudget(tripId, payload),
-        'Failed to create budget',
-        setActionLoading,
-        setError,
-        setSnapshot,
-        () => setBudgetNotFound(false)
-      )();
+  const runAction = useCallback(
+    async (
+      apiCall: () => Promise<BudgetSnapshot>,
+      errorMessage: string,
+      onSuccess?: () => void
+    ): Promise<BudgetSnapshot> => {
+      setActionLoading(true);
+      setError(null);
+      try {
+        const newSnapshot = await apiCall();
+        setSnapshot(newSnapshot);
+        onSuccess?.();
+        return newSnapshot;
+      } catch (err) {
+        const message = extractApiError(err as ApiError, errorMessage);
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setActionLoading(false);
+      }
     },
-    [tripId]
+    []
+  );
+
+  const createBudget = useCallback(
+    (payload: CreateBudgetDTO) => {
+      if (!tripId) throw new Error('Trip ID is required');
+      return runAction(() => apiCreateBudget(tripId, payload), 'Failed to create budget', () =>
+        setBudgetNotFound(false)
+      );
+    },
+    [tripId, runAction]
   );
 
   const updateBaseBudget = useCallback(
-    async (payload: UpdateBudgetDTO): Promise<BudgetSnapshot> => {
+    (payload: UpdateBudgetDTO) => {
       if (!tripId) throw new Error('Trip ID is required');
-      return createBudgetAction(
-        () => apiUpdateBaseBudget(tripId, payload),
-        'Failed to update base budget',
-        setActionLoading,
-        setError,
-        setSnapshot
-      )();
+      return runAction(() => apiUpdateBaseBudget(tripId, payload), 'Failed to update base budget');
     },
-    [tripId]
+    [tripId, runAction]
   );
 
   const createExpense = useCallback(
-    async (payload: CreateExpenseDTO): Promise<BudgetSnapshot> => {
+    (payload: CreateExpenseDTO) => {
       if (!tripId) throw new Error('Trip ID is required');
-      return createBudgetAction(
-        () => apiCreateExpense(tripId, payload),
-        'Failed to create expense',
-        setActionLoading,
-        setError,
-        setSnapshot
-      )();
+      return runAction(() => apiCreateExpense(tripId, payload), 'Failed to create expense');
     },
-    [tripId]
+    [tripId, runAction]
   );
 
   const updateExpense = useCallback(
-    async (expenseId: string, payload: UpdateExpenseDTO): Promise<BudgetSnapshot> => {
-      return createBudgetAction(
-        () => apiUpdateExpense(expenseId, payload),
-        'Failed to update expense',
-        setActionLoading,
-        setError,
-        setSnapshot
-      )();
+    (expenseId: string, payload: UpdateExpenseDTO) => {
+      return runAction(() => apiUpdateExpense(expenseId, payload), 'Failed to update expense');
     },
-    []
+    [runAction]
   );
 
   const deleteExpense = useCallback(
-    async (expenseId: string): Promise<BudgetSnapshot> => {
-      return createBudgetAction(
-        () => apiDeleteExpense(expenseId),
-        'Failed to delete expense',
-        setActionLoading,
-        setError,
-        setSnapshot
-      )();
+    (expenseId: string) => {
+      return runAction(() => apiDeleteExpense(expenseId), 'Failed to delete expense');
     },
-    []
+    [runAction]
   );
 
   const updateMemberContribution = useCallback(
-    async (userId: string, payload: UpdateBudgetMemberDTO): Promise<BudgetSnapshot> => {
+    (userId: string, payload: UpdateBudgetMemberDTO) => {
       if (!tripId) throw new Error('Trip ID is required');
-      return createBudgetAction(
+      return runAction(
         () => apiUpdateMemberContribution(tripId, userId, payload),
-        'Failed to update member contribution',
-        setActionLoading,
-        setError,
-        setSnapshot
-      )();
+        'Failed to update member contribution'
+      );
     },
-    [tripId]
+    [tripId, runAction]
   );
 
   const bulkUpdateMemberContributions = useCallback(
-    async (payload: BulkUpdateBudgetMembersDTO): Promise<BudgetSnapshot> => {
+    (payload: BulkUpdateBudgetMembersDTO) => {
       if (!tripId) throw new Error('Trip ID is required');
-      return createBudgetAction(
+      return runAction(
         () => apiBulkUpdateMemberContributions(tripId, payload),
-        'Failed to update contributions',
-        setActionLoading,
-        setError,
-        setSnapshot
-      )();
+        'Failed to update contributions'
+      );
     },
-    [tripId]
+    [tripId, runAction]
   );
 
-  const clearError = () => setError(null);
+  const clearError = useCallback(() => setError(null), []);
 
-  return {
-    snapshot,
-    loading,
-    actionLoading,
-    error,
-    budgetNotFound,
-    createBudget,
-    updateBaseBudget,
-    createExpense,
-    updateExpense,
-    deleteExpense,
-    updateMemberContribution,
-    bulkUpdateMemberContributions,
-    clearError,
-    reload: load,
-  };
+  return React.createElement(
+    BudgetContext.Provider,
+    {
+      value: {
+        snapshot,
+        loading,
+        actionLoading,
+        error,
+        budgetNotFound,
+        createBudget,
+        updateBaseBudget,
+        createExpense,
+        updateExpense,
+        deleteExpense,
+        updateMemberContribution,
+        bulkUpdateMemberContributions,
+        clearError,
+        reload: load,
+      },
+    },
+    children
+  );
+};
+
+export function useBudget() {
+  const context = useContext(BudgetContext);
+  if (!context) {
+    throw new Error('useBudget must be used within a BudgetProvider');
+  }
+  return context;
 }

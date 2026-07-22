@@ -13,9 +13,10 @@ interface ExpenseRowProps {
   canDelete: boolean;
   isSoloTrip?: boolean;
   getMemberName: (userId: string) => string;
+  isPastMember?: (userId: string) => boolean;
 }
 
-const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, isSoloTrip, getMemberName }: ExpenseRowProps) => {
+const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, isSoloTrip, getMemberName, isPastMember }: ExpenseRowProps) => {
   const { actionLoading, deleteExpense: performDelete, updateExpense: performUpdate, clearError } = useBudget();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -118,7 +119,7 @@ const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, isSoloTrip, get
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-gray-900 truncate">{expense.title || 'Untitled'}</p>
             <p className="text-xs text-gray-400 mt-0.5">
-              {!isSoloTrip ? `Paid by ${getMemberName(expense.paidBy)} · ` : ''}{formatDate(expense.date)}
+              {!isSoloTrip ? `Paid by ${getMemberName(expense.paidBy)}${isPastMember?.(expense.paidBy) ? ' (Past member)' : ''} · ` : ''}{formatDate(expense.date)}
               {expense.category ? <>&nbsp;&middot;&nbsp;{expense.category}</> : null}
             </p>
           </div>
@@ -222,7 +223,10 @@ const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, isSoloTrip, get
                   <div className="flex flex-col gap-1.5 mb-2">
                     {editSplits.map((split, i) => (
                       <div key={split.userId} className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600 flex-1 truncate">{getMemberName(split.userId)}</span>
+                        <span className="text-xs text-gray-600 flex-1 truncate font-medium">
+                          {getMemberName(split.userId)}
+                          {isPastMember?.(split.userId) && <span className="ml-1 text-gray-400 font-normal">(Past member)</span>}
+                        </span>
                         <input
                           type="number"
                           step="0.01"
@@ -294,7 +298,14 @@ const ExpenseRow = ({ expense, baseCurrency, canEdit, canDelete, isSoloTrip, get
                 <div className="flex flex-col gap-1.5">
                   {expense.splits.map((split) => (
                     <div key={split.userId} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">{getMemberName(split.userId)}</span>
+                      <span className="text-sm text-gray-600 flex items-center gap-1.5">
+                        {getMemberName(split.userId)}
+                        {isPastMember?.(split.userId) && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-medium shrink-0">
+                            Past member
+                          </span>
+                        )}
+                      </span>
                       <span className="text-sm font-medium text-gray-900">{formatCurrency(split.amount, baseCurrency)}</span>
                     </div>
                   ))}

@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import TripBudget, { ITripBudget, IBudgetMember } from './budget.model';
 import Expense, { IExpense } from './expense.model';
 import Trip from '../core/trip.model';
+import User from '../../users/user.model';
 import { isTripCreator, isTripMember } from '../members/member.utils';
 import { TripError, TRIP_ERRORS } from '../core/trip.errors';
 import {
@@ -118,7 +119,7 @@ class BudgetService {
       members: budgetMembers,
     });
 
-    return this.buildSnapshot(budget, []);
+    return await this.buildSnapshot(budget, []);
   }
 
   async updateBaseBudget(
@@ -172,7 +173,7 @@ class BudgetService {
       .sort({ date: -1, createdAt: -1 })
       .lean();
 
-    return this.buildSnapshot(budget, expenses);
+    return await this.buildSnapshot(budget, expenses);
   }
 
   async updateMemberContribution(
@@ -278,9 +279,6 @@ class BudgetService {
 
       const member = budget.members.find((m) => m.userId.toString() === update.userId);
       if (!member) throw new TripError(TRIP_ERRORS.INVALID_INPUT, `Budget member ${update.userId} not found`, 404);
-      if (member.isPastMember) {
-        throw new TripError(TRIP_ERRORS.INVALID_INPUT, `Cannot update contribution for a past member (${update.userId})`, 400);
-      }
 
       const newPlanned = FinancialUtils.normalizeMoney(update.plannedContribution);
       const spent = spentMap.get(update.userId) ?? 0;
@@ -469,8 +467,22 @@ class BudgetService {
     return this.buildSnapshotWithExpenses(budget, expense.tripId.toString());
   }
 
-  private buildSnapshot(budget: ITripBudget, expenses: IExpense[] | any[]): BudgetSnapshot {
-    const members = budget.members.map(m => MappingUtils.mapBudgetMember(m));
+  private async buildSnapshot(budget: ITripBudget, expenses: IExpense[] | any[]): Promise<BudgetSnapshot> {
+    const memberUserIds = budget.members.map(m => m.userId);
+    const users = await User.find({ _id: { $in: memberUserIds } }).select('username name profilePicUrl').lean();
+    const userMap = new Map(users.map(u => [u._id.toString(), u]));
+
+    const members = budget.members.map(m => {
+      const mapped = MappingUtils.mapBudgetMember(m);
+      const u = userMap.get(m.userId.toString());
+      return {
+        ...mapped,
+        name: u?.name || u?.username,
+        username: u?.username,
+        profilePicUrl: u?.profilePicUrl,
+      } as any;
+    });
+
     const mappedExpenses = (expenses || []).map(e => MappingUtils.mapExpense(e));
     const summary = MappingUtils.computeSummary(members, mappedExpenses);
     const memberSummaries = MappingUtils.computeMemberSummaries(members, mappedExpenses);
@@ -680,6 +692,43 @@ class BudgetService {
     if (member) {
       member.isPastMember = true;
       await budget.save();
+      await this.syncTripBudgetSummary(tripId.toString());
+    }
+  }
+
+  async addMemberToBudget(
+    tripId: string | Types.ObjectId,
+    userId: string | Types.ObjectId
+  ): Promise<void> {
+    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    if (!budget) return;
+
+    const userObjId = new Types.ObjectId(userId);
+    const existingMember = budget.members.find(m => m.userId.toString() === userId.toString());
+
+    if (existingMember) {
+      if (existingMember.isPastMember) {
+        existingMember.isPastMember = false;
+        await budget.save();
+        await Expense.updateMany(
+          { tripId: new Types.ObjectId(tripId), splitMethod: 'equal' },
+          { $set: { splitMethod: 'custom' } }
+        );
+        await this.syncTripBudgetSummary(tripId.toString());
+      }
+    } else {
+      budget.members.push({
+        userId: userObjId,
+        plannedContribution: 0,
+        role: 'member',
+        joinedAt: new Date(),
+        isPastMember: false,
+      } as IBudgetMember);
+      await budget.save();
+      await Expense.updateMany(
+        { tripId: new Types.ObjectId(tripId), splitMethod: 'equal' },
+        { $set: { splitMethod: 'custom' } }
+      );
       await this.syncTripBudgetSummary(tripId.toString());
     }
   }

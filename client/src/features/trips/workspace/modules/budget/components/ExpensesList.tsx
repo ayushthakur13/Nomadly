@@ -77,6 +77,9 @@ const ExpensesList = ({ snapshot, getMemberName, isSoloTrip }: ExpensesListProps
                     (budget?.rules?.allowMemberExpenseEdits ?? true)))
             );
 
+            const isPastMember = (userId: string) =>
+              Boolean(budget?.members?.find((m) => m.userId === userId)?.isPastMember);
+
             return (
               <ExpenseRow
                 key={expense._id}
@@ -86,6 +89,7 @@ const ExpensesList = ({ snapshot, getMemberName, isSoloTrip }: ExpensesListProps
                 canDelete={canEditOrDelete}
                 isSoloTrip={isSoloTrip}
                 getMemberName={getMemberName}
+                isPastMember={isPastMember}
               />
             );
           })

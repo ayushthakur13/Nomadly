@@ -11,7 +11,6 @@ export const addMemberSchema = z.object({
 
 export const updateMemberRoleSchema = z.object({
   role: z.enum(['editor', 'viewer'], {
-    invalid_type_error: 'Role must be either editor or viewer',
-    required_error: 'Role is required',
+    message: 'Role must be either editor or viewer',
   }),
 });

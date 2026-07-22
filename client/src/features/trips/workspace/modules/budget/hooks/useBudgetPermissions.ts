@@ -56,7 +56,7 @@ export function useBudgetPermissions(snapshot: BudgetSnapshot | null): BudgetPer
       if (isCreator) return true;
       if (toId(userId) !== toId(currentUserId)) return false;
 
-      const memberMeta = budget.members.find((m) => m.userId === userId);
+      const memberMeta = budget.members.find((m) => toId(m.userId) === toId(userId));
       if (!memberMeta || memberMeta.isPastMember) return false;
 
       return budget.rules?.allowMemberContributionEdits ?? true;

@@ -55,7 +55,8 @@ vi.mock('../budget/expense.model', () => {
   return {
     default: {
       find: vi.fn(),
-      aggregate: vi.fn()
+      aggregate: vi.fn(),
+      updateMany: vi.fn()
     }
   };
 });
@@ -366,6 +367,50 @@ describe('Nomadly Travel Services - Individual Cloning Features', () => {
       expect(budgetCreateArg.members[0].userId.toString()).toBe(clonerId.toString());
       expect(budgetCreateArg.members[0].role).toBe('creator');
       expect(budgetCreateArg.members[0].plannedContribution).toBe(0);
+    });
+
+    it('should add a new member to an existing budget via addMemberToBudget', async () => {
+      const tripId = new Types.ObjectId();
+      const existingMemberId = new Types.ObjectId();
+      const newMemberId = new Types.ObjectId();
+
+      const mockBudget = {
+        tripId,
+        members: [
+          { userId: existingMemberId, plannedContribution: 1000, role: 'creator', isPastMember: false }
+        ],
+        save: vi.fn().mockResolvedValue(true)
+      };
+
+      const mockTripDoc = {
+        _id: tripId,
+        isPublic: true,
+        budgetSummary: { total: 0, spent: 0 },
+        save: vi.fn().mockResolvedValue(true)
+      };
+
+      (TripBudget.findOne as any).mockResolvedValue(mockBudget);
+      const mockQuery = Object.assign(
+        Promise.resolve(mockTripDoc),
+        {
+          lean: vi.fn().mockResolvedValue(mockTripDoc)
+        }
+      );
+      (Trip.findById as any).mockReturnValue(mockQuery);
+      (Expense.aggregate as any).mockResolvedValue([]);
+      (Expense.updateMany as any).mockResolvedValue({ acknowledged: true });
+
+      await budgetService.addMemberToBudget(tripId.toString(), newMemberId.toString());
+
+      expect(mockBudget.members.length).toBe(2);
+      expect(mockBudget.members[1]?.userId.toString()).toBe(newMemberId.toString());
+      expect(mockBudget.members[1]?.plannedContribution).toBe(0);
+      expect(mockBudget.members[1]?.isPastMember).toBe(false);
+      expect(mockBudget.save).toHaveBeenCalled();
+      expect(Expense.updateMany).toHaveBeenCalledWith(
+        { tripId: expect.any(Object), splitMethod: 'equal' },
+        { $set: { splitMethod: 'custom' } }
+      );
     });
   });
 });
