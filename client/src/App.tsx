@@ -13,6 +13,7 @@ import { Explore, TripPreviewPage } from './features/explore';
 import { LandingPage } from './features/landing'
 import { HomePage } from './features/home';
 import { ProfilePage, PublicProfilePage } from './features/profile'
+import { SettingsPage } from './features/settings';
 import { CreateTripPage, TripWorkspacePage } from './features/trips/';
 
 const PublicLayout = ({ children }: { children: ReactNode }) => (
@@ -167,7 +168,18 @@ function AppContent() {
         />
 
         <Route
-          path="/profile/:username"
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SettingsPage />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/user/:username"
           element={
             <ConditionalLayout>
               <PublicProfilePage />

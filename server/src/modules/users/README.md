@@ -1,6 +1,6 @@
 # Users Module
 
-User profile management and account operations. Handles profile updates, avatar uploads, and user profile visibility.
+User profile management, security credentials, and public traveler blueprint discovery. Handles profile updates, avatar uploads/deletions, username/password/email changes, Google OAuth provider status, and public traveler profiles.
 
 ---
 
@@ -8,22 +8,22 @@ User profile management and account operations. Handles profile updates, avatar 
 
 ```typescript
 {
-  username: string          // Required, unique
-  email: string            // Unique, sparse index
-  passwordHash: string     // Bcrypt hashed password
-  name: string            // Display name
-  bio: string             // User biography (max 300 chars)
-  profilePicUrl: string   // Cloudinary image URL
-  profilePicPublicId: string  // Cloudinary public ID for deletion
-  isPublic: boolean       // Profile visibility (default: false)
-  isAdmin: boolean        // Admin flag
-  roles: string[]         // User roles (default: ["user"])
-  googleId: string        // OAuth identifier
-  refreshTokenHash: string // Hashed refresh token for revocation
-  stats: {
-    tripsCount: number    // Number of trips created
-    likesCount: number    // Engagement metric
-    followersCount: number // User followers
+  username: string           // Required, unique (3-20 chars, letters/numbers/underscore)
+  email?: string | null      // Unique, sparse index
+  passwordHash?: string | null // Bcrypt hashed password (null for OAuth-only users)
+  name?: string              // Display name
+  bio?: string               // Traveler biography (max 300 chars)
+  profilePicUrl?: string | null     // Cloudinary image URL
+  profilePicPublicId?: string | null// Cloudinary public ID for deletion
+  isPublic: boolean          // Profile visibility (default: false)
+  isAdmin?: boolean          // Admin flag (default: false)
+  roles: string[]            // User roles (default: ["user"])
+  googleId?: string | null   // Google OAuth provider ID
+  refreshTokenHash?: string | null // Hashed refresh token
+  stats?: {
+    tripsCount: number       // Number of trips created
+    likesCount: number       // Engagement metric
+    followersCount: number   // User followers metric
   }
   createdAt: Date
   updatedAt: Date
@@ -33,200 +33,105 @@ User profile management and account operations. Handles profile updates, avatar 
 ### Indexes
 
 ```
-- username: unique
-- email: unique sparse
+- username: unique index
+- email: unique sparse index
 ```
-
-### Virtual Fields
-
-- `_plainPassword`: Temporary field for password hashing (not persisted)
-
----
-
-## Key Features
-
-### Password Management
-
-- **Pre-save Hook**: Automatically hashes plain passwords using bcrypt
-- **Compare Method**: `comparePassword(password: string)` - Bcrypt comparison
-- **Hashing**: 10 salt rounds for security
-
-### Profile Management
-
-- **Bio**: Optional biography (max 300 chars)
-- **Profile Picture**: Stored via Cloudinary
-- **Visibility**: `isPublic` flag controls profile discoverability
-- **Display Name**: Optional name different from username
-
-### Statistics
-
-Track user engagement:
-- `tripsCount` - Number of trips created
-- `likesCount` - Engagement metrics
-- `followersCount` - Social metrics
 
 ---
 
 ## HTTP Endpoints
 
-**Protected Routes**:
-- `GET /api/users/:userId` - Get user profile
-- `PATCH /api/users/:userId` - Update user profile
-- `POST /api/users/:userId/avatar` - Upload profile picture
-- `DELETE /api/users/:userId/avatar` - Delete profile picture
-- `GET /api/users/:userId/trips` - Get user's public trips
+### Public Routes
+- `GET /api/users/public/:username` — View a user's public profile and published public trip blueprints.
 
-**Public Routes** (if isPublic=true):
-- `GET /api/users/:userId/profile` - View public profile
+### Protected Routes (Requires Bearer Auth)
+- `GET /api/users/me` — Fetch current user's profile and credential metadata (`hasPassword`, `googleId`).
+- `PATCH /api/users/me` — Update profile identity fields (`name`, `bio`, `isPublic`). Note: Toggling `isPublic` from `true` to `false` automatically unpublishes the user's public trip templates (`Trip.updateMany(...)`).
+- `POST /api/users/me/avatar` — Upload or replace profile avatar picture (Cloudinary).
+- `DELETE /api/users/me/avatar` — Remove profile avatar picture.
+- `PATCH /api/users/me/username` — Update account username (requires unique 3-20 character username).
+- `PATCH /api/users/me/password` — Change password (requires `currentPassword` verification for existing password accounts).
+- `PATCH /api/users/me/email` — Update primary email address. (Requires `currentPassword` for password accounts; restricted for Google OAuth-only accounts).
 
 ---
 
 ## UserService Methods
 
-### Profile Operations
-
 ```typescript
-getUserById(userId: string): Promise<UserProfile>
-// Fetch user by ID with profile fields
+getUserById(userId: string): Promise<IUser | null>
+// Fetch user document by Mongoose ObjectId string
 
-updateProfile(userId: string, data: Partial<User>): Promise<UserProfile>
-// Update profile fields (name, bio, isPublic, etc.)
-// Validates input and updates timestamps
+getUserByUsername(username: string): Promise<IUser | null>
+// Fetch user document by username
 
-uploadAvatar(userId: string, file: MulterFile): Promise<{ url: string, publicId: string }>
-// Upload profile picture to Cloudinary
-// Deletes old picture if exists
-// Returns new URL and public ID
+updateUserProfile(userId: string, data: { name?: string; bio?: string; isPublic?: boolean }): Promise<IUser>
+// Update profile fields. When switching isPublic to false, unpublishes all user's public trips
 
-deleteAvatar(userId: string): Promise<void>
-// Remove profile picture from Cloudinary
-// Clears profilePicUrl and profilePicPublicId
+updateUserAvatar(userId: string, file: Express.Multer.File): Promise<IUser>
+// Upload new avatar to Cloudinary, deleting old image if present
 
-getPublicProfile(userId: string): Promise<PublicProfile>
-// Get public profile data (respects isPublic flag)
+deleteUserAvatar(userId: string): Promise<IUser>
+// Remove avatar from Cloudinary and clear profilePicUrl
 
-incrementTripCount(userId: string): Promise<void>
-// Update stats after trip creation
+changeUserUsername(userId: string, newUsername: string): Promise<IUser>
+// Validate format and update username (checks uniqueness)
+
+changeUserPassword(userId: string, payload: { currentPassword?: string; newPassword: string }): Promise<IUser>
+// Change user password after verifying currentPassword if set
+
+updateUserEmail(userId: string, payload: { newEmail: string; currentPassword?: string }): Promise<IUser>
+// Update primary email address. Verifies currentPassword for password accounts.
+// Restricts direct email edits for Google OAuth-only users.
 ```
 
 ---
 
-## Upload Configuration
+## Serializer & DTO Specs
 
-**Avatar Upload** (`uploadProfile` middleware):
-- **Folder**: `nomadly/profiles`
-- **Formats**: jpg, jpeg, png, webp
-- **Transform**: 500x500 (fill crop)
-- **Limits**: Single file, enforced by multer
-
----
-
-## Permissions
-
-- **Own Profile**: Users can update their own profile
-- **Public Profiles**: Anyone can view if `isPublic=true`
-- **Private Profiles**: Only owner can view (default)
-- **Admin Operations**: Admins can modify roles and flags
-
----
-
-## ProfileDTO
-
+### Private Serializer (`publicUser`)
+Returned for authenticated user endpoints (`/users/me`, update operations):
 ```typescript
 {
-  id: ObjectId
+  id: string
+  _id: string
   username: string
   name?: string
+  email?: string
   bio?: string
   profilePicUrl?: string
+  isAdmin: boolean
   isPublic: boolean
-  stats: {
-    tripsCount: number
-    likesCount: number
-    followersCount: number
-  }
+  googleId: string | null
+  hasPassword: boolean
   createdAt: Date
   updatedAt: Date
 }
 ```
 
----
-
-## Integration Points
-
-**Called by**:
-- Auth module after registration/login
-- Trip module when managing members
-- Invitations when resolving user references
-
-**Calls**:
-- Cloudinary utils for avatar upload/deletion
-- Trip model for trip count updates
-
----
-
-## Examples
-
-### Get User Profile
-
+### Public Profile Serializer (`publicProfileUser`)
+Allow-listed fields returned for public profile discovery (`GET /users/public/:username`):
 ```typescript
-GET /api/users/507f1f77bcf86cd799439011
-Authorization: Bearer eyJhbGc...
-
-// Response:
 {
-  "success": true,
-  "data": {
-    "user": {
-      "id": "507f1f77bcf86cd799439011",
-      "username": "johndoe",
-      "name": "John Doe",
-      "bio": "Travel enthusiast",
-      "profilePicUrl": "https://...",
-      "isPublic": true,
-      "stats": {
-        "tripsCount": 5,
-        "likesCount": 12,
-        "followersCount": 8
-      }
-    }
-  }
+  id: string
+  username: string
+  name?: string
+  bio?: string
+  profilePicUrl?: string
+  isPublic: boolean
+  publicTripCount: number
+  createdAt: Date
 }
-```
-
-### Update Profile
-
-```typescript
-PATCH /api/users/507f1f77bcf86cd799439011
-Authorization: Bearer eyJhbGc...
-Content-Type: application/json
-
-{
-  "name": "John D",
-  "bio": "Adventure seeker and photographer",
-  "isPublic": true
-}
-```
-
-### Upload Avatar
-
-```typescript
-POST /api/users/507f1f77bcf86cd799439011/avatar
-Authorization: Bearer eyJhbGc...
-Content-Type: multipart/form-data
-
-[image file]
 ```
 
 ---
 
 ## Error Handling
 
-| Scenario | Status | Response |
-|----------|--------|----------|
-| User not found | 404 | "User not found" |
-| Unauthorized update | 403 | "Cannot update other user's profile" |
-| Invalid file type | 400 | "Invalid file format" |
-| File too large | 413 | "File size exceeds limit" |
-| Bio exceeds 300 chars | 400 | "Bio must be max 300 characters" |
-
+| Scenario | Code | Status | Message / Reason |
+|---|---|---|---|
+| User not found | `USER_NOT_FOUND` | 404 | `"User not found"` |
+| Username taken | `USERNAME_TAKEN` | 409 | `"Username already taken"` |
+| Email taken | `EMAIL_TAKEN` | 409 | `"Email address is already registered"` |
+| Incorrect password | `WRONG_CURRENT_PASSWORD` | 400 | `"Incorrect current password"` |
+| Invalid password length | `INVALID_PASSWORD` | 400 | `"Password must be at least 6 characters"` |
+| OAuth email update attempt | `INVALID_INPUT` | 400 | `"Email changes are managed by your Google OAuth provider"` |

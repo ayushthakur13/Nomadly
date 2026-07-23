@@ -98,3 +98,15 @@ export const updatePasswordAPI = async (payload: any): Promise<any> => {
   }
 };
 
+/**
+ * Update authenticated user's email address
+ */
+export const updateEmailAPI = async (payload: { newEmail: string; currentPassword?: string }): Promise<any> => {
+  try {
+    const response = await api.patch("/users/me/email", payload);
+    return response.data;
+  } catch (error) {
+    throw new Error(extractApiError(error as ApiError, "Failed to update email address"));
+  }
+};
+

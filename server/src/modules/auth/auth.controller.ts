@@ -24,6 +24,8 @@ function publicUser(u: any) {
     profilePicUrl: u.profilePicUrl,
     isAdmin: u.isAdmin || false,
     isPublic: u.isPublic || false,
+    googleId: u.googleId || null,
+    hasPassword: Boolean(u.passwordHash),
     createdAt: u.createdAt,
     updatedAt: u.updatedAt,
   };

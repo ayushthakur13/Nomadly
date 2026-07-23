@@ -26,6 +26,7 @@ function publicUser(u: any) {
     profilePicUrl: u.profilePicUrl,
     isAdmin: u.isAdmin || false,
     isPublic: u.isPublic || false,
+    googleId: u.googleId || null,
     hasPassword: Boolean(u.passwordHash),
     createdAt: u.createdAt,
     updatedAt: u.updatedAt,
@@ -74,8 +75,6 @@ export async function updateProfile(req: Request, res: Response, next: NextFunct
     }
 
     const { name, bio, isPublic } = req.body;
-
-
 
     const updatedUser = await userService.updateUserProfile(req.user.id, {
       name,
@@ -178,7 +177,6 @@ export async function changeUsername(req: Request, res: Response, next: NextFunc
 
     const { username } = req.body || {};
 
-
     const updatedUser = await userService.changeUserUsername(req.user.id, username);
     res.status(200).json({ success: true, message: 'Username updated', data: { user: publicUser(updatedUser) } });
   } catch (err: any) {
@@ -198,7 +196,6 @@ export async function changePassword(req: Request, res: Response, next: NextFunc
     }
 
     const { currentPassword, newPassword } = req.body || {};
-
 
     const updatedUser = await userService.changeUserPassword(req.user.id, { currentPassword, newPassword });
     res.status(200).json({ success: true, message: 'Password updated successfully', data: { user: publicUser(updatedUser) } });
@@ -241,6 +238,26 @@ export async function getPublicProfile(req: Request, res: Response, next: NextFu
   }
 }
 
+export async function updateEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.user?.id) {
+      res.status(401).json({ success: false, message: 'Authentication required' });
+      return;
+    }
+
+    const { newEmail, currentPassword } = req.body || {};
+
+    const updatedUser = await userService.updateUserEmail(req.user.id, { newEmail, currentPassword });
+    res.status(200).json({ success: true, message: 'Email address updated successfully', data: { user: publicUser(updatedUser) } });
+  } catch (err: any) {
+    if (err instanceof UserError) {
+      res.status(err.statusCode).json({ success: false, message: err.message });
+      return;
+    }
+    next(err);
+  }
+}
+
 export default {
   getProfile,
   updateProfile,
@@ -248,5 +265,6 @@ export default {
   deleteAvatar,
   changeUsername,
   changePassword,
+  updateEmail,
   getPublicProfile
 };

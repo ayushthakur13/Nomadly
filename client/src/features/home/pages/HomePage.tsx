@@ -400,7 +400,7 @@ const HomePage = () => {
                   onCardClick={(id) => navigate(`/explore/trips/${id}`)}
                   onCreatorClick={(e, username) => {
                     e.stopPropagation();
-                    navigate(`/profile/${username}`);
+                    navigate(`/user/${username}`);
                   }}
                 />
               )}

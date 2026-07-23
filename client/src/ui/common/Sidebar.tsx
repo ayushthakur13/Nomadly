@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useNavigation, type NavItem } from '@/hooks/useNavigation';
 import { useLogout } from '@/features/auth';
 import Icon from '../icon/Icon';
@@ -12,10 +12,15 @@ interface SidebarProps {
 
 const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { topNavItems, isActive, displayName, user } = useNavigation();
   const { performLogout } = useLogout();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const isProfilePage = location.pathname.startsWith('/profile');
+  const isSettingsPage = location.pathname.startsWith('/settings');
+  const isProfileOrSettings = isProfilePage || isSettingsPage;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -99,31 +104,33 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
             <button
               type="button"
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className={`w-full flex items-center px-3 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 ${collapsed ? "gap-0" : "gap-3"
-                }`}
-              title={collapsed ? "Profile" : undefined}
+              className={`w-full flex items-center px-3 py-2 rounded-xl transition-colors ${
+                isProfileOrSettings
+                  ? 'bg-emerald-50/80 border border-emerald-100 text-emerald-950 font-medium'
+                  : 'hover:bg-gray-100 text-gray-900 border border-transparent'
+              } ${collapsed ? 'gap-0 justify-center' : 'gap-3'}`}
+              title={collapsed ? 'Profile & Settings' : undefined}
             >
               <div
                 className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 bg-cover bg-center flex items-center justify-center"
                 style={{
                   backgroundImage: user?.profilePicUrl
                     ? `url('${user.profilePicUrl}')`
-                    : "none",
+                    : 'none',
                 }}
               >
                 {!user?.profilePicUrl && (
-                  <span className="text-gray-600 text-xs font-semibold">
+                  <span className={isProfileOrSettings ? 'text-emerald-700 font-bold text-xs' : 'text-gray-600 text-xs font-semibold'}>
                     {displayName.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
-              <div className={`min-w-0 flex-1 text-left transition-all duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden pointer-events-none" : "opacity-100 w-auto"
-                }`}>
-                <p className="text-sm font-medium text-gray-900 truncate">
+              <div className={`min-w-0 flex-1 text-left transition-all duration-200 ${collapsed ? 'opacity-0 w-0 overflow-hidden pointer-events-none' : 'opacity-100 w-auto'}`}>
+                <p className={`text-sm font-medium truncate ${isProfileOrSettings ? 'text-emerald-950 font-semibold' : 'text-gray-900'}`}>
                   {displayName}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email || "Traveler"}
+                <p className={`text-xs truncate ${isProfileOrSettings ? 'text-emerald-700 font-medium' : 'text-gray-500'}`}>
+                  {user?.email || 'Traveler'}
                 </p>
               </div>
             </button>
@@ -152,9 +159,13 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
                     setShowProfileMenu(false);
                     navigate("/profile");
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors text-left ${
+                    isProfilePage
+                      ? "bg-emerald-50 text-emerald-700 font-semibold"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
-                  <Icon name="user" size={16} className="text-gray-500" />
+                  <Icon name="user" size={16} className={isProfilePage ? "text-emerald-600" : "text-gray-500"} />
                   <span>View Profile</span>
                 </button>
                 
@@ -163,11 +174,15 @@ const Sidebar = ({ collapsed, onToggle, className = '' }: SidebarProps) => {
                   type="button"
                   onClick={() => {
                     setShowProfileMenu(false);
-                    navigate("/profile");
+                    navigate("/settings");
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors text-left ${
+                    isSettingsPage
+                      ? "bg-emerald-50 text-emerald-700 font-semibold"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
-                  <Icon name="settings" size={16} className="text-gray-500" />
+                  <Icon name="settings" size={16} className={isSettingsPage ? "text-emerald-600" : "text-gray-500"} />
                   <span>Settings</span>
                 </button>
                 

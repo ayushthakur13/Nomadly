@@ -9,7 +9,9 @@ interface AvatarManagerProps {
   onPickFile: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDelete: () => void;
-  isPublicRegister: any;
+  isPublicValue: boolean;
+  onTogglePublic: (checked: boolean) => void;
+  onViewPublicProfile?: () => void;
 }
 
 export default function AvatarManager({
@@ -20,7 +22,9 @@ export default function AvatarManager({
   onPickFile,
   onFileChange,
   onDelete,
-  isPublicRegister,
+  isPublicValue,
+  onTogglePublic,
+  onViewPublicProfile,
 }: AvatarManagerProps) {
   return (
     <div className="flex flex-col items-center">
@@ -86,7 +90,7 @@ export default function AvatarManager({
       <p className="text-xs text-gray-500 mt-3 text-center">JPG, PNG or WebP. Max 5MB.</p>
 
       {/* Public Profile Toggle */}
-      <div className="mt-6 w-full p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="mt-6 w-full p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <label htmlFor="isPublic" className="block text-sm font-medium text-gray-700">
@@ -98,14 +102,26 @@ export default function AvatarManager({
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
-              {...isPublicRegister}
               type="checkbox"
               id="isPublic"
+              checked={Boolean(isPublicValue)}
+              onChange={(e) => onTogglePublic(e.target.checked)}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
           </label>
         </div>
+
+        {isPublicValue && onViewPublicProfile && (
+          <button
+            type="button"
+            onClick={onViewPublicProfile}
+            className="w-full mt-2 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+          >
+            <Icon name="eye" size={14} />
+            <span>View Public Profile</span>
+          </button>
+        )}
       </div>
     </div>
   );

@@ -14,7 +14,6 @@ interface AppNavbarProps {
 const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }: AppNavbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useSelector((state: any) => state.auth);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const handleAddTrip = useCallback(() => {
@@ -26,7 +25,6 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
   }, []);
 
   const path = location.pathname;
-  const displayName = user?.name || 'Nomad';
   const showAddTrip = !path.startsWith('/trips/new');
 
   // Mobile title: Nomadly or mapped page title
@@ -34,6 +32,7 @@ const AppNavbar = ({ onToggleSidebar, isSidebarCollapsed, onOpenMobileSidebar }:
     if (path.startsWith('/trips/new')) return 'New Trip';
     if (path.startsWith('/trips')) return 'My Trips';
     if (path.startsWith('/profile')) return 'Profile';
+    if (path.startsWith('/settings')) return 'Settings';
     if (path.startsWith('/explore')) return 'Explore';
     return 'Nomadly';
   })();

@@ -7,6 +7,7 @@ export const USER_ERRORS = {
   INVALID_UPDATE_FIELDS: 'INVALID_UPDATE_FIELDS',
   INVALID_USERNAME: 'INVALID_USERNAME',
   USERNAME_TAKEN: 'USERNAME_TAKEN',
+  EMAIL_TAKEN: 'EMAIL_TAKEN',
   WRONG_CURRENT_PASSWORD: 'WRONG_CURRENT_PASSWORD',
   INVALID_PASSWORD: 'INVALID_PASSWORD',
   INVALID_INPUT: 'INVALID_INPUT'
@@ -24,7 +25,7 @@ export class UserError extends Error {
     this.code = code;
     if (code === 'USER_NOT_FOUND') {
       this.statusCode = 404;
-    } else if (code === 'USERNAME_TAKEN') {
+    } else if (code === 'USERNAME_TAKEN' || code === 'EMAIL_TAKEN') {
       this.statusCode = 409;
     } else {
       this.statusCode = 400;
@@ -177,6 +178,35 @@ export async function changeUserPassword(userId: string, payload: { currentPassw
   return user;
 }
 
+export async function updateUserEmail(userId: string, payload: { newEmail: string; currentPassword?: string; }) {
+  const user = await User.findById(userId);
+  if (!user) throw new UserError(USER_ERRORS.USER_NOT_FOUND, 'User not found');
+
+  if (user.googleId && !user.passwordHash) {
+    throw new UserError(USER_ERRORS.INVALID_INPUT, 'Email changes are managed by your Google OAuth provider');
+  }
+
+  const email = (payload.newEmail || '').trim().toLowerCase();
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!isValid) throw new UserError(USER_ERRORS.INVALID_INPUT, 'Invalid email address');
+
+  const existing = await User.findOne({ email });
+  if (existing && existing.id !== user.id) {
+    throw new UserError(USER_ERRORS.EMAIL_TAKEN, 'Email address is already registered');
+  }
+
+  if (user.passwordHash) {
+    const current = (payload.currentPassword || '').trim();
+    if (!current) throw new UserError(USER_ERRORS.INVALID_INPUT, 'Current password is required to update email');
+    const ok = await (user as any).comparePassword(current);
+    if (!ok) throw new UserError(USER_ERRORS.WRONG_CURRENT_PASSWORD, 'Incorrect current password');
+  }
+
+  user.email = email;
+  await user.save();
+  return user;
+}
+
 export default {
   getUserById,
   getUserByUsername,
@@ -184,5 +214,6 @@ export default {
   updateUserAvatar,
   deleteUserAvatar,
   changeUserUsername,
-  changeUserPassword
+  changeUserPassword,
+  updateUserEmail
 };

@@ -29,12 +29,14 @@ The application is structured as a domain-driven monorepo with three root folder
 ### Domain Boundaries
 We organize features by business domains, not by UI page hierarchies. The application domains are:
 1. **Auth & Identity** (User accounts, registration, credentials, login, Google OAuth).
-2. **Trips & Core Workspace** (Trip lifecycles, permissions, basic info, covers, sharing).
-3. **Itinerary & Destinations** (Stops, coordinates, dates, chronological routing).
-4. **Budget & Finance** (Base budgets, expenses, member splits, contributions).
-5. **Tasks & Collaboration** (Shared todo lists, task assignments, status tracking).
-6. **Chat & Realtime** (Sockets messaging, room-snooping protections).
-7. **Invitations & Invites** (Trips access requests, member addition flows).
+2. **Profile & Identity** (Traveler persona, display avatar, bio, username, public profile toggle).
+3. **Settings & Security** (Account settings, email management, password updates, OAuth provider status).
+4. **Trips & Core Workspace** (Trip lifecycles, permissions, basic info, covers, sharing).
+5. **Itinerary & Destinations** (Stops, coordinates, dates, chronological routing).
+6. **Budget & Finance** (Base budgets, expenses, member splits, contributions).
+7. **Tasks & Collaboration** (Shared todo lists, task assignments, status tracking).
+8. **Chat & Realtime** (Sockets messaging, room-snooping protections).
+9. **Invitations & Invites** (Trips access requests, member addition flows).
 
 ### Directory Rules
 * **Features Folder (client/src/features)**:

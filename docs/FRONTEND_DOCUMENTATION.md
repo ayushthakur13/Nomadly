@@ -57,7 +57,8 @@ client/src/
 │   ├── explore/           # Public trip feed
 │   ├── home/              # Home page
 │   ├── trips/             # Trip management & workspace
-│   ├── profile/           # User profile
+│   ├── profile/           # User profile identity
+│   ├── settings/          # Account security & settings
 │   ├── landing/           # Landing page
 │   ├── invitations/       # Trip invitations
 │   └── <feature>/         # New features follow same pattern

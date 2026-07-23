@@ -16,3 +16,8 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().trim().optional(),
   newPassword: z.string().min(6, 'Password must be at least 6 characters'),
 });
+
+export const updateEmailSchema = z.object({
+  newEmail: z.email({ message: 'Invalid email address format' }),
+  currentPassword: z.string().trim().optional(),
+});

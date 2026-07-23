@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { extractApiError } from "@/utils/errorHandling";
-import { Icon } from "@/ui/icon/";
 import {
   updateProfileStart,
   updateProfileSuccess,
@@ -13,15 +12,18 @@ import {
 } from "@/features/auth";
 import {
   fetchCurrentUserAPI,
+  fetchPublicProfileAPI,
   updateProfileAPI,
   updateUsernameAPI,
   uploadAvatarAPI,
   deleteAvatarAPI,
   updatePasswordAPI
 } from "@/services/users.service";
+import { fetchTripsAPI } from "@/services/trips.service";
 import { useAsyncAction } from "@/hooks/useAsyncAction";
 import { TOAST_MESSAGES } from "@/constants/toastMessages";
-import { AvatarManager, SecuritySection } from "../components";
+import { ConfirmationModal } from "@/ui/common";
+import { AvatarManager } from "../components";
 
 interface ProfileFormData {
   username: string;
@@ -37,6 +39,10 @@ export default function Profile() {
   const { user, loading } = useSelector((state: any) => state.auth);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [publicTripCount, setPublicTripCount] = useState<number>(0);
+  const [isVisibilityWarningOpen, setIsVisibilityWarningOpen] = useState<boolean>(false);
+  const [isSubmittingVisibility, setIsSubmittingVisibility] = useState<boolean>(false);
+
   const { execute: fetchProfile, isLoading: profileLoading } = useAsyncAction({
     showToast: false
   });
@@ -58,6 +64,7 @@ export default function Profile() {
     formState: { errors, isDirty },
     reset,
     watch,
+    setValue,
   } = useForm<ProfileFormData>();
 
   useEffect(() => {
@@ -70,8 +77,61 @@ export default function Profile() {
         bio: profile.bio ?? "",
         isPublic: profile.isPublic ?? false,
       });
+
+      if (profile.username && profile.isPublic) {
+        try {
+          const pubProfile = await fetchPublicProfileAPI(profile.username);
+          setPublicTripCount(pubProfile.user.publicTripCount || 0);
+        } catch {
+          const userTrips = await fetchTripsAPI().catch(() => []);
+          if (Array.isArray(userTrips)) {
+            const count = userTrips.filter((t: any) => t.isPublic).length;
+            setPublicTripCount(count);
+          }
+        }
+      }
     });
   }, [reset, fetchProfile]);
+
+  const isPublicWatch = watch("isPublic");
+
+  const handleTogglePublic = (checked: boolean) => {
+    if (!checked && (user?.isPublic ?? false) && publicTripCount > 0) {
+      setIsVisibilityWarningOpen(true);
+    } else {
+      setValue("isPublic", checked, { shouldDirty: true });
+    }
+  };
+
+  const handleConfirmPrivate = async () => {
+    setIsSubmittingVisibility(true);
+    dispatch(updateProfileStart());
+    try {
+      const response = await updateProfileAPI({ isPublic: false });
+      const latestUser = response.data.user;
+      dispatch(updateProfileSuccess({ user: latestUser }));
+      toast.success("Profile set to private. All public trips unpublished.");
+      setPublicTripCount(0);
+      reset({
+        username: latestUser.username || "",
+        name: latestUser.name || "",
+        bio: latestUser.bio || "",
+        isPublic: false,
+      });
+      setIsVisibilityWarningOpen(false);
+    } catch (error: any) {
+      const message = extractApiError(error, "Failed to update profile visibility");
+      toast.error(message);
+      dispatch(updateProfileFailure(message));
+    } finally {
+      setIsSubmittingVisibility(false);
+    }
+  };
+
+  const handleCancelPrivateModal = () => {
+    setIsVisibilityWarningOpen(false);
+    setValue("isPublic", true, { shouldDirty: false });
+  };
 
   const onSubmit = async (data: ProfileFormData) => {
     const updates: any = {};
@@ -240,14 +300,15 @@ export default function Profile() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 py-8 overflow-x-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#2E2E2E]">
-              Profile Settings
+      <div className="min-h-screen bg-gray-50/50 py-8 overflow-x-hidden">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          {/* Page Header */}
+          <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Profile Identity
             </h1>
-            <p className="text-gray-600 mt-2">
-              Manage your profile information and preferences
+            <p className="text-sm text-gray-500 mt-1">
+              Customize your public traveler persona, avatar, and visibility settings
             </p>
           </div>
 
@@ -264,7 +325,9 @@ export default function Profile() {
                     onPickFile={() => fileInputRef.current?.click()}
                     onFileChange={handleAvatarChange}
                     onDelete={handleDeleteAvatar}
-                    isPublicRegister={register("isPublic")}
+                    isPublicValue={isPublicWatch}
+                    onTogglePublic={handleTogglePublic}
+                    onViewPublicProfile={user?.isPublic ? () => navigate(`/user/${user.username}`) : undefined}
                   />
                 </div>
 
@@ -387,45 +450,24 @@ export default function Profile() {
                       </p>
                     )}
                   </form>
-
-                  {/* Security */}
-                  <SecuritySection
-                    hasPassword={hasPassword}
-                    currentPassword={currentPassword}
-                    newPassword={newPassword}
-                    confirmPassword={confirmPassword}
-                    setCurrentPassword={setCurrentPassword}
-                    setNewPassword={setNewPassword}
-                    setConfirmPassword={setConfirmPassword}
-                    pwdLoading={pwdLoading}
-                    onChangePassword={handleChangePassword}
-                  />
-
-                  {/* Danger Zone - Logout */}
-                  <div className="mt-8 pt-8 border-t border-gray-200">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Logout</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Sign out of your account on this device
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="px-6 py-2.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm"
-                      >
-                        <Icon name="logout" size={16} />
-                        Logout
-                      </button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={isVisibilityWarningOpen}
+        title="Switch Profile to Private?"
+        description={`Switching your profile to private will automatically unpublish your ${publicTripCount} public trip template${publicTripCount === 1 ? '' : 's'}.`}
+        confirmText="Make Private & Unpublish"
+        cancelText="Keep Profile Public"
+        isWarning={true}
+        isLoading={isSubmittingVisibility}
+        onConfirm={handleConfirmPrivate}
+        onCancel={handleCancelPrivateModal}
+      />
     </>
   );
 }

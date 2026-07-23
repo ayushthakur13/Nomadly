@@ -18,10 +18,8 @@ import {
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import Footer from "../../ui/common/Footer";
 import toast from "react-hot-toast";
-import { Icon } from "@/ui";
 import TripPreviewHero from "./components/TripPreviewHero";
 import {
-  OverviewPanel,
   ItineraryPanel,
   StaysPanel,
   MemoriesPanel,
@@ -133,8 +131,6 @@ export default function TripPreviewPage() {
       }
     });
   }, [tripId, isAuthenticated, loadTripDetails]);
-
-
 
   const handleLike = async () => {
     if (!tripId) return;
@@ -251,8 +247,6 @@ export default function TripPreviewPage() {
     (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)
   ) || 1;
 
-
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between [main_&]:-mx-4 sm:[main_&]:-mx-6 lg:[main_&]:-mx-8 [main_&]:-mt-6 [main_&]:-mb-6">
       <div>
@@ -268,7 +262,7 @@ export default function TripPreviewPage() {
             navigator.clipboard.writeText(window.location.href);
             toast.success("Link copied to clipboard!");
           }}
-          onAuthorClick={() => navigate(`/profile/${trip.createdBy.username}`)}
+          onAuthorClick={() => navigate(`/user/${trip.createdBy.username}`)}
           destinations={destinations}
           accommodations={accommodations}
           tasks={tasks}

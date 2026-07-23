@@ -443,3 +443,28 @@ To balance data integrity with user flexibility, we implement Option C (Soft Val
 **Consequences:**
 - **Pros**: Outstanding user experience for exploring public itineraries; 100% DRY Mapbox and date validation utilities; robust timeline and budget cloning logic; end-to-end Zod request boundary validation across all write API routes.
 - **Cons**: None.
+
+---
+
+## Domain Separation of Profile & Settings, OAuth Email Policy & Extensible Settings Architecture
+**Status:** Accepted
+
+**Context:**
+- Profile information (identity, display avatar, bio, public profile toggle) and account administration (email, password security, authentication providers, session logout) were previously combined into a single page.
+- Password change fields were displayed for Google OAuth social login users who do not have a password hash.
+- Email updates lacked current password verification for password-based accounts.
+
+**Decision:**
+1. **Domain Separation**: Split the domain into two cleanly separated modules:
+   - **Profile Domain (`/profile` -> `ProfilePage.tsx`)**: Manages traveler identity, display avatar, bio, username, public profile toggle, and conditional `"View Public Profile"` button (`/user/:username`).
+   - **Settings Domain (`/settings` -> `SettingsPage.tsx`)**: Manages account security, email, password credentials, Google OAuth provider badges, and active sessions.
+2. **Extensible Settings UI Architecture**: Built `SettingsPage.tsx` with a modular sidebar/tabbed sub-navigation (`Account & Security`, extensible for future `Preferences & Notifications`), and rendered a unified top navigation tab bar (`[ Profile Identity | Account Settings ]`) across both `/profile` and `/settings`.
+3. **Google OAuth Email & Security Policy**:
+   - For password-based accounts: Email update is enabled and requires `currentPassword` verification.
+   - For Google OAuth accounts (`googleId` present, `passwordHash: null`): Email input is **read-only** with a `Managed by Google OAuth` badge. Restricting direct email modification preserves single-source-of-truth identity and eliminates unauthorized session hijacking risks.
+   - Password fields are replaced with a clear status notice: *"Signed in via Google OAuth. Password management is handled by your Google account."*
+4. **Backend `updateUserEmail` API**: Added `PATCH /users/me/email` protected route with `updateEmailSchema` Zod validation, enforcing email uniqueness (`409 Conflict`) and password verification.
+
+**Consequences:**
+- **Pros**: Highly extensible Settings UI layout; strict security boundaries for email and password updates; clear separation between identity and security settings; 100% alignment with modern SaaS standards (GitHub, Vercel, Linear).
+- **Cons**: None.

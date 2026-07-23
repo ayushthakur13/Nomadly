@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 export const createInvitationSchema = z.object({
   tripId: z.string().min(1, 'tripId is required'),
-  invitedEmail: z.string().email('Invalid email address').optional(),
+  invitedEmail: z.email({ message: 'Invalid email address' }).optional(),
   invitedUsername: z.string().min(1, 'Username must not be empty').optional(),
   invitedUserId: z.string().optional(),
-  inviteeEmail: z.string().email('Invalid email address').optional(),
+  inviteeEmail: z.email({ message: 'Invalid email address' }).optional(),
   inviteeUsername: z.string().min(1, 'Username must not be empty').optional(),
   inviteeUserId: z.string().optional(),
   role: z.enum(['editor', 'viewer']).optional().default('editor'),

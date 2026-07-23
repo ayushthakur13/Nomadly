@@ -15,41 +15,6 @@ interface PanelProps {
   budget: PublicBudgetSummary | null;
 }
 
-export function OverviewPanel({ trip, destinations, accommodations, memories }: Omit<PanelProps, "tasks" | "budget">) {
-  return (
-    <div className="space-y-6 text-left">
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">Trip Overview</h3>
-        <p className="text-gray-600 leading-relaxed text-sm">
-          Welcome to the public travel blueprint of this trip. This plan has been shared as a public resource for other travellers. You can inspect the scheduled stops, stays, tasks, and budgets below, or copy this plan directly into your own workspace using the **Clone Plan** button above.
-        </p>
-      </div>
-
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 pt-4 border-t">
-        <div className="bg-gray-50 rounded-2xl p-5 border">
-          <span className="text-2xl">📍</span>
-          <h4 className="font-semibold text-gray-900 mt-2">Destinations</h4>
-          <p className="text-sm text-gray-500 mt-1">{destinations.length} stops mapped out.</p>
-        </div>
-        <div className="bg-gray-50 rounded-2xl p-5 border">
-          <span className="text-2xl">🏨</span>
-          <h4 className="font-semibold text-gray-900 mt-2">Places to Stay</h4>
-          <p className="text-sm text-gray-500 mt-1">{accommodations.length} lodges & stays.</p>
-        </div>
-        <div className="bg-gray-50 rounded-2xl p-5 border">
-          <span className="text-2xl">📸</span>
-          <h4 className="font-semibold text-gray-900 mt-2">Memories</h4>
-          <p className="text-sm text-gray-500 mt-1">
-            {trip.memoriesPublic
-              ? `${memories.length} public photos shared.`
-              : "Memories gallery is set to private."}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function ItineraryPanel({ destinations }: Pick<PanelProps, "destinations">) {
   return (
     <div className="space-y-6 text-left">
