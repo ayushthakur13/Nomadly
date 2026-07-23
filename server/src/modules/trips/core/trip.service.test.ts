@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import tripService from './trip.service';
 import Trip from './trip.model';
 import User from '../../users/user.model';
@@ -10,6 +10,13 @@ import budgetService from '../budget/budget.service';
 import taskService from '../tasks/task.service';
 import SavedTrip from '../../explore/save.model';
 import { TripError, TRIP_ERRORS } from './trip.errors';
+
+const mockSession = {
+  withTransaction: vi.fn(async (cb: any) => await cb()),
+  endSession: vi.fn().mockResolvedValue(undefined)
+};
+
+vi.spyOn(mongoose, 'startSession').mockResolvedValue(mockSession as any);
 
 vi.mock('./trip.model', () => {
   const mockSave = vi.fn();
@@ -24,6 +31,10 @@ vi.mock('./trip.model', () => {
 
   (MockTrip as any).findById = vi.fn();
   (MockTrip as any).findByIdAndUpdate = vi.fn();
+  (MockTrip as any).create = vi.fn().mockImplementation(async (arr: any[]) => {
+    const doc = new (MockTrip as any)(arr[0]);
+    return [doc];
+  });
   return {
     default: MockTrip
   };
@@ -138,27 +149,50 @@ describe('TripService - cloneTrip', () => {
       budgetCloneMode: 'PLANNING'
     });
 
-    expect(Trip).toHaveBeenCalled();
-    expect(destinationService.cloneDestinations).toHaveBeenCalledWith(tripId, result._id.toString(), expect.any(Number));
+    expect(destinationService.cloneDestinations).toHaveBeenCalledWith(
+      tripId,
+      result._id.toString(),
+      expect.any(Number),
+      mockSession
+    );
     expect(accommodationService.cloneAccommodations).toHaveBeenCalledWith(
       tripId,
       result._id.toString(),
       userId,
       destMap,
-      expect.any(Number)
+      expect.any(Number),
+      mockSession
     );
-    expect(taskService.cloneTasks).toHaveBeenCalledWith(tripId, result._id.toString(), userId, expect.any(Number));
+    expect(taskService.cloneTasks).toHaveBeenCalledWith(
+      tripId,
+      result._id.toString(),
+      userId,
+      expect.any(Number),
+      mockSession
+    );
     expect(budgetService.cloneBudget).toHaveBeenCalledWith(
       tripId,
       result._id.toString(),
       userId,
-      'PLANNING'
+      'PLANNING',
+      mockSession
     );
-    expect(Trip.findByIdAndUpdate).toHaveBeenCalledWith(tripId, { $inc: { 'engagement.clones': 1 } });
-    expect(User.findByIdAndUpdate).toHaveBeenCalledWith(userId, { $inc: { 'stats.tripsCount': 1 } });
-    expect(SavedTrip.deleteOne).toHaveBeenCalledWith({
-      userId: new Types.ObjectId(userId),
-      tripId: new Types.ObjectId(tripId)
-    });
+    expect(Trip.findByIdAndUpdate).toHaveBeenCalledWith(
+      tripId,
+      { $inc: { 'engagement.clones': 1 } },
+      { session: mockSession }
+    );
+    expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
+      userId,
+      { $inc: { 'stats.tripsCount': 1 } },
+      { session: mockSession }
+    );
+    expect(SavedTrip.deleteOne).toHaveBeenCalledWith(
+      {
+        userId: new Types.ObjectId(userId),
+        tripId: new Types.ObjectId(tripId)
+      },
+      { session: mockSession }
+    );
   });
 });

@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 import Destination, { IDestination } from './destination.model';
 import Trip from '../core/trip.model';
 import { deleteFromCloudinary } from '@shared/utils';
@@ -413,11 +413,14 @@ class DestinationService {
   async cloneDestinations(
     originalTripId: string,
     newTripId: string,
-    dateOffsetMs?: number
+    dateOffsetMs?: number,
+    session?: ClientSession
   ): Promise<Map<string, Types.ObjectId>> {
-    const originalDestinations = await Destination.find({ tripId: new Types.ObjectId(originalTripId) })
-      .sort({ order: 1 })
-      .lean();
+    let query = Destination.find({ tripId: new Types.ObjectId(originalTripId) }).sort({ order: 1 });
+    if (session) {
+      query = query.session(session);
+    }
+    const originalDestinations = await query.lean();
 
     const destinationIdMap = new Map<string, Types.ObjectId>();
 
@@ -441,7 +444,7 @@ class DestinationService {
         updatedAt: new Date()
       });
 
-      await clonedDest.save();
+      await clonedDest.save(session ? { session } : undefined);
     }
 
     return destinationIdMap;

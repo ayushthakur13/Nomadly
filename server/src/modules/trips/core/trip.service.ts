@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import Trip, { ITrip } from './trip.model';
 import '../destinations/destination.model';
 import User from '../../users/user.model';
@@ -333,28 +333,31 @@ class TripService {
       throw new TripError(TRIP_ERRORS.UNAUTHORIZED, 'Only trip creator can delete this trip', 403);
     }
 
-    await Trip.findByIdAndDelete(tripId);
-    await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': -1 } });
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await Trip.findByIdAndDelete(tripId, { session });
+        await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': -1 } }, { session });
 
-    // Cascade delete memories associated with the trip
-    await memoryService.deleteTripMemories(tripId).catch((err) => {
-      console.error(`Failed to cascade delete memories for trip ${tripId}:`, err);
-    });
+        // Cascade delete memories associated with the trip
+        await memoryService.deleteTripMemories(tripId, session).catch((err) => {
+          console.error(`Failed to cascade delete memories for trip ${tripId}:`, err);
+        });
 
-    // Cascade delete chat messages associated with the trip
-    await chatService.deleteTripMessages(tripId).catch((err) => {
-      console.error(`Failed to cascade delete chat messages for trip ${tripId}:`, err);
-    });
+        // Cascade delete chat messages associated with the trip
+        await chatService.deleteTripMessages(tripId, session).catch((err) => {
+          console.error(`Failed to cascade delete chat messages for trip ${tripId}:`, err);
+        });
 
-    // Cascade delete accommodations associated with the trip
-    await accommodationService.deleteTripAccommodations(tripId).catch((err) => {
-      console.error(`Failed to cascade delete accommodations for trip ${tripId}:`, err);
-    });
-
-    return true;
-
-
-
+        // Cascade delete accommodations associated with the trip
+        await accommodationService.deleteTripAccommodations(tripId, session).catch((err) => {
+          console.error(`Failed to cascade delete accommodations for trip ${tripId}:`, err);
+        });
+      });
+      return true;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async publishTrip(tripId: string, userId: string): Promise<ITrip | null> {
@@ -487,77 +490,90 @@ class TripService {
       };
     }
 
-    const clonedTrip = new Trip(clonedData);
-    await clonedTrip.save();
+    const session = await mongoose.startSession();
+    let clonedTrip: ITrip | undefined = undefined;
 
-    // Calculate date offset for relative date shifting
-    const originalStartDate = originalTrip.startDate instanceof Date
-      ? originalTrip.startDate
-      : new Date(originalTrip.startDate);
+    try {
+      await session.withTransaction(async () => {
+        const [newTripDoc] = await Trip.create([clonedData], { session });
+        clonedTrip = newTripDoc as unknown as ITrip;
 
-    const clonedStartDate = clonedTrip.startDate instanceof Date
-      ? clonedTrip.startDate
-      : new Date(clonedTrip.startDate);
+        // Calculate date offset for relative date shifting
+        const originalStartDate = originalTrip.startDate instanceof Date
+          ? originalTrip.startDate
+          : new Date(originalTrip.startDate);
 
-    const dateOffsetMs = clonedStartDate.getTime() - originalStartDate.getTime();
+        const clonedStartDate = clonedTrip.startDate instanceof Date
+          ? clonedTrip.startDate
+          : new Date(clonedTrip.startDate);
 
-    // 1. Clone destinations if includeDestinations is not false
-    let destinationIdMap = new Map<string, Types.ObjectId>();
-    if (options.includeDestinations !== false) {
-      destinationIdMap = await destinationService.cloneDestinations(
-        tripId,
-        clonedTrip._id.toString(),
-        dateOffsetMs
-      );
-      
-      // Update destinations array references on cloned trip
-      clonedTrip.destinations = Array.from(destinationIdMap.values());
-      await clonedTrip.save();
+        const dateOffsetMs = clonedStartDate.getTime() - originalStartDate.getTime();
 
-      // 2. Clone accommodations if includeAccommodations is not false
-      if (options.includeAccommodations !== false) {
-        await accommodationService.cloneAccommodations(
-          tripId,
-          clonedTrip._id.toString(),
-          userId,
-          destinationIdMap,
-          dateOffsetMs
-        );
-      }
-    }
+        // 1. Clone destinations if includeDestinations is not false
+        let destinationIdMap = new Map<string, Types.ObjectId>();
+        if (options.includeDestinations !== false) {
+          destinationIdMap = await destinationService.cloneDestinations(
+            tripId,
+            clonedTrip._id.toString(),
+            dateOffsetMs,
+            session
+          );
+          
+          // Update destinations array references on cloned trip
+          clonedTrip.destinations = Array.from(destinationIdMap.values());
+          await (clonedTrip as any).save({ session });
 
-    // 3. Clone tasks if includeTasks is not false
-    if (options.includeTasks !== false) {
-      await taskService.cloneTasks(
-        tripId,
-        clonedTrip._id.toString(),
-        userId,
-        dateOffsetMs
-      );
-    }
+          // 2. Clone accommodations if includeAccommodations is not false
+          if (options.includeAccommodations !== false) {
+            await accommodationService.cloneAccommodations(
+              tripId,
+              clonedTrip._id.toString(),
+              userId,
+              destinationIdMap,
+              dateOffsetMs,
+              session
+            );
+          }
+        }
 
-    // 4. Clone budget if includeBudget is true
-    if (includeBudget) {
-      await budgetService.cloneBudget(
-        tripId,
-        clonedTrip._id.toString(),
-        userId,
-        budgetCloneMode
-      ).catch((err) => {
-        console.error(`[TripService] Failed to clone budget for trip ${clonedTrip._id}:`, err);
+        // 3. Clone tasks if includeTasks is not false
+        if (options.includeTasks !== false) {
+          await taskService.cloneTasks(
+            tripId,
+            clonedTrip._id.toString(),
+            userId,
+            dateOffsetMs,
+            session
+          );
+        }
+
+        // 4. Clone budget if includeBudget is true
+        if (includeBudget) {
+          await budgetService.cloneBudget(
+            tripId,
+            clonedTrip._id.toString(),
+            userId,
+            budgetCloneMode,
+            session
+          ).catch((err) => {
+            console.error(`[TripService] Failed to clone budget for trip ${clonedTrip!._id}:`, err);
+          });
+        }
+
+        await Trip.findByIdAndUpdate(tripId, { $inc: { 'engagement.clones': 1 } }, { session });
+        await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': 1 } }, { session });
+
+        // Automatically unsave the cloned trip for this user
+        await SavedTrip.deleteOne({
+          userId: new Types.ObjectId(userId),
+          tripId: new Types.ObjectId(tripId)
+        }, { session });
       });
+
+      return clonedTrip!;
+    } finally {
+      await session.endSession();
     }
-
-    await Trip.findByIdAndUpdate(tripId, { $inc: { 'engagement.clones': 1 } });
-    await User.findByIdAndUpdate(userId, { $inc: { 'stats.tripsCount': 1 } });
-
-    // Automatically unsave the cloned trip for this user
-    await SavedTrip.deleteOne({
-      userId: new Types.ObjectId(userId),
-      tripId: new Types.ObjectId(tripId)
-    });
-
-    return clonedTrip;
   }
 
   async getFeaturedTrips(limit = 10): Promise<ITrip[]> {

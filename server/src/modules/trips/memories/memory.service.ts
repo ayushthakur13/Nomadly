@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 import Memory, { IMemory } from './memory.model';
 import Trip from '../core/trip.model';
 import { isTripMember, isTripCreator } from '../members/member.utils';
@@ -178,10 +178,14 @@ class MemoryService {
   /**
    * Delete all memories associated with a trip (cascade removal when trip is deleted)
    */
-  async deleteTripMemories(tripId: string): Promise<void> {
-    const memories = await Memory.find({
+  async deleteTripMemories(tripId: string, session?: ClientSession): Promise<void> {
+    let query = Memory.find({
       tripId: new Types.ObjectId(tripId),
     });
+    if (session) {
+      query = query.session(session);
+    }
+    const memories = await query;
 
     for (const memory of memories) {
       if (memory.publicId) {
@@ -193,7 +197,7 @@ class MemoryService {
 
     await Memory.deleteMany({
       tripId: new Types.ObjectId(tripId),
-    });
+    }, session ? { session } : undefined);
   }
 }
 

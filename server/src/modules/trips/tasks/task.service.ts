@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 import Task, { ITask } from './task.model';
 import Trip, { ITrip } from '../core/trip.model';
 import {
@@ -364,9 +364,14 @@ class TaskService {
     originalTripId: string,
     newTripId: string,
     userId: string,
-    dateOffsetMs?: number
+    dateOffsetMs?: number,
+    session?: ClientSession
   ): Promise<void> {
-    const originalTasks = await Task.find({ tripId: new Types.ObjectId(originalTripId) }).lean();
+    let query = Task.find({ tripId: new Types.ObjectId(originalTripId) });
+    if (session) {
+      query = query.session(session);
+    }
+    const originalTasks = await query.lean();
 
     for (const task of originalTasks) {
       const clonedTask = new Task({
@@ -384,7 +389,7 @@ class TaskService {
         updatedAt: new Date()
       });
 
-      await clonedTask.save();
+      await clonedTask.save(session ? { session } : undefined);
     }
   }
 }

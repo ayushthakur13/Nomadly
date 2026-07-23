@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 import Message, { IMessage } from './message.model';
 import Trip from '../core/trip.model';
 import { isTripMember, isTripCreator } from '../members/member.utils';
@@ -49,8 +49,8 @@ class ChatService {
   /**
    * Cascade delete all messages associated with a trip
    */
-  async deleteTripMessages(tripId: string): Promise<void> {
-    await Message.deleteMany({ trip: new Types.ObjectId(tripId) });
+  async deleteTripMessages(tripId: string, session?: ClientSession): Promise<void> {
+    await Message.deleteMany({ trip: new Types.ObjectId(tripId) }, session ? { session } : undefined);
   }
 
   /**

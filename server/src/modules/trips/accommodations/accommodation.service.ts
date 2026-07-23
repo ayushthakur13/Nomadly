@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types, ClientSession } from "mongoose";
 import Accommodation, { IAccommodation } from "./accommodation.model";
 import Trip from "../core/trip.model";
 import { isTripCreator, isTripMember } from "../members/member.utils";
@@ -196,11 +196,11 @@ class AccommodationService {
     return `https://${trimmed}`;
   }
 
-  async deleteTripAccommodations(tripId: string): Promise<void> {
+  async deleteTripAccommodations(tripId: string, session?: ClientSession): Promise<void> {
     if (!Types.ObjectId.isValid(tripId)) {
       throw new TripError(TRIP_ERRORS.INVALID_INPUT, "Invalid trip ID", 400);
     }
-    await Accommodation.deleteMany({ tripId: new Types.ObjectId(tripId) });
+    await Accommodation.deleteMany({ tripId: new Types.ObjectId(tripId) }, session ? { session } : undefined);
   }
 
   private canEditAccommodation(trip: any, accommodation: IAccommodation, userId: string): boolean {
@@ -227,9 +227,14 @@ class AccommodationService {
     newTripId: string,
     userId: string,
     destinationIdMap: Map<string, Types.ObjectId>,
-    dateOffsetMs?: number
+    dateOffsetMs?: number,
+    session?: ClientSession
   ): Promise<void> {
-    const originalAccommodations = await Accommodation.find({ tripId: new Types.ObjectId(originalTripId) }).lean();
+    let query = Accommodation.find({ tripId: new Types.ObjectId(originalTripId) });
+    if (session) {
+      query = query.session(session);
+    }
+    const originalAccommodations = await query.lean();
 
     for (const acc of originalAccommodations) {
       let newDestinationId: Types.ObjectId | undefined = undefined;
@@ -253,7 +258,7 @@ class AccommodationService {
         updatedAt: new Date()
       });
 
-      await clonedAcc.save();
+      await clonedAcc.save(session ? { session } : undefined);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Types, ClientSession } from 'mongoose';
 import TripBudget, { ITripBudget, IBudgetMember } from './budget.model';
 import Expense, { IExpense } from './expense.model';
 import Trip from '../core/trip.model';
@@ -521,25 +521,37 @@ class BudgetService {
    * TODO: wrap in a MongoDB session (requires replica set / Atlas) when moving
    * to production to guarantee full consistency.
    */
-  private async syncTripBudgetSummary(tripId: string): Promise<void> {
+  private async syncTripBudgetSummary(tripId: string, session?: ClientSession): Promise<void> {
     // Re-query budget fresh so totalPlanned always reflects committed DB state or base budget target.
-    const budget = await TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    let budgetQuery = TripBudget.findOne({ tripId: new Types.ObjectId(tripId) });
+    if (session) budgetQuery = budgetQuery.session(session);
+    const budget = await budgetQuery;
     const membersTotal = budget ? budget.members.reduce((sum, m) => sum + (m.plannedContribution || 0), 0) : 0;
     const totalPlanned = FinancialUtils.normalizeMoney(
       membersTotal > 0 ? membersTotal : (budget?.baseBudgetAmount || 0)
     );
 
-    const totalSpentAgg = await Expense.aggregate([
-      { $match: { tripId: new Types.ObjectId(tripId) } },
-      { $group: { _id: '$tripId', total: { $sum: '$amount' } } }
-    ]);
+    let totalSpentAgg: any[];
+    if (session) {
+      totalSpentAgg = await Expense.aggregate([
+        { $match: { tripId: new Types.ObjectId(tripId) } },
+        { $group: { _id: '$tripId', total: { $sum: '$amount' } } }
+      ]).session(session);
+    } else {
+      totalSpentAgg = await Expense.aggregate([
+        { $match: { tripId: new Types.ObjectId(tripId) } },
+        { $group: { _id: '$tripId', total: { $sum: '$amount' } } }
+      ]);
+    }
     const totalSpent = FinancialUtils.normalizeMoney(totalSpentAgg[0]?.total || 0);
 
-    const trip = await Trip.findById(tripId);
+    let tripQuery = Trip.findById(tripId);
+    if (session) tripQuery = tripQuery.session(session);
+    const trip = await tripQuery;
     if (!trip) return;
 
     trip.budgetSummary = { total: totalPlanned, spent: totalSpent };
-    await trip.save();
+    await trip.save(session ? { session } : undefined);
   }
 
   private async getMemberSpent(tripId: string, userId: string): Promise<number> {
@@ -568,30 +580,33 @@ class BudgetService {
     originalTripId: string,
     newTripId: string,
     cloningUserId: string,
-    mode: 'TEMPLATE' | 'PLANNING' | 'FULL_HISTORY' = 'PLANNING'
+    mode: 'TEMPLATE' | 'PLANNING' | 'FULL_HISTORY' = 'PLANNING',
+    session?: ClientSession
   ): Promise<void> {
     ValidationUtils.validateObjectId(originalTripId, 'original trip ID');
     ValidationUtils.validateObjectId(newTripId, 'new trip ID');
     ValidationUtils.validateObjectId(cloningUserId, 'cloning user ID');
 
     // Fetch original budget
-    const originalBudget = await TripBudget.findOne({ 
-      tripId: new Types.ObjectId(originalTripId) 
-    });
+    let origQuery = TripBudget.findOne({ tripId: new Types.ObjectId(originalTripId) });
+    if (session) origQuery = origQuery.session(session);
+    const originalBudget = await origQuery;
     if (!originalBudget) {
       throw new TripError(TRIP_ERRORS.BUDGET_NOT_FOUND, 'Original budget not found', 404);
     }
 
     // Check if new trip already has a budget
-    const existingBudget = await TripBudget.findOne({ 
-      tripId: new Types.ObjectId(newTripId) 
-    });
+    let existQuery = TripBudget.findOne({ tripId: new Types.ObjectId(newTripId) });
+    if (session) existQuery = existQuery.session(session);
+    const existingBudget = await existQuery;
     if (existingBudget) {
       throw new TripError(TRIP_ERRORS.BUDGET_ALREADY_EXISTS, 'Budget already exists for the new trip', 400);
     }
 
     // Fetch new trip to align budget members
-    const newTrip = await Trip.findById(newTripId).lean();
+    let newTripQuery = Trip.findById(newTripId);
+    if (session) newTripQuery = newTripQuery.session(session);
+    const newTrip = await newTripQuery.lean();
     const newTripMemberIds = new Set<string>(
       newTrip ? newTrip.members.map(m => m.userId.toString()) : [cloningUserId]
     );
@@ -654,13 +669,13 @@ class BudgetService {
       rules: originalBudget.rules ? { ...originalBudget.rules } : {}
     });
 
-    await clonedBudget.save();
+    await clonedBudget.save(session ? { session } : undefined);
 
     // For FULL_HISTORY mode, copy all expenses
     if (mode === 'FULL_HISTORY') {
-      const originalExpenses = await Expense.find({
-        tripId: new Types.ObjectId(originalTripId)
-      }).lean();
+      let expQuery = Expense.find({ tripId: new Types.ObjectId(originalTripId) });
+      if (session) expQuery = expQuery.session(session);
+      const originalExpenses = await expQuery.lean();
 
       if (originalExpenses.length > 0) {
         const clonedExpenses = originalExpenses.map(expense => ({
@@ -672,13 +687,17 @@ class BudgetService {
         }));
 
         if (clonedExpenses.length > 0) {
-          await Expense.insertMany(clonedExpenses);
+          if (session) {
+            await Expense.insertMany(clonedExpenses, { session });
+          } else {
+            await Expense.insertMany(clonedExpenses);
+          }
         }
       }
     }
 
     // Sync Trip budget summary cache
-    await this.syncTripBudgetSummary(newTripId);
+    await this.syncTripBudgetSummary(newTripId, session);
   }
 
   async markMemberAsPast(
